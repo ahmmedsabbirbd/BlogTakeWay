@@ -300,12 +300,12 @@ class AISK_Order_Handler {
     public function format_order_status_response($response) {
         if (empty($response['order_info'])) {
             /* translators: Error message shown when no order is found matching the provided information */
-            return esc_html__("I couldn't find any order matching your information. Please check the order number and try again.", 'aisk-ai-chat');
+            return esc_html__("I couldn't find any order matching your information. Please check the order number and try again.", 'promo-bar-x');
         }
 
         /* translators: 1: Order number, 2: Order status, 3: Status details */
         return sprintf(
-            esc_html__('Your order #%1$s is currently %2$s. %3$s', 'aisk-ai-chat'),
+            esc_html__('Your order #%1$s is currently %2$s. %3$s', 'promo-bar-x'),
             esc_html($response['order_info']['order_number']),
             esc_html($response['order_info']['status']),
             esc_html($response['order_info']['status_details'])
@@ -323,13 +323,13 @@ class AISK_Order_Handler {
      */
     private function get_status_details( $status ) {
         $details = [
-            'pending' => esc_html__('We are waiting for payment confirmation.', 'aisk-ai-chat'),
-            'processing' => esc_html__('We are preparing your order for shipment.', 'aisk-ai-chat'),
-            'on-hold' => esc_html__('Your order is currently on hold. Please check your email for more information.', 'aisk-ai-chat'),
-            'completed' => esc_html__('Your order has been delivered.', 'aisk-ai-chat'),
-            'cancelled' => esc_html__('This order has been cancelled.', 'aisk-ai-chat'),
-            'refunded' => esc_html__('This order has been refunded.', 'aisk-ai-chat'),
-            'failed' => esc_html__('There was an issue processing this order.', 'aisk-ai-chat'),
+            'pending' => esc_html__('We are waiting for payment confirmation.', 'promo-bar-x'),
+            'processing' => esc_html__('We are preparing your order for shipment.', 'promo-bar-x'),
+            'on-hold' => esc_html__('Your order is currently on hold. Please check your email for more information.', 'promo-bar-x'),
+            'completed' => esc_html__('Your order has been delivered.', 'promo-bar-x'),
+            'cancelled' => esc_html__('This order has been cancelled.', 'promo-bar-x'),
+            'refunded' => esc_html__('This order has been refunded.', 'promo-bar-x'),
+            'failed' => esc_html__('There was an issue processing this order.', 'promo-bar-x'),
         ];
 
         return isset( $details[ $status ] ) ? $details[ $status ] : '';

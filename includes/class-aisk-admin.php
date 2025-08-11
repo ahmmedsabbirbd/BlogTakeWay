@@ -75,8 +75,8 @@ class AISK_Admin {
     public function register_admin_menu() {
 
         add_menu_page(
-            esc_html__( 'Aisk', 'aisk-ai-chat' ),
-            esc_html__( 'Aisk', 'aisk-ai-chat' ),
+            esc_html__( 'Aisk', 'promo-bar-x' ),
+            esc_html__( 'Aisk', 'promo-bar-x' ),
             'manage_options',
             $this->plugin_slug,
             [ $this, 'render_dashboard_page' ],
@@ -86,8 +86,8 @@ class AISK_Admin {
 
         add_submenu_page(
             $this->plugin_slug,
-            esc_html__( 'Inquiries', 'aisk-ai-chat' ),
-            esc_html__( 'Inquiries', 'aisk-ai-chat' ),
+            esc_html__( 'Inquiries', 'promo-bar-x' ),
+            esc_html__( 'Inquiries', 'promo-bar-x' ),
             'manage_options',
             $this->plugin_slug . '-inquiries',
             [ $this, 'render_inquiries_page' ]
@@ -96,8 +96,8 @@ class AISK_Admin {
         // Add Chat History submenu
         add_submenu_page(
             $this->plugin_slug,
-            esc_html__( 'Chat History', 'aisk-ai-chat' ),
-            esc_html__( 'Chat History', 'aisk-ai-chat' ),
+            esc_html__( 'Chat History', 'promo-bar-x' ),
+            esc_html__( 'Chat History', 'promo-bar-x' ),
             'manage_options',
             $this->plugin_slug . '-history',
             [ $this, 'render_history_page' ]
@@ -106,8 +106,8 @@ class AISK_Admin {
         // Add Settings submenu
         add_submenu_page(
             $this->plugin_slug,
-            esc_html__( 'Settings', 'aisk-ai-chat' ),
-            esc_html__( 'Settings', 'aisk-ai-chat' ),
+            esc_html__( 'Settings', 'promo-bar-x' ),
+            esc_html__( 'Settings', 'promo-bar-x' ),
             'manage_options',
             $this->plugin_slug . '-settings',
             [ $this, 'render_settings_page' ]
@@ -176,7 +176,7 @@ class AISK_Admin {
                 'maxUploadSize' => wp_max_upload_size(),
             ]
         );
-        wp_set_script_translations('aisk-admin', 'aisk-ai-chat');
+        wp_set_script_translations('aisk-admin', 'promo-bar-x');
     }
 
     /**

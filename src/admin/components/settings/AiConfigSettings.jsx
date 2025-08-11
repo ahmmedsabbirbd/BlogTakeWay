@@ -45,12 +45,12 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
 
     useEffect(() => {
         if (!nonce) {
-            setError(__('Authentication token missing. Please refresh the page.', 'aisk-ai-chat'));
+            setError(__('Authentication token missing. Please refresh the page.', 'promo-bar-x'));
             return;
         }
 
         if (!restUrl) {
-            setError(__('API endpoint not configured. Please refresh the page.', 'aisk-ai-chat'));
+            setError(__('API endpoint not configured. Please refresh the page.', 'promo-bar-x'));
             return;
         }
 
@@ -101,11 +101,11 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
 
         try {
             if (!nonce) {
-                throw new Error(__('Authentication token missing. Please refresh the page.', 'aisk-ai-chat'));
+                throw new Error(__('Authentication token missing. Please refresh the page.', 'promo-bar-x'));
             }
 
             if (!restUrl) {
-                throw new Error(__('API endpoint not configured. Please refresh the page.', 'aisk-ai-chat'));
+                throw new Error(__('API endpoint not configured. Please refresh the page.', 'promo-bar-x'));
             }
 
 
@@ -122,7 +122,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
             // Check if we got redirected to login page
             const responseText = await response.text();
             if (responseText.includes('wp-login.php') || responseText.includes('login')) {
-                throw new Error(__('Authentication required. Please refresh the page and try again.', 'aisk-ai-chat'));
+                throw new Error(__('Authentication required. Please refresh the page and try again.', 'promo-bar-x'));
             }
 
             if (!response.ok) {
@@ -134,22 +134,22 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
             try {
                 data = JSON.parse(responseText);
             } catch (e) {
-                throw new Error(__('Invalid response format from server', 'aisk-ai-chat'));
+                throw new Error(__('Invalid response format from server', 'promo-bar-x'));
             }
 
             if (data && typeof data === 'object') {
                 if ('success' in data && 'count' in data) {
                     setUnprocessedCount(data.count);
-                } else if (data.message === __('No content available to process', 'aisk-ai-chat')) {
+                } else if (data.message === __('No content available to process', 'promo-bar-x')) {
                     setUnprocessedCount(0);
                 } else {
-                    throw new Error(__('Invalid response structure from server', 'aisk-ai-chat'));
+                    throw new Error(__('Invalid response structure from server', 'promo-bar-x'));
                 }
             } else {
-                throw new Error(__('Invalid response data from server', 'aisk-ai-chat'));
+                throw new Error(__('Invalid response data from server', 'promo-bar-x'));
             }
         } catch (error) {
-            setError(error.message || __('Failed to load unprocessed count. Please try again.', 'aisk-ai-chat'));
+            setError(error.message || __('Failed to load unprocessed count. Please try again.', 'promo-bar-x'));
             setUnprocessedCount(0);
         }
     };
@@ -217,11 +217,11 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
 
             // Only show no content error if both posts and pages are empty
             if (!postsData.length && !pagesData.length) {
-                setError(__('No posts or pages found. Please create some content first.', 'aisk-ai-chat'));
+                setError(__('No posts or pages found. Please create some content first.', 'promo-bar-x'));
             }
         } catch (error) {
             console.error('Error loading content:', error);
-            setError(__('Failed to load posts and pages. Please try again.', 'aisk-ai-chat'));
+            setError(__('Failed to load posts and pages. Please try again.', 'promo-bar-x'));
         } finally {
             setIsLoading(false);
         }
@@ -235,11 +235,11 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
             setSuccessMessage(null);
 
             if (!nonce) {
-                throw new Error(__('Authentication token missing. Please refresh the page.', 'aisk-ai-chat'));
+                throw new Error(__('Authentication token missing. Please refresh the page.', 'promo-bar-x'));
             }
 
             if (!restUrl) {
-                throw new Error(__('API endpoint not configured. Please refresh the page.', 'aisk-ai-chat'));
+                throw new Error(__('API endpoint not configured. Please refresh the page.', 'promo-bar-x'));
             }
 
             // If there are settings changes, update the original values first
@@ -282,14 +282,14 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
             console.log('Processed data:', data);
 
             if (data.success) {
-                let message = __('Successfully processed content', 'aisk-ai-chat');
+                let message = __('Successfully processed content', 'promo-bar-x');
                 if (data.processed > 0) {
-                    message += `: ${data.processed} ${__('items processed', 'aisk-ai-chat')}`;
+                    message += `: ${data.processed} ${__('items processed', 'promo-bar-x')}`;
                     if (data.total > 0) {
-                        message += `, ${data.total} ${__('remaining', 'aisk-ai-chat')}`;
+                        message += `, ${data.total} ${__('remaining', 'promo-bar-x')}`;
                     }
                 } else {
-                    message += `: ${__('No items to process', 'aisk-ai-chat')}`;
+                    message += `: ${__('No items to process', 'promo-bar-x')}`;
                 }
 
                 setSuccessMessage(message);
@@ -305,11 +305,11 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                 // Refresh unprocessed count after processing
                 await loadUnprocessedCount();
             } else {
-                throw new Error(data.message || __('Failed to process content', 'aisk-ai-chat'));
+                throw new Error(data.message || __('Failed to process content', 'promo-bar-x'));
             }
         } catch (error) {
             console.error('Error processing content:', error);
-            setError(error.message || __('Error processing content', 'aisk-ai-chat'));
+            setError(error.message || __('Error processing content', 'promo-bar-x'));
         } finally {
             setProcessing(false);
         }
@@ -327,7 +327,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
     // Function to clean up excluded content embeddings
     const cleanupExcludedEmbeddings = async () => {
         setIsCleaningUp(true);
-        setCleanupStatus(__('Removing embeddings for excluded content...', 'aisk-ai-chat'));
+        setCleanupStatus(__('Removing embeddings for excluded content...', 'promo-bar-x'));
 
         try {
             const response = await fetch('/wp-json/aisk/v1/cleanup-excluded-embeddings', {
@@ -341,15 +341,15 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
             const data = await response.json();
 
             if (data.success) {
-                setCleanupStatus(data.message || __('Successfully removed embeddings for excluded content.', 'aisk-ai-chat'));
+                setCleanupStatus(data.message || __('Successfully removed embeddings for excluded content.', 'promo-bar-x'));
                 // Refresh unprocessed count after cleanup
                 await loadUnprocessedCount();
             } else {
-                setCleanupStatus(`${__('Error:', 'aisk-ai-chat')} ${data.message || __('Failed to remove embeddings for excluded content.', 'aisk-ai-chat')}`);
+                setCleanupStatus(`${__('Error:', 'promo-bar-x')} ${data.message || __('Failed to remove embeddings for excluded content.', 'promo-bar-x')}`);
             }
         } catch (error) {
             console.error('Error cleaning up excluded embeddings:', error);
-            setCleanupStatus(`${__('Error:', 'aisk-ai-chat')} ${error.message || __('Failed to remove embeddings for excluded content.', 'aisk-ai-chat')}`);
+            setCleanupStatus(`${__('Error:', 'promo-bar-x')} ${error.message || __('Failed to remove embeddings for excluded content.', 'promo-bar-x')}`);
         } finally {
             // Clear status message after a delay
             setTimeout(() => {
@@ -362,18 +362,18 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>{__('AI Configuration', 'aisk-ai-chat')}</CardTitle>
+                <CardTitle>{__('AI Configuration', 'promo-bar-x')}</CardTitle>
                 <CardDescription>
-                    {__('Configure AI settings and process your content for the chatbot', 'aisk-ai-chat')}
+                    {__('Configure AI settings and process your content for the chatbot', 'promo-bar-x')}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* WooCommerce Integration */}
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                        <Label>{__('WooCommerce Integration', 'aisk-ai-chat')}</Label>
+                        <Label>{__('WooCommerce Integration', 'promo-bar-x')}</Label>
                         <p className="text-sm text-gray-500">
-                            {__('Enable AI processing for WooCommerce products', 'aisk-ai-chat')}
+                            {__('Enable AI processing for WooCommerce products', 'promo-bar-x')}
                         </p>
                         <div className="flex items-center gap-4">
                             <Switch
@@ -390,7 +390,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                                     className="text-blue-500 hover:text-blue-700 p-0"
                                     onClick={async () => {
                                         setProcessing(true);
-                                        setProcessMessage(__('Installing WooCommerce...', 'aisk-ai-chat'));
+                                        setProcessMessage(__('Installing WooCommerce...', 'promo-bar-x'));
 
                                         try {
                                             const response = await fetch('/wp-json/aisk/v1/install-woocommerce', {
@@ -405,13 +405,13 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
 
                                             if (data.success) {
                                                 setIsWooCommerceActive(true);
-                                                setProcessMessage(__('WooCommerce installed and activated successfully!', 'aisk-ai-chat'));
+                                                setProcessMessage(__('WooCommerce installed and activated successfully!', 'promo-bar-x'));
                                                 setTimeout(() => {
                                                     setProcessing(false);
                                                     setProcessMessage('');
                                                 }, 2000);
                                             } else {
-                                                setProcessMessage(data.message || __('Failed to install WooCommerce', 'aisk-ai-chat'));
+                                                setProcessMessage(data.message || __('Failed to install WooCommerce', 'promo-bar-x'));
                                                 setTimeout(() => {
                                                     setProcessing(false);
                                                     setProcessMessage('');
@@ -419,7 +419,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                                             }
                                         } catch (error) {
                                             console.error('Error installing WooCommerce:', error);
-                                            setProcessMessage(__('Error installing WooCommerce', 'aisk-ai-chat'));
+                                            setProcessMessage(__('Error installing WooCommerce', 'promo-bar-x'));
                                             setTimeout(() => {
                                                 setProcessing(false);
                                                 setProcessMessage('');
@@ -427,7 +427,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                                         }
                                     }}
                                 >
-                                    {__('Install & Activate WooCommerce', 'aisk-ai-chat')}
+                                    {__('Install & Activate WooCommerce', 'promo-bar-x')}
                                 </Button>
                             )}
                             {processing && processMessage && (
@@ -439,18 +439,18 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
 
                 {settings.ai_config.woocommerce_enabled && isWooCommerceActive && (
                     <div>
-                        <Label className="mb-2 block">{__('Excluded Products', 'aisk-ai-chat')}</Label>
+                        <Label className="mb-2 block">{__('Excluded Products', 'promo-bar-x')}</Label>
                         <MultiSelect
                             options={products}
                             selected={settings.ai_config.excluded_products || []}
                             onChange={(selected) => handleExclusionUpdate('ai_config', 'excluded_products', selected)}
                             placeholder={isLoading ?
-                                __('Loading products...', 'aisk-ai-chat') :
+                                __('Loading products...', 'promo-bar-x') :
                                 products.length ?
                                     settings.ai_config.excluded_products?.length ?
                                         '' :
-                                        __('Select products to exclude...', 'aisk-ai-chat') :
-                                    __('No products found', 'aisk-ai-chat')
+                                        __('Select products to exclude...', 'promo-bar-x') :
+                                    __('No products found', 'promo-bar-x')
                             }
                             disabled={isLoading || !products.length || isCleaningUp}
                             type="product"
@@ -460,7 +460,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
 
                 {/* Content Types */}
                 <div className="space-y-3">
-                    <Label>{__('Content Types', 'aisk-ai-chat')}</Label>
+                    <Label>{__('Content Types', 'promo-bar-x')}</Label>
                     <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                             <Checkbox
@@ -473,7 +473,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                                     updateSettings('ai_config', 'included_post_types', types);
                                 }}
                             />
-                            <label htmlFor="posts" className="text-sm font-medium">{__('Posts', 'aisk-ai-chat')}</label>
+                            <label htmlFor="posts" className="text-sm font-medium">{__('Posts', 'promo-bar-x')}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <Checkbox
@@ -486,7 +486,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                                     updateSettings('ai_config', 'included_post_types', types);
                                 }}
                             />
-                            <label htmlFor="pages" className="text-sm font-medium">{__('Pages', 'aisk-ai-chat')}</label>
+                            <label htmlFor="pages" className="text-sm font-medium">{__('Pages', 'promo-bar-x')}</label>
                         </div>
                     </div>
                 </div>
@@ -500,18 +500,18 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                         <div className="space-y-4">
                             {settings.ai_config.included_post_types.includes('post') && (
                                 <div>
-                                    <Label className="mb-2 block">{__('Excluded Posts', 'aisk-ai-chat')}</Label>
+                                    <Label className="mb-2 block">{__('Excluded Posts', 'promo-bar-x')}</Label>
                                     <MultiSelect
                                         options={posts}
                                         selected={settings.ai_config.excluded_posts || []}
                                         onChange={(selected) => handleExclusionUpdate('ai_config', 'excluded_posts', selected)}
                                         placeholder={isLoading ?
-                                            __('Loading posts...', 'aisk-ai-chat') :
+                                            __('Loading posts...', 'promo-bar-x') :
                                             posts.length ?
                                                 settings.ai_config.excluded_posts?.length ?
                                                     '' :
-                                                    __('Select posts to exclude...', 'aisk-ai-chat') :
-                                                __('No posts found', 'aisk-ai-chat')
+                                                    __('Select posts to exclude...', 'promo-bar-x') :
+                                                __('No posts found', 'promo-bar-x')
                                         }
                                         disabled={isLoading || !posts.length || isCleaningUp}
                                         type="post"
@@ -520,18 +520,18 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                             )}
                             {settings.ai_config.included_post_types.includes('page') && (
                                 <div>
-                                    <Label className="mb-2 block">{__('Excluded Pages', 'aisk-ai-chat')}</Label>
+                                    <Label className="mb-2 block">{__('Excluded Pages', 'promo-bar-x')}</Label>
                                     <MultiSelect
                                         options={pages}
                                         selected={settings.ai_config.excluded_pages || []}
                                         onChange={(selected) => handleExclusionUpdate('ai_config', 'excluded_pages', selected)}
                                         placeholder={isLoading ?
-                                            __('Loading pages...', 'aisk-ai-chat') :
+                                            __('Loading pages...', 'promo-bar-x') :
                                             pages.length ?
                                                 settings.ai_config.excluded_pages?.length ?
                                                     '' :
-                                                    __('Select pages to exclude...', 'aisk-ai-chat') :
-                                                __('No pages found', 'aisk-ai-chat')
+                                                    __('Select pages to exclude...', 'promo-bar-x') :
+                                                __('No pages found', 'promo-bar-x')
                                         }
                                         disabled={isLoading || !pages.length || isCleaningUp}
                                         type="page"
@@ -555,10 +555,10 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                 {/* Contact Information */}
                 <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                        <Label htmlFor="contact_info">{__('Contact Information', 'aisk-ai-chat')}</Label>
+                        <Label htmlFor="contact_info">{__('Contact Information', 'promo-bar-x')}</Label>
                         {settings.ai_config.contact_info !== originalContactInfo && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                {__('Modified', 'aisk-ai-chat')}
+                                {__('Modified', 'promo-bar-x')}
                             </span>
                         )}
                     </div>
@@ -572,22 +572,22 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                             'Email: support@example.com\n' +
                             'Address: 123 Main St, City, State 12345\n' +
                             'Support Team: John (Sales), Mary (Technical Support)',
-                            'aisk-ai-chat'
+                            'promo-bar-x'
                         )}
                         className={`h-40 ${settings.ai_config.contact_info !== originalContactInfo ? 'border-blue-300 bg-blue-50' : ''}`}
                     />
                     <p className="text-sm text-muted-foreground text-gray-500">
-                        {__('Add contact information that the chatbot can share when users ask about contacting support or visiting your store.', 'aisk-ai-chat')}
+                        {__('Add contact information that the chatbot can share when users ask about contacting support or visiting your store.', 'promo-bar-x')}
                     </p>
                 </div>
 
                 {/* Custom Content */}
                 <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                        <Label htmlFor="custom_content">{__('Custom Content', 'aisk-ai-chat')}</Label>
+                        <Label htmlFor="custom_content">{__('Custom Content', 'promo-bar-x')}</Label>
                         {settings.ai_config.custom_content !== originalCustomContent && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                {__('Modified', 'aisk-ai-chat')}
+                                {__('Modified', 'promo-bar-x')}
                             </span>
                         )}
                     </div>
@@ -599,18 +599,18 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                             'Return Policy: Items can be returned within 30 days of purchase with original receipt.\n' +
                             'Shipping Information: Free shipping on orders over $50. Standard shipping takes 3-5 business days.\n' +
                             'Store Locations: Downtown Store (123 Main St), Mall Store (456 Shopping Ave)',
-                            'aisk-ai-chat'
+                            'promo-bar-x'
                         )}
                         className={`h-60 ${settings.ai_config.custom_content !== originalCustomContent ? 'border-blue-300 bg-blue-50' : ''}`}
                     />
                     <p className="text-sm text-muted-foreground text-gray-500">
-                        {__('Add any additional information that you want the chatbot to know about your business, policies, or services.', 'aisk-ai-chat')}
+                        {__('Add any additional information that you want the chatbot to know about your business, policies, or services.', 'promo-bar-x')}
                     </p>
                 </div>
 
                 {/* Batch Size */}
                 <div className="space-y-2">
-                    <Label htmlFor="batch_size">{__('Processing Batch Size', 'aisk-ai-chat')}</Label>
+                    <Label htmlFor="batch_size">{__('Processing Batch Size', 'promo-bar-x')}</Label>
                     <Input
                         id="batch_size"
                         type="number"
@@ -620,7 +620,7 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                         onChange={(e) => updateSettings('ai_config', 'batch_size', parseInt(e.target.value))}
                     />
                     <p className="text-sm text-gray-500">
-                        {__('Number of items to process in each batch', 'aisk-ai-chat')}
+                        {__('Number of items to process in each batch', 'promo-bar-x')}
                     </p>
                 </div>
 
@@ -628,12 +628,12 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                 <div className="space-y-4 pt-4 border-t">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h4 className="text-sm font-medium">{__('Knowledge Base Processing', 'aisk-ai-chat')}</h4>
+                            <h4 className="text-sm font-medium">{__('Knowledge Base Processing', 'promo-bar-x')}</h4>
                             <p className="text-sm text-gray-500">
-                                {__('Unprocessed items:', 'aisk-ai-chat')} {unprocessedCount + (hasSettingsChanges ? 1 : 0)}
+                                {__('Unprocessed items:', 'promo-bar-x')} {unprocessedCount + (hasSettingsChanges ? 1 : 0)}
                                 {hasSettingsChanges && (
                                     <span className="text-blue-600 ml-1">
-                                        ({__('includes Contact Information & Custom Content changes', 'aisk-ai-chat')})
+                                        ({__('includes Contact Information & Custom Content changes', 'promo-bar-x')})
                                     </span>
                                 )}
                             </p>
@@ -644,14 +644,14 @@ const AiConfigSettings = ({ settings, updateSettings }) => {
                                 onClick={cleanupExcludedEmbeddings}
                                 disabled={processing || isCleaningUp}
                             >
-                                {isCleaningUp ? __('Cleaning...', 'aisk-ai-chat') : __('Clean Excluded Content', 'aisk-ai-chat')}
+                                {isCleaningUp ? __('Cleaning...', 'promo-bar-x') : __('Clean Excluded Content', 'promo-bar-x')}
                             </Button>
 
                             <Button
                                 onClick={processContent}
                                 disabled={processing || isCleaningUp}
                             >
-                                {processing ? __('Processing...', 'aisk-ai-chat') : __('Generate Embeddings', 'aisk-ai-chat')}
+                                {processing ? __('Processing...', 'promo-bar-x') : __('Generate Embeddings', 'promo-bar-x')}
                             </Button>
                         </div>
                     </div>

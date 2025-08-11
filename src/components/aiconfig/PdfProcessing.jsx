@@ -38,7 +38,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
         const maxSize = window.AiskSettings?.maxUploadSize || 2 * 1024 * 1024; // Default 2MB
         if (file.size > maxSize) {
             setPdfError(sprintf(
-                __('File size exceeds the maximum allowed size of %s. This is limited by your server configuration.', 'aisk-ai-chat'),
+                __('File size exceeds the maximum allowed size of %s. This is limited by your server configuration.', 'promo-bar-x'),
                 getMaxUploadSize()
             ));
             return false;
@@ -50,13 +50,13 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
     const validatePdfFile = (file) => {
         // Check file extension
         if (!file.name.toLowerCase().endsWith('.pdf')) {
-            setPdfError(__('Please upload a PDF file with .pdf extension', 'aisk-ai-chat'));
+            setPdfError(__('Please upload a PDF file with .pdf extension', 'promo-bar-x'));
             return false;
         }
 
         // Check MIME type
         if (file.type && file.type !== 'application/pdf') {
-            setPdfError(__('Invalid file type. Please upload a valid PDF file', 'aisk-ai-chat'));
+            setPdfError(__('Invalid file type. Please upload a valid PDF file', 'promo-bar-x'));
             return false;
         }
 
@@ -72,7 +72,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                 if (header === '%PDF-') {
                     resolve(true);
                 } else {
-                    setPdfError(__('Invalid PDF file. The file does not appear to be a valid PDF document', 'aisk-ai-chat'));
+                    setPdfError(__('Invalid PDF file. The file does not appear to be a valid PDF document', 'promo-bar-x'));
                     resolve(false);
                 }
             };
@@ -90,7 +90,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
 
     const processPdf = async () => {
         if (!pdfFile) {
-            setPdfError(__('No PDF file selected', 'aisk-ai-chat'));
+            setPdfError(__('No PDF file selected', 'promo-bar-x'));
             return;
         }
 
@@ -185,7 +185,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
             // After closing popup, start progress animation and show processing message in the main UI
             setPdfProcessing(true);
             setPdfProgress(10);
-            setProcessMessage(__('Processing PDF...', 'aisk-ai-chat'));
+            setProcessMessage(__('Processing PDF...', 'promo-bar-x'));
 
             // Now process the PDF in the background
             const formData = new FormData();
@@ -209,16 +209,16 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                 // Handle non-JSON response
                 const text = await response.text();
                 console.error('Invalid response:', text);
-                throw new Error(__('Server returned an invalid response. Please try again.', 'aisk-ai-chat'));
+                throw new Error(__('Server returned an invalid response. Please try again.', 'promo-bar-x'));
             }
 
             if (!response.ok) {
-                throw new Error(result.message || __('Failed to process PDF', 'aisk-ai-chat'));
+                throw new Error(result.message || __('Failed to process PDF', 'promo-bar-x'));
             }
 
             if (result.success) {
                 setPdfProgress(100);
-                setProcessMessage(__('PDF queued for processing!', 'aisk-ai-chat'));
+                setProcessMessage(__('PDF queued for processing!', 'promo-bar-x'));
 
                 // When updating after upload, only update the last PDF (the new one)
                 const latestPdfs = (settings.ai_config.pdf_files || []);
@@ -253,7 +253,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                     }, 2000);
                 }
             } else {
-                throw new Error(result.message || __('Failed to process PDF', 'aisk-ai-chat'));
+                throw new Error(result.message || __('Failed to process PDF', 'promo-bar-x'));
             }
 
             // Reset states after a short delay
@@ -267,7 +267,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
             console.error('Error processing PDF:', error);
             setPdfProgress(0);
             setPdfProcessing(false);
-            setProcessMessage(error.message || __('Failed to process PDF. Please try again.', 'aisk-ai-chat'));
+            setProcessMessage(error.message || __('Failed to process PDF. Please try again.', 'promo-bar-x'));
 
             // Remove the failed PDF from settings
             try {
@@ -341,7 +341,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                         if (data.failed) {
                             newStatus = 'failed';
                             newChunks = 0;
-                            errorMsg = data.user_message || __('PDF processing failed', 'aisk-ai-chat');
+                            errorMsg = data.user_message || __('PDF processing failed', 'promo-bar-x');
                         }
                         currentSettings.ai_config.pdf_files[pdfIndex] = {
                             ...currentSettings.ai_config.pdf_files[pdfIndex],
@@ -377,9 +377,9 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                     attempts++;
                     setTimeout(checkStatus, 5000); // Check every 5 seconds
                 } else if (data.failed) {
-                    setProcessMessage(data.user_message || __('PDF processing failed', 'aisk-ai-chat'));
+                    setProcessMessage(data.user_message || __('PDF processing failed', 'promo-bar-x'));
                 } else if (data.processed) {
-                    setProcessMessage(__('PDF processed successfully!', 'aisk-ai-chat'));
+                    setProcessMessage(__('PDF processed successfully!', 'promo-bar-x'));
                 }
             } catch (error) {
                 console.error('Error checking PDF status:', error);
@@ -450,7 +450,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
             const pdfToRemove = settings.ai_config.pdf_files[index];
 
             // Show processing state
-            setProcessMessage(__('Deleting PDF...', 'aisk-ai-chat'));
+            setProcessMessage(__('Deleting PDF...', 'promo-bar-x'));
 
             // First, remove from local state
             const newPdfs = [...(settings.ai_config.pdf_files || [])];
@@ -488,7 +488,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
 
                 if (data.success) {
                     // Set success message
-                    setProcessMessage(__('PDF deleted successfully.', 'aisk-ai-chat'));
+                    setProcessMessage(__('PDF deleted successfully.', 'promo-bar-x'));
 
                     // Fetch the updated queue list from backend
                     await fetchPdfQueueList();
@@ -550,14 +550,14 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                         setProcessMessage('');
                     }, 3000);
                 } else {
-                    throw new Error(data.message || __('Failed to delete PDF', 'aisk-ai-chat'));
+                    throw new Error(data.message || __('Failed to delete PDF', 'promo-bar-x'));
                 }
             } else {
                 // For PDFs that are still processing or don't have an attachment ID yet
                 console.log('PDF had no attachment ID, only removed from settings');
 
                 // Set success message
-                setProcessMessage(__('PDF removed from settings.', 'aisk-ai-chat'));
+                setProcessMessage(__('PDF removed from settings.', 'promo-bar-x'));
 
                 // Fetch fresh settings before updating
                 let freshSettings;
@@ -622,7 +622,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
             }
         } catch (error) {
             console.error('Error removing PDF:', error);
-            setProcessMessage(__(`Error: ${error.message}`, 'aisk-ai-chat'));
+            setProcessMessage(__(`Error: ${error.message}`, 'promo-bar-x'));
 
             // Reset error message after a delay
             setTimeout(() => {
@@ -671,7 +671,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
     return (
         <div className="space-y-4 mt-6">
             <div className="flex items-center justify-between mb-4">
-                <Label>{__('PDF Sources', 'aisk-ai-chat')}</Label>
+                <Label>{__('PDF Sources', 'promo-bar-x')}</Label>
                 <div className="flex gap-2">
                     <Button
                         variant="outline"
@@ -680,7 +680,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                         className="flex items-center gap-2"
                     >
                         <PlusIcon className="h-4 w-4" />
-                        {__('Add PDF', 'aisk-ai-chat')}
+                        {__('Add PDF', 'promo-bar-x')}
                     </Button>
                 </div>
             </div>
@@ -697,7 +697,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                 <div className="space-y-2">
                     <Progress value={pdfProgress} className="w-full" />
                     <p className="text-sm text-center text-gray-500">
-                        {__('Processing... This may take a few minutes for larger files.', 'aisk-ai-chat')}
+                        {__('Processing... This may take a few minutes for larger files.', 'promo-bar-x')}
                     </p>
                 </div>
             )}
@@ -705,7 +705,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
             {(settings.ai_config.pdf_files || []).length === 0 ? (
                 <div className="text-center py-4 border rounded-lg bg-gray-50">
                     <p className="text-sm text-gray-500">
-                        {__('No PDF sources added yet', 'aisk-ai-chat')}
+                        {__('No PDF sources added yet', 'promo-bar-x')}
                     </p>
                 </div>
             ) : (
@@ -717,7 +717,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                         >
                             <div className="flex items-center gap-2 w-full">
                                 <span className="font-medium">
-                                    {pdfConfig.name || __('Unnamed PDF', 'aisk-ai-chat')}
+                                    {pdfConfig.name || __('Unnamed PDF', 'promo-bar-x')}
                                 </span>
                                 {/* Status badge with color and error message for failed */}
                                 {pdfConfig.status && (
@@ -741,7 +741,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                                 )}
                                 {pdfConfig.chunks !== undefined && (
                                     <span className="text-xs text-gray-500">
-                                        {pdfConfig.chunks} {__('chunks', 'aisk-ai-chat')}
+                                        {pdfConfig.chunks} {__('chunks', 'promo-bar-x')}
                                     </span>
                                 )}
 
@@ -754,7 +754,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
 
                                 {pdfConfig.status === 'failed' && pdfConfig.user_message && (
                                     <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded ml-2">
-                                        <strong>{__('Error:', 'aisk-ai-chat')}</strong> {pdfConfig.user_message}
+                                        <strong>{__('Error:', 'promo-bar-x')}</strong> {pdfConfig.user_message}
                                     </span>
                                 )}
                             </div>
@@ -775,14 +775,14 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
             <Dialog open={openPdfDialog} onOpenChange={setOpenPdfDialog}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{__('Add PDF Document', 'aisk-ai-chat')}</DialogTitle>
+                        <DialogTitle>{__('Add PDF Document', 'promo-bar-x')}</DialogTitle>
                         <DialogDescription>
-                            {__('Upload a PDF document to process and include in the knowledge base', 'aisk-ai-chat')}
+                            {__('Upload a PDF document to process and include in the knowledge base', 'promo-bar-x')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-2">
                         <div className="space-y-2">
-                            <Label htmlFor="pdf-upload">{__('PDF Document', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="pdf-upload">{__('PDF Document', 'promo-bar-x')}</Label>
                             <Input
                                 id="pdf-upload"
                                 type="file"
@@ -796,7 +796,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
 
                                         if (file.size > maxSize) {
                                             setPdfError(
-                                                __(`The file is too large. Maximum allowed size is ${getMaxUploadSize()}. This is limited by your server configuration.`, 'aisk-ai-chat')
+                                                __(`The file is too large. Maximum allowed size is ${getMaxUploadSize()}. This is limited by your server configuration.`, 'promo-bar-x')
                                             );
                                             e.target.value = ''; // Clear the input
                                         } else {
@@ -814,11 +814,11 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                                 }}
                             />
                             <p className="text-xs text-gray-500">
-                                {__(`Maximum file size: ${getMaxUploadSize()} (server limit)`, 'aisk-ai-chat')}
+                                {__(`Maximum file size: ${getMaxUploadSize()} (server limit)`, 'promo-bar-x')}
                             </p>
                             {pdfFile && (
                                 <p className="text-sm text-gray-500">
-                                    {__('Selected file:', 'aisk-ai-chat')} {pdfFile.name} ({(pdfFile.size / (1024 * 1024)).toFixed(2)} MB)
+                                    {__('Selected file:', 'promo-bar-x')} {pdfFile.name} ({(pdfFile.size / (1024 * 1024)).toFixed(2)} MB)
                                 </p>
                             )}
                         </div>
@@ -847,7 +847,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                             }}
                             disabled={pdfProcessing}
                         >
-                            {__('Cancel', 'aisk-ai-chat')}
+                            {__('Cancel', 'promo-bar-x')}
                         </Button>
                         <Button
                             variant="default"
@@ -855,7 +855,7 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                             onClick={processPdf}
                             disabled={!pdfFile || pdfProcessing || pdfError}
                         >
-                            {pdfProcessing ? __('Processing...', 'aisk-ai-chat') : __('Process Now', 'aisk-ai-chat')}
+                            {pdfProcessing ? __('Processing...', 'promo-bar-x') : __('Process Now', 'promo-bar-x')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -865,15 +865,15 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
             <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{__('Confirm Deletion', 'aisk-ai-chat')}</DialogTitle>
+                        <DialogTitle>{__('Confirm Deletion', 'promo-bar-x')}</DialogTitle>
                         <DialogDescription>
-                            {__('Are you sure you want to delete this PDF? This will remove it from your knowledge base.', 'aisk-ai-chat')}
+                            {__('Are you sure you want to delete this PDF? This will remove it from your knowledge base.', 'promo-bar-x')}
                         </DialogDescription>
                     </DialogHeader>
                     {pdfToDelete !== null && settings.ai_config.pdf_files && settings.ai_config.pdf_files[pdfToDelete] && (
                         <div className="py-3">
                             <p className="font-medium text-center">
-                                {settings.ai_config.pdf_files[pdfToDelete].name || __('Unnamed PDF', 'aisk-ai-chat')}
+                                {settings.ai_config.pdf_files[pdfToDelete].name || __('Unnamed PDF', 'promo-bar-x')}
                             </p>
                         </div>
                     )}
@@ -882,13 +882,13 @@ const PdfProcessing = ({ settings, updateSettings, isActiveConfigTab }) => {
                             variant="secondary"
                             onClick={cancelDelete}
                         >
-                            {__('Cancel', 'aisk-ai-chat')}
+                            {__('Cancel', 'promo-bar-x')}
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={confirmDelete}
                         >
-                            {__('Delete', 'aisk-ai-chat')}
+                            {__('Delete', 'promo-bar-x')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

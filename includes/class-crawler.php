@@ -48,7 +48,7 @@ class AISK_Crawler {
                     $results['main_url']['status'] = 'failed';
                     $results['main_url']['user_message'] = __(
                         'The provided URL content cannot be extracted or crawled due to bot protection or dynamic content.',
-                        'aisk-ai-chat'
+                        'promo-bar-x'
                     );
                     // Persist the user_message for polling
                     update_option('aisk_url_user_message_' . md5($url), $results['main_url']['user_message']);

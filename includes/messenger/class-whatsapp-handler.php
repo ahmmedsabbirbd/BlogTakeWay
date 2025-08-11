@@ -370,43 +370,43 @@ class AISK_WhatsApp_Handler {
      */
     private function format_order_message( $order ) {
         $order_info = $order['order_info'];
-        $message = esc_html__('*Order Details*', 'aisk-ai-chat') . "\n\n";
+        $message = esc_html__('*Order Details*', 'promo-bar-x') . "\n\n";
         
         /* translators: %s: Order number */
         $message .= sprintf(
             // translators: %s: Order number
-            esc_html__('Order #%s', 'aisk-ai-chat') . "\n",
+            esc_html__('Order #%s', 'promo-bar-x') . "\n",
             esc_html($order_info['order_number'])
         );
         
         /* translators: %s: Order status */
         $message .= sprintf(
             // translators: %s: Order status
-            esc_html__('Status: %s', 'aisk-ai-chat') . "\n",
+            esc_html__('Status: %s', 'promo-bar-x') . "\n",
             esc_html($order_info['status'])
         );
         
         /* translators: %s: Order date */
         $message .= sprintf(
             // translators: %s: Order date
-            esc_html__('Date: %s', 'aisk-ai-chat') . "\n",
+            esc_html__('Date: %s', 'promo-bar-x') . "\n",
             esc_html($order_info['date_created'])
         );
         
         /* translators: %s: Order total amount */
         $message .= sprintf(
             // translators: %s: Order total
-            esc_html__('Total: %s', 'aisk-ai-chat') . "\n\n",
+            esc_html__('Total: %s', 'promo-bar-x') . "\n\n",
             esc_html($order_info['total'])
         );
 
         if ( ! empty($order_info['items']) ) {
-            $message .= esc_html__('*Items:*', 'aisk-ai-chat') . "\n";
+            $message .= esc_html__('*Items:*', 'promo-bar-x') . "\n";
             foreach ( $order_info['items'] as $item ) {
                 /* translators: 1: Item quantity, 2: Item name, 3: Item total */
                 $message .= sprintf(
                     // translators: %s: Item quantity
-                    esc_html__('• %1$dx %2$s (%3$s)', 'aisk-ai-chat') . "\n",
+                    esc_html__('• %1$dx %2$s (%3$s)', 'promo-bar-x') . "\n",
                     esc_html($item['quantity']),
                     esc_html($item['name']),
                     esc_html($item['total'])

@@ -58,7 +58,7 @@ const InquiriesPage = () => {
             const nonce = window?.wpApiSettings?.nonce || window?.AiskData?.nonce;
 
             if (!nonce) {
-                throw new Error(__('Authentication token missing. Please refresh the page.', 'aisk-ai-chat'));
+                throw new Error(__('Authentication token missing. Please refresh the page.', 'promo-bar-x'));
             }
 
             const response = await fetch(
@@ -104,7 +104,7 @@ const InquiriesPage = () => {
             const nonce = window?.wpApiSettings?.nonce || window?.AiskData?.nonce;
 
             if (!nonce) {
-                throw new Error(__('Authentication token missing. Please refresh the page.', 'aisk-ai-chat'));
+                throw new Error(__('Authentication token missing. Please refresh the page.', 'promo-bar-x'));
             }
 
             const response = await fetch(
@@ -138,9 +138,9 @@ const InquiriesPage = () => {
 
     const getStatusChip = (status) => {
         const statusConfig = {
-            pending: { color: 'warning', label: __('Pending', 'aisk-ai-chat') },
-            in_progress: { color: 'info', label: __('In Progress', 'aisk-ai-chat') },
-            resolved: { color: 'success', label: __('Resolved', 'aisk-ai-chat') }
+            pending: { color: 'warning', label: __('Pending', 'promo-bar-x') },
+            in_progress: { color: 'info', label: __('In Progress', 'promo-bar-x') },
+            resolved: { color: 'success', label: __('Resolved', 'promo-bar-x') }
         };
         const config = statusConfig[status] || statusConfig.pending;
         return <Chip label={config.label} color={config.color} size="small" />;
@@ -149,27 +149,27 @@ const InquiriesPage = () => {
     const columns = [
         {
             field: 'id',
-            headerName: __('ID', 'aisk-ai-chat'),
+            headerName: __('ID', 'promo-bar-x'),
             width: 70
         },
         {
             field: 'order_number',
-            headerName: __('Order #', 'aisk-ai-chat'),
+            headerName: __('Order #', 'promo-bar-x'),
             width: 100
         },
         {
             field: 'customer_email',
-            headerName: __('Email', 'aisk-ai-chat'),
+            headerName: __('Email', 'promo-bar-x'),
             width: 200
         },
         {
             field: 'customer_phone',
-            headerName: __('Phone', 'aisk-ai-chat'),
+            headerName: __('Phone', 'promo-bar-x'),
             width: 130
         },
         {
             field: 'note',
-            headerName: __('Inquiry', 'aisk-ai-chat'),
+            headerName: __('Inquiry', 'promo-bar-x'),
             width: 300,
             renderCell: (params) => (
                 <Typography
@@ -186,7 +186,7 @@ const InquiriesPage = () => {
         },
         {
             field: 'status',
-            headerName: __('Status', 'aisk-ai-chat'),
+            headerName: __('Status', 'promo-bar-x'),
             width: 150,
             renderCell: (params) => (
                 <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -215,7 +215,7 @@ const InquiriesPage = () => {
         },
         {
             field: 'created_at',
-            headerName: __('Date', 'aisk-ai-chat'),
+            headerName: __('Date', 'promo-bar-x'),
             width: 180,
             valueFormatter: (params) => {
                 let utcDateString = params.value;
@@ -247,7 +247,7 @@ const InquiriesPage = () => {
         },
         {
             field: 'actions',
-            headerName: __('Actions', 'aisk-ai-chat'),
+            headerName: __('Actions', 'promo-bar-x'),
             width: 200,
             renderCell: (params) => (
                 <Stack direction="row" spacing={1}>
@@ -273,13 +273,13 @@ const InquiriesPage = () => {
     return (
         <Box sx={{ p: 3 }} className="admin-customer-inquiries">
             <Typography variant="h4" component="h1" gutterBottom>
-                {__('Customer Inquiries', 'aisk-ai-chat')}
+                {__('Customer Inquiries', 'promo-bar-x')}
             </Typography>
 
             <Stack direction="row" spacing={2} sx={{ mb: 3 }} alignItems="center">
                 <TextField
                     type="date"
-                    label={__('Start Date', 'aisk-ai-chat')}
+                    label={__('Start Date', 'promo-bar-x')}
                     className="admin-customer-inquiries__input-date-pic"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
@@ -290,7 +290,7 @@ const InquiriesPage = () => {
 
                 <TextField
                     type="date"
-                    label={__('End Date', 'aisk-ai-chat')}
+                    label={__('End Date', 'promo-bar-x')}
                     className="admin-customer-inquiries__input-date-pic"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
@@ -300,27 +300,27 @@ const InquiriesPage = () => {
                 />
 
                 <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel className="admin-customer-inquiries__input-select-label">{__('Status', 'aisk-ai-chat')}</InputLabel>
+                    <InputLabel className="admin-customer-inquiries__input-select-label">{__('Status', 'promo-bar-x')}</InputLabel>
                     <Select
                         className="admin-customer-inquiries__input-select"
                         value={statusFilter}
-                        label={__('Status', 'aisk-ai-chat')}
+                        label={__('Status', 'promo-bar-x')}
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
-                        <MenuItem value="all">{__('All', 'aisk-ai-chat')}</MenuItem>
-                        <MenuItem value="pending">{__('Pending', 'aisk-ai-chat')}</MenuItem>
-                        <MenuItem value="in_progress">{__('In Progress', 'aisk-ai-chat')}</MenuItem>
-                        <MenuItem value="resolved">{__('Resolved', 'aisk-ai-chat')}</MenuItem>
+                        <MenuItem value="all">{__('All', 'promo-bar-x')}</MenuItem>
+                        <MenuItem value="pending">{__('Pending', 'promo-bar-x')}</MenuItem>
+                        <MenuItem value="in_progress">{__('In Progress', 'promo-bar-x')}</MenuItem>
+                        <MenuItem value="resolved">{__('Resolved', 'promo-bar-x')}</MenuItem>
                     </Select>
                 </FormControl>
 
                 <TextField
                     size="small"
                     className="admin-customer-inquiries__input-search"
-                    label={__('Search', 'aisk-ai-chat')}
+                    label={__('Search', 'promo-bar-x')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={__('Order #, Email, Phone...', 'aisk-ai-chat')}
+                    placeholder={__('Order #, Email, Phone...', 'promo-bar-x')}
                     sx={{ width: 250 }}
                 />
 
@@ -329,7 +329,7 @@ const InquiriesPage = () => {
                     className="admin-customer-inquiries__button"
                     onClick={handleResetFilters}
                 >
-                    {__('Reset Filters', 'aisk-ai-chat')}
+                    {__('Reset Filters', 'promo-bar-x')}
                 </Button>
             </Stack>
 

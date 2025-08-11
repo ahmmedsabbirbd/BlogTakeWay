@@ -89,7 +89,7 @@ class AISK_AI_Chatbot {
         define('AISK_VERSION', '2.2.1');
         define('AISK_PLUGIN_DIR', plugin_dir_path(__FILE__));
         define('AISK_PLUGIN_URL', plugin_dir_url(__FILE__));
-        define('AISK_TEXT_DOMAIN', 'aisk-ai-chat');
+        define('AISK_TEXT_DOMAIN', 'promo-bar-x');
         define('AISK_CHAT_SESSION_COOKIE', 'aisk_chat_session');
         define('AISK_GREAP_KEY', 'zcP5AsW6bwGApWF5NdyF4TvyKZs6w7KP');
 

@@ -335,7 +335,7 @@ class AISK_Embeddings_Handler
             'removed_count' => $result['removed_count'],
             'message' => sprintf(
             /* translators: %d: Number of embeddings removed */
-                __('Successfully removed %d embeddings for excluded content.', 'aisk-ai-chat'),
+                __('Successfully removed %d embeddings for excluded content.', 'promo-bar-x'),
                 $result['removed_count']
             ),
         ));
@@ -576,7 +576,7 @@ class AISK_Embeddings_Handler
             if (!$nonce || !wp_verify_nonce($nonce, 'wp_rest')) {
                 return new WP_Error(
                     'invalid_nonce',
-                    __('Invalid security token. Please refresh the page and try again.', 'aisk-ai-chat'),
+                    __('Invalid security token. Please refresh the page and try again.', 'promo-bar-x'),
                     array('status' => 403)
                 );
             }
@@ -585,7 +585,7 @@ class AISK_Embeddings_Handler
             if (!is_user_logged_in()) {
                 return new WP_Error(
                     'not_logged_in',
-                    __('You must be logged in to process content.', 'aisk-ai-chat'),
+                    __('You must be logged in to process content.', 'promo-bar-x'),
                     array('status' => 401)
                 );
             }
@@ -594,7 +594,7 @@ class AISK_Embeddings_Handler
             if (!current_user_can('manage_options')) {
                 return new WP_Error(
                     'insufficient_permissions',
-                    __('You do not have permission to process content.', 'aisk-ai-chat'),
+                    __('You do not have permission to process content.', 'promo-bar-x'),
                     array('status' => 403)
                 );
             }
@@ -602,7 +602,7 @@ class AISK_Embeddings_Handler
             if (empty($this->api_key)) {
                 return new WP_Error(
                     'missing_api_key',
-                    __('OpenAI API key is not configured', 'aisk-ai-chat'),
+                    __('OpenAI API key is not configured', 'promo-bar-x'),
                     array('status' => 400)
                 );
             }
@@ -635,7 +635,7 @@ class AISK_Embeddings_Handler
                         } catch (Exception $e) {
                             $errors[] = sprintf(
                             /* translators: 1: Content type 2: Content ID 3: Error message */
-                                __('Error processing %1$s ID: %2$d - %3$s', 'aisk-ai-chat'),
+                                __('Error processing %1$s ID: %2$d - %3$s', 'promo-bar-x'),
                                 $item->post_type,
                                 $item->ID,
                                 $e->getMessage()
@@ -647,7 +647,7 @@ class AISK_Embeddings_Handler
                     //     'processed' => 0,
                     //     'total' => 0,
                     //     'done' => true,
-                    //     'message' => __('No content available to process', 'aisk-ai-chat')
+                    //     'message' => __('No content available to process', 'promo-bar-x')
                     // ));
                 }
 
@@ -661,7 +661,7 @@ class AISK_Embeddings_Handler
                 } catch (Exception $e) {
                     $errors[] = sprintf(
                     /* translators: %s: Error message */
-                        __('Error processing settings content - %s', 'aisk-ai-chat'),
+                        __('Error processing settings content - %s', 'promo-bar-x'),
                         $e->getMessage()
                     );
                 }
@@ -698,7 +698,7 @@ class AISK_Embeddings_Handler
         } catch (Exception $e) {
             return new WP_Error(
                 'server_error',
-                __('An unexpected error occurred: ', 'aisk-ai-chat') . $e->getMessage(),
+                __('An unexpected error occurred: ', 'promo-bar-x') . $e->getMessage(),
                 array('status' => 500)
             );
         }
@@ -873,7 +873,7 @@ class AISK_Embeddings_Handler
         /* translators: %s: Post title */
         $content = sprintf(
             // translators: %s: Post title
-            esc_html__('Title: %s', 'aisk-ai-chat') . "\n\n",
+            esc_html__('Title: %s', 'promo-bar-x') . "\n\n",
             esc_html($post->post_title)
         );
 
@@ -883,7 +883,7 @@ class AISK_Embeddings_Handler
             /* translators: %s: Comma-separated list of category names */
             $content .= sprintf(
                 // translators: %s: Post categories
-                esc_html__('Categories: %s', 'aisk-ai-chat') . "\n\n",
+                esc_html__('Categories: %s', 'promo-bar-x') . "\n\n",
                 esc_html(implode(', ', $categories))
             );
         }
@@ -894,17 +894,17 @@ class AISK_Embeddings_Handler
             /* translators: %s: Comma-separated list of tag names */
             $content .= sprintf(
                 // translators: %s: Post tags
-                esc_html__('Tags: %s', 'aisk-ai-chat') . "\n\n",
+                esc_html__('Tags: %s', 'promo-bar-x') . "\n\n",
                 esc_html(implode(', ', $tags))
             );
         }
 
         // Content
-        $content .= esc_html__('Content:', 'aisk-ai-chat') . "\n" . wp_strip_all_tags($post->post_content) . "\n\n";
+        $content .= esc_html__('Content:', 'promo-bar-x') . "\n" . wp_strip_all_tags($post->post_content) . "\n\n";
 
         // Excerpt
         if (!empty($post->post_excerpt)) {
-            $content .= esc_html__('Excerpt:', 'aisk-ai-chat') . "\n" . wp_strip_all_tags($post->post_excerpt) . "\n\n";
+            $content .= esc_html__('Excerpt:', 'promo-bar-x') . "\n" . wp_strip_all_tags($post->post_excerpt) . "\n\n";
         }
 
         return $content;

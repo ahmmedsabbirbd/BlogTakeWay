@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Aisk – AI Powered Chatbot | Support Assistant | Support "
 "Bot | Live Chat 1.0.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/aisk-ai-chat\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/promo-bar-x\n"
 "Last-Translator: Khalid Jubair <khalidjubair@khalids-macbook-pro.local>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -13,21 +13,21 @@ msgstr ""
 "POT-Creation-Date: 2025-02-16T10:45:02+00:00\n"
 "PO-Revision-Date: 2025-03-10 22:52+0600\n"
 "X-Generator: WP-CLI 2.11.0\n"
-"X-Domain: aisk-ai-chat\n"
+"X-Domain: promo-bar-x\n"
 "Language: zh_CN\n"
 
 #. Plugin Name of the plugin
-#: aisk-ai-chat.php
+#: promo-bar-x.php
 msgid "Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: aisk-ai-chat.php
+#: promo-bar-x.php
 msgid "https://aisk.chat"
 msgstr ""
 
 #. Description of the plugin
-#: aisk-ai-chat.php
+#: promo-bar-x.php
 msgid ""
 "AISK is a revolutionary AI-powered chatbot designed specifically for "
 "WooCommerce stores and WordPress websites. Say goodbye to repetitive support "
@@ -36,12 +36,12 @@ msgid ""
 msgstr ""
 
 #. Author of the plugin
-#: aisk-ai-chat.php
+#: promo-bar-x.php
 msgid "Aisk Team <support@aisk.chat>"
 msgstr ""
 
 #. Author URI of the plugin
-#: aisk-ai-chat.php
+#: promo-bar-x.php
 msgid "https://aisk.chat/"
 msgstr ""
 

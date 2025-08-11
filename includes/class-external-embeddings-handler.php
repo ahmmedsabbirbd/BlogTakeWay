@@ -1628,7 +1628,7 @@ class AISK_External_Embeddings_Handler {
         if (empty($parent_url)) {
             return new WP_Error(
                 'missing_url',
-                __('Parent URL is required', 'aisk-ai-chat'),
+                __('Parent URL is required', 'promo-bar-x'),
                 ['status' => 400]
             );
         }
@@ -1849,7 +1849,7 @@ class AISK_External_Embeddings_Handler {
             if (empty($pdf_attachments)) {
                 return new WP_REST_Response([
                     'success' => true,
-                    'message' => __('No PDF files found in media library', 'aisk-ai-chat'),
+                    'message' => __('No PDF files found in media library', 'promo-bar-x'),
                     'deleted_count' => 0
                 ], 200);
             }
@@ -1891,7 +1891,7 @@ class AISK_External_Embeddings_Handler {
                 } else {
                     $errors[] = sprintf(
                         /* translators: %s: PDF file name */
-                        __('Failed to delete PDF: %s', 'aisk-ai-chat'),
+                        __('Failed to delete PDF: %s', 'promo-bar-x'),
                         $attachment->post_title
                     );
                 }
@@ -1904,7 +1904,7 @@ class AISK_External_Embeddings_Handler {
                 'success' => true,
                 'message' => sprintf(
                     /* translators: %d: Number of PDF files deleted */
-                    __('Successfully deleted %d PDF files from media library', 'aisk-ai-chat'),
+                    __('Successfully deleted %d PDF files from media library', 'promo-bar-x'),
                     $deleted_count
                 ),
                 'deleted_count' => $deleted_count,
@@ -1934,7 +1934,7 @@ class AISK_External_Embeddings_Handler {
 
             // Validate required file data.
             if (empty($file_data['file_name']) || empty($file_data['file_path'])) {
-                throw new Exception(esc_html__('Missing required file data', 'aisk-ai-chat'));
+                throw new Exception(esc_html__('Missing required file data', 'promo-bar-x'));
             }
 
             // Generate a unique cache key based on file name and path.
@@ -2279,7 +2279,7 @@ class AISK_External_Embeddings_Handler {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'wp_rest')) {
             return new WP_Error(
                 'invalid_nonce',
-                esc_html__('Security check failed', 'aisk-ai-chat'),
+                esc_html__('Security check failed', 'promo-bar-x'),
                 array('status' => 403)
             );
         }
@@ -2289,7 +2289,7 @@ class AISK_External_Embeddings_Handler {
         if (!isset($_FILES['pdf_file']) || !isset($_FILES['pdf_file']['size'])) {
             return new WP_Error(
                 'missing_file',
-                esc_html__('No PDF file provided', 'aisk-ai-chat'),
+                esc_html__('No PDF file provided', 'promo-bar-x'),
                 array('status' => 400)
             );
         }
@@ -2300,7 +2300,7 @@ class AISK_External_Embeddings_Handler {
                 'file_too_large',
                 sprintf(
                     /* translators: %s: File size, %s: System POST limit */
-                    esc_html__('File size (%1$s) exceeds the system POST limit (%2$s). Please contact your server administrator to increase the limit.', 'aisk-ai-chat'),
+                    esc_html__('File size (%1$s) exceeds the system POST limit (%2$s). Please contact your server administrator to increase the limit.', 'promo-bar-x'),
                     size_format($file_size),
                     size_format($system_limits['post_max_size'])
                 ),
@@ -2312,7 +2312,7 @@ class AISK_External_Embeddings_Handler {
         if (!isset($_FILES['pdf_file']) || !is_array($_FILES['pdf_file'])) {
             return new WP_Error(
                 'invalid_file',
-                esc_html__('Invalid file upload', 'aisk-ai-chat'),
+                esc_html__('Invalid file upload', 'promo-bar-x'),
                 array('status' => 400)
             );
         }
@@ -2356,7 +2356,7 @@ class AISK_External_Embeddings_Handler {
 
         return new WP_REST_Response([
             'success' => true,
-            'message' => esc_html__('PDF processed successfully', 'aisk-ai-chat'),
+            'message' => esc_html__('PDF processed successfully', 'promo-bar-x'),
             'file_path' => esc_html($file_path)
         ], 200);
     }
@@ -2367,7 +2367,7 @@ class AISK_External_Embeddings_Handler {
         if (!$attachment_id) {
             return new WP_Error(
                 'missing_attachment_id',
-                __('Attachment ID is required', 'aisk-ai-chat'),
+                __('Attachment ID is required', 'promo-bar-x'),
                 ['status' => 400]
             );
         }
@@ -2396,7 +2396,7 @@ class AISK_External_Embeddings_Handler {
         if (!$status) {
             return new WP_Error(
                 'not_found',
-                __('PDF processing status not found', 'aisk-ai-chat'),
+                __('PDF processing status not found', 'promo-bar-x'),
                 ['status' => 404]
             );
         }
@@ -2435,7 +2435,7 @@ class AISK_External_Embeddings_Handler {
         if (!$job_id && !$attachment_id) {
             return new WP_Error(
                 'missing_parameters',
-                __('Either job_id or attachment_id is required', 'aisk-ai-chat'),
+                __('Either job_id or attachment_id is required', 'promo-bar-x'),
                 ['status' => 400]
             );
         }
@@ -2461,7 +2461,7 @@ class AISK_External_Embeddings_Handler {
             if (!$attachment_id) {
                 return new WP_Error(
                     'invalid_job_id',
-                    __('Invalid job ID', 'aisk-ai-chat'),
+                    __('Invalid job ID', 'promo-bar-x'),
                     ['status' => 404]
                 );
             }
@@ -2469,7 +2469,7 @@ class AISK_External_Embeddings_Handler {
         }
         // If status is 'completed' or 'failed', return cached status without querying embeddings
         if ($status['status'] === 'completed' || $status['status'] === 'failed') {
-            $user_message = ($status['status'] === 'failed') ? ($status['error_message'] ?: __('PDF processing failed.', 'aisk-ai-chat')) : __('Processed', 'aisk-ai-chat');
+            $user_message = ($status['status'] === 'failed') ? ($status['error_message'] ?: __('PDF processing failed.', 'promo-bar-x')) : __('Processed', 'promo-bar-x');
             return new WP_REST_Response([
                 'status' => $status['status'],
                 'processed' => ($status['status'] === 'completed'),
@@ -2501,11 +2501,11 @@ class AISK_External_Embeddings_Handler {
         $failed = ($status['status'] === 'failed');
         $user_message = '';
         if ($failed) {
-            $user_message = $status['error_message'] ?: __('PDF processing failed.', 'aisk-ai-chat');
+            $user_message = $status['error_message'] ?: __('PDF processing failed.', 'promo-bar-x');
         } elseif ($processing) {
-            $user_message = __('Processing in background...', 'aisk-ai-chat');
+            $user_message = __('Processing in background...', 'promo-bar-x');
         } elseif ($processed) {
-            $user_message = __('Processed', 'aisk-ai-chat');
+            $user_message = __('Processed', 'promo-bar-x');
         }
         return new WP_REST_Response([
             'status' => $status['status'],
@@ -2557,7 +2557,7 @@ class AISK_External_Embeddings_Handler {
             // Extract text from PDF
             $pdf_text = $this->extract_pdf_text($file_path);
             if (empty($pdf_text)) {
-                throw new Exception(__('Failed to extract text from PDF', 'aisk-ai-chat'));
+                throw new Exception(__('Failed to extract text from PDF', 'promo-bar-x'));
             }
 
             // Split content into chunks
@@ -2571,12 +2571,12 @@ class AISK_External_Embeddings_Handler {
 
             // If no embeddings were created, or store_embedding failed, mark as failed
             if (!$success || count($chunks) === 0) {
-                $this->update_pdf_job_status($job_id, 'failed', __('No text content found in PDF or failed to store embeddings', 'aisk-ai-chat'));
+                $this->update_pdf_job_status($job_id, 'failed', __('No text content found in PDF or failed to store embeddings', 'promo-bar-x'));
                 wp_delete_attachment($attachment_id, true);
                 return;
             }
 
-            $this->update_pdf_job_status($job_id, 'completed', __('PDF processed successfully', 'aisk-ai-chat'));
+            $this->update_pdf_job_status($job_id, 'completed', __('PDF processed successfully', 'promo-bar-x'));
 
         } catch (Exception $e) {
             $this->update_pdf_job_status($job_id, 'failed', $e->getMessage());
@@ -2778,7 +2778,7 @@ class AISK_External_Embeddings_Handler {
         if (!$pdf_id) {
             return new WP_Error(
                 'missing_pdf_id',
-                __('PDF ID is required', 'aisk-ai-chat'),
+                __('PDF ID is required', 'promo-bar-x'),
                 array('status' => 400)
             );
         }
@@ -2859,7 +2859,7 @@ class AISK_External_Embeddings_Handler {
         if ($result === false) {
             return new WP_Error(
                 'delete_failed',
-                __('Failed to delete PDF embeddings', 'aisk-ai-chat'),
+                __('Failed to delete PDF embeddings', 'promo-bar-x'),
                 array('status' => 500)
             );
         }
@@ -2867,7 +2867,7 @@ class AISK_External_Embeddings_Handler {
         return new WP_REST_Response(
             array(
                 'success' => true,
-                'message' => __('PDF embeddings and job deleted successfully', 'aisk-ai-chat'),
+                'message' => __('PDF embeddings and job deleted successfully', 'promo-bar-x'),
                 'pdf_job_deleted' => $pdf_job_deleted
             ),
             200
@@ -2917,38 +2917,38 @@ class AISK_External_Embeddings_Handler {
      */
     public function get_upload_limit_instructions() {
         $instructions = '<div class="upload-limit-instructions">';
-        $instructions .= '<h3>' . __('How to Increase Upload Limit', 'aisk-ai-chat') . '</h3>';
-        $instructions .= '<p>' . __('Your server currently has a maximum upload size of', 'aisk-ai-chat') . ' <strong>' . $this->get_current_max_upload_size_formatted() . '</strong>. ';
-        $instructions .= __('To upload larger files, you need to increase this limit.', 'aisk-ai-chat') . '</p>';
+        $instructions .= '<h3>' . __('How to Increase Upload Limit', 'promo-bar-x') . '</h3>';
+        $instructions .= '<p>' . __('Your server currently has a maximum upload size of', 'promo-bar-x') . ' <strong>' . $this->get_current_max_upload_size_formatted() . '</strong>. ';
+        $instructions .= __('To upload larger files, you need to increase this limit.', 'promo-bar-x') . '</p>';
         
-        $instructions .= '<h4>' . __('Method 1: Edit php.ini', 'aisk-ai-chat') . '</h4>';
+        $instructions .= '<h4>' . __('Method 1: Edit php.ini', 'promo-bar-x') . '</h4>';
         $instructions .= '<ol>';
-        $instructions .= '<li>' . __('Locate your php.ini file', 'aisk-ai-chat') . '</li>';
-        $instructions .= '<li>' . __('Find and modify these lines:', 'aisk-ai-chat') . '</li>';
+        $instructions .= '<li>' . __('Locate your php.ini file', 'promo-bar-x') . '</li>';
+        $instructions .= '<li>' . __('Find and modify these lines:', 'promo-bar-x') . '</li>';
         $instructions .= '<pre>upload_max_filesize = 64M
 post_max_size = 64M
 memory_limit = 256M
 max_execution_time = 300
 max_input_time = 300</pre>';
-        $instructions .= '<li>' . __('Save the file and restart your web server', 'aisk-ai-chat') . '</li>';
+        $instructions .= '<li>' . __('Save the file and restart your web server', 'promo-bar-x') . '</li>';
         $instructions .= '</ol>';
         
-        $instructions .= '<h4>' . __('Method 2: Edit .htaccess', 'aisk-ai-chat') . '</h4>';
+        $instructions .= '<h4>' . __('Method 2: Edit .htaccess', 'promo-bar-x') . '</h4>';
         $instructions .= '<ol>';
-        $instructions .= '<li>' . __('Edit your .htaccess file in the WordPress root directory', 'aisk-ai-chat') . '</li>';
-        $instructions .= '<li>' . __('Add these lines:', 'aisk-ai-chat') . '</li>';
+        $instructions .= '<li>' . __('Edit your .htaccess file in the WordPress root directory', 'promo-bar-x') . '</li>';
+        $instructions .= '<li>' . __('Add these lines:', 'promo-bar-x') . '</li>';
         $instructions .= '<pre>php_value upload_max_filesize 64M
 php_value post_max_size 64M
 php_value memory_limit 256M
 php_value max_execution_time 300
 php_value max_input_time 300</pre>';
-        $instructions .= '<li>' . __('Save the file', 'aisk-ai-chat') . '</li>';
+        $instructions .= '<li>' . __('Save the file', 'promo-bar-x') . '</li>';
         $instructions .= '</ol>';
         
-        $instructions .= '<h4>' . __('Method 3: Contact Your Hosting Provider', 'aisk-ai-chat') . '</h4>';
-        $instructions .= '<p>' . __('If you don\'t have access to these files, contact your hosting provider to increase these limits for you.', 'aisk-ai-chat') . '</p>';
+        $instructions .= '<h4>' . __('Method 3: Contact Your Hosting Provider', 'promo-bar-x') . '</h4>';
+        $instructions .= '<p>' . __('If you don\'t have access to these files, contact your hosting provider to increase these limits for you.', 'promo-bar-x') . '</p>';
         
-        $instructions .= '<p><strong>' . __('Note:', 'aisk-ai-chat') . '</strong> ' . __('For optimal performance, we recommend keeping file sizes under', 'aisk-ai-chat') . ' <strong>' . $this->get_optimum_upload_size_formatted() . '</strong>.</p>';
+        $instructions .= '<p><strong>' . __('Note:', 'promo-bar-x') . '</strong> ' . __('For optimal performance, we recommend keeping file sizes under', 'promo-bar-x') . ' <strong>' . $this->get_optimum_upload_size_formatted() . '</strong>.</p>';
         
         $instructions .= '</div>';
         
@@ -2969,7 +2969,7 @@ php_value max_input_time 300</pre>';
             $class = 'notice notice-warning is-dismissible';
             $message = sprintf(
                 /* translators: 1: Server's maximum upload size 2: Recommended optimum size */
-            __('Your server\'s maximum upload size (%1$s) is below our recommended optimum size (%2$s). This may limit your ability to process larger PDF files. <a href="#" class="show-upload-instructions">Learn how to increase this limit</a>.', 'aisk-ai-chat'),
+            __('Your server\'s maximum upload size (%1$s) is below our recommended optimum size (%2$s). This may limit your ability to process larger PDF files. <a href="#" class="show-upload-instructions">Learn how to increase this limit</a>.', 'promo-bar-x'),
                 $this->get_current_max_upload_size_formatted(),
                 $this->get_optimum_upload_size_formatted()
             );
@@ -3281,12 +3281,12 @@ php_value max_input_time 300</pre>';
     public function handle_pdf_upload() {
         // Verify nonce
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'aisk_pdf_upload')) {
-            wp_die(esc_html__('Security check failed', 'aisk-ai-chat'), 403);
+            wp_die(esc_html__('Security check failed', 'promo-bar-x'), 403);
         }
 
         // Validate file input
         if (!isset($_FILES['pdf_file']) || !is_array($_FILES['pdf_file'])) {
-            wp_die(esc_html__('No PDF file provided', 'aisk-ai-chat'), 400);
+            wp_die(esc_html__('No PDF file provided', 'promo-bar-x'), 400);
         }
 
         $file = array_map('sanitize_text_field', wp_unslash($_FILES['pdf_file']));
@@ -3315,7 +3315,7 @@ php_value max_input_time 300</pre>';
         }
 
         wp_send_json_success([
-            'message' => esc_html__('PDF processed successfully', 'aisk-ai-chat'),
+            'message' => esc_html__('PDF processed successfully', 'promo-bar-x'),
             'file_path' => esc_html($file_path)
         ]);
     }

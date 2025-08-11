@@ -29,11 +29,11 @@ export const FileUploader = ({ accept, maxSize, onUpload }) => {
             <UploadIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
             <p className="text-sm text-gray-600">
                 {isDragActive
-                    ? __('Drop the file here...', 'aisk-ai-chat')
-                    : __('Drag & drop a PDF file here, or click to select', 'aisk-ai-chat')}
+                    ? __('Drop the file here...', 'promo-bar-x')
+                    : __('Drag & drop a PDF file here, or click to select', 'promo-bar-x')}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-                {__('Maximum file size:', 'aisk-ai-chat')} {maxSize}MB
+                {__('Maximum file size:', 'promo-bar-x')} {maxSize}MB
             </p>
         </div>
     );

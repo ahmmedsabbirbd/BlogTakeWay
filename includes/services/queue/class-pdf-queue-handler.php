@@ -112,7 +112,7 @@ class AISK_PDF_Queue_Handler {
     public function add_cron_interval($schedules) {
         $schedules['aisk_five_minutes'] = array(
             'interval' => self::MIN_PROCESSING_INTERVAL,
-            'display'  => __('Every 5 Minutes', 'aisk-ai-chat')
+            'display'  => __('Every 5 Minutes', 'promo-bar-x')
         );
         return $schedules;
     }

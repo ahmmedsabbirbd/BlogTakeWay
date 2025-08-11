@@ -372,7 +372,7 @@ class AISK_Chat_Handler {
             
             if (!$is_woocommerce_enabled && in_array($intent['intent_type'], ['product_search', 'product_info_search'])) {
                 return [
-                    'message' => __("Product search is currently disabled. Please enable WooCommerce integration in the settings.", 'aisk-ai-chat'),
+                    'message' => __("Product search is currently disabled. Please enable WooCommerce integration in the settings.", 'promo-bar-x'),
                     'products' => []
                 ];
             }
@@ -1341,7 +1341,7 @@ class AISK_Chat_Handler {
         $settings = get_option('aisk_settings');
         if (empty($settings['ai_config']['woocommerce_enabled'])) {
             return [
-                'message' => __("Product search is currently disabled. Please enable WooCommerce integration in the settings.", 'aisk-ai-chat'),
+                'message' => __("Product search is currently disabled. Please enable WooCommerce integration in the settings.", 'promo-bar-x'),
                 'products' => []
             ];
         }
@@ -1354,8 +1354,8 @@ class AISK_Chat_Handler {
             $default_message = sprintf(
                 /* translators: %s: product category or 'products' */
                 /* translators: %s: Content type (e.g., products, articles) */
-            __("I couldn't find any %s matching your request. Could you please try describing what you're looking for in a different way?", 'aisk-ai-chat'),
-                isset($intent['category']) ? $intent['category'] : __('products', 'aisk-ai-chat')
+            __("I couldn't find any %s matching your request. Could you please try describing what you're looking for in a different way?", 'promo-bar-x'),
+                isset($intent['category']) ? $intent['category'] : __('products', 'promo-bar-x')
             );
 
             return [
@@ -1365,7 +1365,7 @@ class AISK_Chat_Handler {
         }
 
         return [
-            'message' => isset($intent['responses']['found']) ? $intent['responses']['found'] : __('Awesome! Here are some products you might like:', 'aisk-ai-chat'),
+            'message' => isset($intent['responses']['found']) ? $intent['responses']['found'] : __('Awesome! Here are some products you might like:', 'promo-bar-x'),
             'products' => $products,
         ];
     }
@@ -1649,49 +1649,49 @@ class AISK_Chat_Handler {
         foreach ($grouped_content as $type => $contents) {
             switch ($type) {
                 case 'product':
-                    $context .= esc_html__('Product Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('Product Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }
                     break;
                 case 'order':
-                    $context .= esc_html__('Order Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('Order Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }
                     break;
                 case 'pdf':
-                    $context .= esc_html__('Document Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('Document Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }
                     break;
                 case 'external_url':
-                    $context .= esc_html__('External Resource Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('External Resource Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }
                     break;
                 case 'post':
-                    $context .= esc_html__('Blog Post Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('Blog Post Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }
                     break;
                 case 'page':
-                    $context .= esc_html__('Page Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('Page Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }
                     break;
                 case 'settings':
-                    $context .= esc_html__('Store Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('Store Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }
                     break;
                 default:
-                    $context .= esc_html__('Additional Information:', 'aisk-ai-chat') . "\n";
+                    $context .= esc_html__('Additional Information:', 'promo-bar-x') . "\n";
                     foreach ($contents as $content) {
                         $context .= "- " . esc_html($content['content_chunk']) . "\n";
                     }

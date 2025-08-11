@@ -100,9 +100,9 @@ const InquiryDetails = ({ inquiryId }) => {
 
     const getStatusChip = (status) => {
         const statusConfig = {
-            pending: { color: 'warning', label: __('Pending', 'aisk-ai-chat') },
-            in_progress: { color: 'info', label: __('In Progress', 'aisk-ai-chat') },
-            resolved: { color: 'success', label: __('Resolved', 'aisk-ai-chat') }
+            pending: { color: 'warning', label: __('Pending', 'promo-bar-x') },
+            in_progress: { color: 'info', label: __('In Progress', 'promo-bar-x') },
+            resolved: { color: 'success', label: __('Resolved', 'promo-bar-x') }
         };
         const config = statusConfig[status] || statusConfig.pending;
         return <Chip label={config.label} color={config.color} size="small" />;
@@ -113,40 +113,40 @@ const InquiryDetails = ({ inquiryId }) => {
         const now = new Date();
         const diffInSeconds = Math.floor((now - date) / 1000);
 
-        if (diffInSeconds < 60) return __('just now', 'aisk-ai-chat');
+        if (diffInSeconds < 60) return __('just now', 'promo-bar-x');
 
         const diffInMinutes = Math.floor(diffInSeconds / 60);
         if (diffInMinutes < 60) {
             return diffInMinutes === 1
-                ? __('1 minute ago', 'aisk-ai-chat')
-                : sprintf(__('%d minutes ago', 'aisk-ai-chat'), diffInMinutes);
+                ? __('1 minute ago', 'promo-bar-x')
+                : sprintf(__('%d minutes ago', 'promo-bar-x'), diffInMinutes);
         }
 
         const diffInHours = Math.floor(diffInMinutes / 60);
         if (diffInHours < 24) {
             return diffInHours === 1
-                ? __('1 hour ago', 'aisk-ai-chat')
-                : sprintf(__('%d hours ago', 'aisk-ai-chat'), diffInHours);
+                ? __('1 hour ago', 'promo-bar-x')
+                : sprintf(__('%d hours ago', 'promo-bar-x'), diffInHours);
         }
 
         const diffInDays = Math.floor(diffInHours / 24);
         if (diffInDays < 30) {
             return diffInDays === 1
-                ? __('1 day ago', 'aisk-ai-chat')
-                : sprintf(__('%d days ago', 'aisk-ai-chat'), diffInDays);
+                ? __('1 day ago', 'promo-bar-x')
+                : sprintf(__('%d days ago', 'promo-bar-x'), diffInDays);
         }
 
         const diffInMonths = Math.floor(diffInDays / 30);
         if (diffInMonths < 12) {
             return diffInMonths === 1
-                ? __('1 month ago', 'aisk-ai-chat')
-                : sprintf(__('%d months ago', 'aisk-ai-chat'), diffInMonths);
+                ? __('1 month ago', 'promo-bar-x')
+                : sprintf(__('%d months ago', 'promo-bar-x'), diffInMonths);
         }
 
         const diffInYears = Math.floor(diffInMonths / 12);
         return diffInYears === 1
-            ? __('1 year ago', 'aisk-ai-chat')
-            : sprintf(__('%d years ago', 'aisk-ai-chat'), diffInYears);
+            ? __('1 year ago', 'promo-bar-x')
+            : sprintf(__('%d years ago', 'promo-bar-x'), diffInYears);
     };
 
     // Helper to ensure date string is parsed as UTC
@@ -163,8 +163,8 @@ const InquiryDetails = ({ inquiryId }) => {
         return new Date(dateString);
     };
 
-    if (loading) return <Box sx={{ p: 3 }}>{__('Loading...', 'aisk-ai-chat')}</Box>;
-    if (!inquiry) return <Box sx={{ p: 3 }}>{__('Inquiry not found', 'aisk-ai-chat')}</Box>;
+    if (loading) return <Box sx={{ p: 3 }}>{__('Loading...', 'promo-bar-x')}</Box>;
+    if (!inquiry) return <Box sx={{ p: 3 }}>{__('Inquiry not found', 'promo-bar-x')}</Box>;
 
     return (
         <Box sx={{ p: 3 }}>
@@ -178,10 +178,10 @@ const InquiryDetails = ({ inquiryId }) => {
                     <Box>
                         <Box>
                             <Typography variant="h5" gutterBottom>
-                                {__('Inquiry', 'aisk-ai-chat')} #{inquiry.id} - {__('Order', 'aisk-ai-chat')} #{inquiry.order_number}
+                                {__('Inquiry', 'promo-bar-x')} #{inquiry.id} - {__('Order', 'promo-bar-x')} #{inquiry.order_number}
                             </Typography>
                             <Typography variant="subtitle2" color="text.secondary">
-                                {__('Created:', 'aisk-ai-chat')}
+                                {__('Created:', 'promo-bar-x')}
                                 {(() => {
                                     // Parse the UTC timestamp from the database (stored in UTC)
                                     const utcDate = new Date(inquiry.created_at);
@@ -219,15 +219,15 @@ const InquiryDetails = ({ inquiryId }) => {
 
                 <Stack spacing={3}>
                     <Box>
-                        <Typography variant="h6" gutterBottom>{__('Customer Details', 'aisk-ai-chat')}</Typography>
+                        <Typography variant="h6" gutterBottom>{__('Customer Details', 'promo-bar-x')}</Typography>
                         <Stack spacing={1}>
-                            <Typography>{__('Email:', 'aisk-ai-chat')} {inquiry.customer_email}</Typography>
-                            <Typography>{__('Phone:', 'aisk-ai-chat')} {inquiry.customer_phone}</Typography>
+                            <Typography>{__('Email:', 'promo-bar-x')} {inquiry.customer_email}</Typography>
+                            <Typography>{__('Phone:', 'promo-bar-x')} {inquiry.customer_phone}</Typography>
                         </Stack>
                     </Box>
 
                     <Box>
-                        <Typography variant="h6" gutterBottom>{__('Inquiry Details', 'aisk-ai-chat')}</Typography>
+                        <Typography variant="h6" gutterBottom>{__('Inquiry Details', 'promo-bar-x')}</Typography>
                         <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
                             <Typography>{inquiry.note}</Typography>
                         </Paper>
@@ -236,7 +236,7 @@ const InquiryDetails = ({ inquiryId }) => {
                     <Divider />
 
                     <Box>
-                        <Typography variant="h6" gutterBottom>{__('Notes History', 'aisk-ai-chat')}</Typography>
+                        <Typography variant="h6" gutterBottom>{__('Notes History', 'promo-bar-x')}</Typography>
                         <List sx={{ bgcolor: 'background.paper' }}>
                             {notes.map((note) => (
                                 <ListItem
@@ -256,7 +256,7 @@ const InquiryDetails = ({ inquiryId }) => {
                                             color="text.secondary"
                                             sx={{ mt: 1, display: 'block' }}
                                         >
-                                            {__('Added by', 'aisk-ai-chat')} {note.author} • {getTimeAgo(note.created_at)}
+                                            {__('Added by', 'promo-bar-x')} {note.author} • {getTimeAgo(note.created_at)}
                                             <span title={parseUTCDate(note.created_at).toLocaleString(undefined, {
                                                 year: 'numeric',
                                                 month: 'short',
@@ -278,14 +278,14 @@ const InquiryDetails = ({ inquiryId }) => {
                         </List>
 
                         <Box sx={{ mt: 3 }}>
-                            <Typography variant="subtitle1" gutterBottom>{__('Add Note', 'aisk-ai-chat')}</Typography>
+                            <Typography variant="subtitle1" gutterBottom>{__('Add Note', 'promo-bar-x')}</Typography>
                             <TextField
                                 fullWidth
                                 multiline
                                 rows={3}
                                 value={newNote}
                                 onChange={(e) => setNewNote(e.target.value)}
-                                placeholder={__('Type your note here...', 'aisk-ai-chat')}
+                                placeholder={__('Type your note here...', 'promo-bar-x')}
                                 sx={{ mb: 2 }}
                             />
                             <Button
@@ -293,7 +293,7 @@ const InquiryDetails = ({ inquiryId }) => {
                                 onClick={handleAddNote}
                                 disabled={!newNote.trim()}
                             >
-                                {__('Add Note', 'aisk-ai-chat')}
+                                {__('Add Note', 'promo-bar-x')}
                             </Button>
                         </Box>
                     </Box>

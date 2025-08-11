@@ -78,15 +78,15 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
             <TabsList className="mb-4">
                 <TabsTrigger value="whatsapp" className="flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
-                    {__('WhatsApp', 'aisk-ai-chat')}
+                    {__('WhatsApp', 'promo-bar-x')}
                 </TabsTrigger>
                 <TabsTrigger value="telegram" className="flex items-center gap-2">
                     <Send className="w-4 h-4" />
-                    {__('Telegram', 'aisk-ai-chat')}
+                    {__('Telegram', 'promo-bar-x')}
                 </TabsTrigger>
                 <TabsTrigger value="contact_form" className="flex items-center gap-2">
                     <Mail className="w-4 h-4" />
-                    {__('Contact Form', 'aisk-ai-chat')}
+                    {__('Contact Form', 'promo-bar-x')}
                 </TabsTrigger>
             </TabsList>
 
@@ -94,14 +94,14 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
             <TabsContent value="whatsapp">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{__('WhatsApp Integration', 'aisk-ai-chat')}</CardTitle>
-                        <CardDescription>{__('Configure WhatsApp messaging integration', 'aisk-ai-chat')}</CardDescription>
+                        <CardTitle>{__('WhatsApp Integration', 'promo-bar-x')}</CardTitle>
+                        <CardDescription>{__('Configure WhatsApp messaging integration', 'promo-bar-x')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>{__('Enable WhatsApp', 'aisk-ai-chat')}</Label>
-                                <p className="text-sm text-gray-500">{__('Activate WhatsApp integration', 'aisk-ai-chat')}</p>
+                                <Label>{__('Enable WhatsApp', 'promo-bar-x')}</Label>
+                                <p className="text-sm text-gray-500">{__('Activate WhatsApp integration', 'promo-bar-x')}</p>
                                 <Switch
                                     checked={settings.integrations.whatsapp.enabled}
                                     onCheckedChange={(checked) => updateIntegrationSettings('whatsapp', 'enabled', checked)}
@@ -110,7 +110,7 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="account_sid">{__('Twilio Account SID', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="account_sid">{__('Twilio Account SID', 'promo-bar-x')}</Label>
                             <Input
                                 id="account_sid"
                                 value={settings.integrations.whatsapp.account_sid}
@@ -118,7 +118,7 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                                 type="password"
                             />
                             <p className="text-xs text-muted-foreground">
-                                {__('Get your SID from', 'aisk-ai-chat')}{" "}
+                                {__('Get your SID from', 'promo-bar-x')}{" "}
                                 <a
                                     href="https://www.twilio.com/try-twilio"
                                     target="_blank"
@@ -131,7 +131,7 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="auth_token">{__('Twilio Auth Token', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="auth_token">{__('Twilio Auth Token', 'promo-bar-x')}</Label>
                             <Input
                                 id="auth_token"
                                 value={settings.integrations.whatsapp.auth_token}
@@ -139,7 +139,7 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                                 type="password"
                             />
                             <p className="text-xs text-muted-foreground">
-                                {__('Get your auth token from', 'aisk-ai-chat')}{" "}
+                                {__('Get your auth token from', 'promo-bar-x')}{" "}
                                 <a
                                     href="https://www.twilio.com/try-twilio"
                                     target="_blank"
@@ -152,28 +152,28 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="phone_number">{__('WhatsApp Number', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="phone_number">{__('WhatsApp Number', 'promo-bar-x')}</Label>
                             <Input
                                 id="phone_number"
                                 value={settings.integrations.whatsapp.phone_number}
                                 onChange={(e) => updateIntegrationSettings('whatsapp', 'phone_number', e.target.value)}
-                                placeholder={__('whatsapp:+1234567890', 'aisk-ai-chat')}
+                                placeholder={__('whatsapp:+1234567890', 'promo-bar-x')}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="whatsapp_welcome">{__('Welcome Message', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="whatsapp_welcome">{__('Welcome Message', 'promo-bar-x')}</Label>
                             <Textarea
                                 id="whatsapp_welcome"
                                 value={settings.integrations.whatsapp.welcome_message}
                                 onChange={(e) => updateIntegrationSettings('whatsapp', 'welcome_message', e.target.value)}
-                                placeholder={__('Enter welcome message', 'aisk-ai-chat')}
+                                placeholder={__('Enter welcome message', 'promo-bar-x')}
                                 rows={3}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label>{__('Webhook URL', 'aisk-ai-chat')}</Label>
+                            <Label>{__('Webhook URL', 'promo-bar-x')}</Label>
                             <div className="p-2 bg-gray-100 rounded-md flex items-center justify-between">
                                 <code className="text-sm">{window.location.origin}/wp-json/aisk/v1/whatsapp-webhook</code>
                                 {/* <code className="text-sm">https://ff13-103-31-154-235.ngrok-free.app/wp-json/aisk/v1/whatsapp-webhook</code> */}
@@ -185,7 +185,7 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                                     {copiedWhatsapp ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                                 </Button>
                             </div>
-                            <p className="text-sm text-gray-500">{__('Set this as your Twilio WhatsApp webhook URL', 'aisk-ai-chat')}</p>
+                            <p className="text-sm text-gray-500">{__('Set this as your Twilio WhatsApp webhook URL', 'promo-bar-x')}</p>
                         </div>
 
                         {/* <div className="flex items-center space-x-2">
@@ -194,7 +194,7 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                                 checked={settings.integrations.whatsapp.enable_template_messages}
                                 onCheckedChange={(checked) => updateIntegrationSettings('whatsapp', 'enable_template_messages', checked)}
                             />
-                            <Label htmlFor="template_messages">{__('Enable template messages', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="template_messages">{__('Enable template messages', 'promo-bar-x')}</Label>
                         </div> */}
                     </CardContent>
                 </Card>
@@ -204,14 +204,14 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
             <TabsContent value="telegram">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{__('Telegram Integration', 'aisk-ai-chat')}</CardTitle>
-                        <CardDescription>{__('Configure Telegram bot integration', 'aisk-ai-chat')}</CardDescription>
+                        <CardTitle>{__('Telegram Integration', 'promo-bar-x')}</CardTitle>
+                        <CardDescription>{__('Configure Telegram bot integration', 'promo-bar-x')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>{__('Enable Telegram', 'aisk-ai-chat')}</Label>
-                                <p className="text-sm text-gray-500">{__('Activate Telegram integration', 'aisk-ai-chat')}</p>
+                                <Label>{__('Enable Telegram', 'promo-bar-x')}</Label>
+                                <p className="text-sm text-gray-500">{__('Activate Telegram integration', 'promo-bar-x')}</p>
                                 <Switch
                                     checked={settings.integrations.telegram.enabled}
                                     onCheckedChange={(checked) => updateIntegrationSettings('telegram', 'enabled', checked)}
@@ -220,39 +220,39 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="bot_token">{__('Bot Token', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="bot_token">{__('Bot Token', 'promo-bar-x')}</Label>
                             <Input
                                 id="bot_token"
                                 value={settings.integrations.telegram.bot_token}
                                 onChange={(e) => updateIntegrationSettings('telegram', 'bot_token', e.target.value)}
                                 type="password"
                             />
-                            <p className="text-sm text-gray-500">{__('Enter the bot token provided by @BotFather', 'aisk-ai-chat')}</p>
+                            <p className="text-sm text-gray-500">{__('Enter the bot token provided by @BotFather', 'promo-bar-x')}</p>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="bot_username">{__('Bot Username', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="bot_username">{__('Bot Username', 'promo-bar-x')}</Label>
                             <Input
                                 id="bot_username"
                                 value={settings.integrations.telegram.bot_username}
                                 onChange={(e) => updateIntegrationSettings('telegram', 'bot_username', e.target.value)}
-                                placeholder={__('@YourBotUsername', 'aisk-ai-chat')}
+                                placeholder={__('@YourBotUsername', 'promo-bar-x')}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="telegram_welcome">{__('Welcome Message', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="telegram_welcome">{__('Welcome Message', 'promo-bar-x')}</Label>
                             <Textarea
                                 id="telegram_welcome"
                                 value={settings.integrations.telegram.welcome_message}
                                 onChange={(e) => updateIntegrationSettings('telegram', 'welcome_message', e.target.value)}
-                                placeholder={__('Enter welcome message', 'aisk-ai-chat')}
+                                placeholder={__('Enter welcome message', 'promo-bar-x')}
                                 rows={3}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label>{__('Webhook URL', 'aisk-ai-chat')}</Label>
+                            <Label>{__('Webhook URL', 'promo-bar-x')}</Label>
                             <div className="p-2 bg-gray-100 rounded-md flex items-center justify-between overflow-x-auto">
                                 <code className="text-sm whitespace-nowrap">
                                     https://api.telegram.org/bot%3CTOKEN%3E/setWebhook?url={window.location.origin}/wp-json/aisk/v1/telegram-webhook
@@ -274,7 +274,7 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                                     </Button>
                                 </div>
                             </div>
-                            <p className="text-sm text-gray-500">{__('Visit this URL in your browser to set up the webhook', 'aisk-ai-chat')}</p>
+                            <p className="text-sm text-gray-500">{__('Visit this URL in your browser to set up the webhook', 'promo-bar-x')}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -284,14 +284,14 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
             <TabsContent value="contact_form">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{__('Contact Form Integration', 'aisk-ai-chat')}</CardTitle>
-                        <CardDescription>{__('Configure contact form integration', 'aisk-ai-chat')}</CardDescription>
+                        <CardTitle>{__('Contact Form Integration', 'promo-bar-x')}</CardTitle>
+                        <CardDescription>{__('Configure contact form integration', 'promo-bar-x')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label>{__('Enable Contact Form', 'aisk-ai-chat')}</Label>
-                                <p className="text-sm text-gray-500">{__('Activate contact form integration', 'aisk-ai-chat')}</p>
+                                <Label>{__('Enable Contact Form', 'promo-bar-x')}</Label>
+                                <p className="text-sm text-gray-500">{__('Activate contact form integration', 'promo-bar-x')}</p>
                                 <Switch
                                     checked={settings.integrations.contact_form.enabled}
                                     onCheckedChange={(checked) => updateIntegrationSettings('contact_form', 'enabled', checked)}
@@ -300,14 +300,14 @@ const IntegrationsSettings = ({ settings, updateSettings }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="shortcode">{__('Form Shortcode', 'aisk-ai-chat')}</Label>
+                            <Label htmlFor="shortcode">{__('Form Shortcode', 'promo-bar-x')}</Label>
                             <Input
                                 id="shortcode"
                                 value={settings.integrations.contact_form.shortcode}
                                 onChange={(e) => updateIntegrationSettings('contact_form', 'shortcode', e.target.value)}
-                                placeholder={__('[contact-form-7 id=\'\']', 'aisk-ai-chat')}
+                                placeholder={__('[contact-form-7 id=\'\']', 'promo-bar-x')}
                             />
-                            <p className="text-sm text-gray-500">{__('Enter your contact form shortcode', 'aisk-ai-chat')}</p>
+                            <p className="text-sm text-gray-500">{__('Enter your contact form shortcode', 'promo-bar-x')}</p>
                         </div>
                     </CardContent>
                 </Card>

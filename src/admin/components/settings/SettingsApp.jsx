@@ -130,10 +130,10 @@ const SettingsApp = () => {
                     title: (
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                            <span>{__('Settings saved successfully!', 'aisk-ai-chat')}</span>
+                            <span>{__('Settings saved successfully!', 'promo-bar-x')}</span>
                         </div>
                     ),
-                    description: __('Your changes have been applied.', 'aisk-ai-chat'),
+                    description: __('Your changes have been applied.', 'promo-bar-x'),
                     className: "bg-green-50 border-green-200"
                 });
             } else {
@@ -144,10 +144,10 @@ const SettingsApp = () => {
                 title: (
                     <div className="flex items-center gap-2">
                         <XCircle className="h-4 w-4 text-red-500" />
-                        <span>{__('Failed to save settings', 'aisk-ai-chat')}</span>
+                        <span>{__('Failed to save settings', 'promo-bar-x')}</span>
                     </div>
                 ),
-                description: __('Please try again or contact support if the problem persists.', 'aisk-ai-chat'),
+                description: __('Please try again or contact support if the problem persists.', 'promo-bar-x'),
                 className: "bg-red-50 border-red-200"
             });
         } finally {
@@ -172,9 +172,9 @@ const SettingsApp = () => {
                     <CardHeader>
                         <div className="flex justify-between items-start">
                             <div>
-                                <CardTitle className="text-2xl">{__('Aisk Settings', 'aisk-ai-chat')}</CardTitle>
+                                <CardTitle className="text-2xl">{__('Aisk Settings', 'promo-bar-x')}</CardTitle>
                                 <CardDescription>
-                                    {__('Configure your chatbot and integration settings', 'aisk-ai-chat')}
+                                    {__('Configure your chatbot and integration settings', 'promo-bar-x')}
                                 </CardDescription>
                             </div>
                             <div className="space-x-3">
@@ -184,7 +184,7 @@ const SettingsApp = () => {
                                    className={buttonVariants({ variant: "default" })}
                                 >
                                     <HelpCircle className="w-4 h-4 mr-2" />
-                                    {__('Need Help?', 'aisk-ai-chat')}
+                                    {__('Need Help?', 'promo-bar-x')}
                                 </a>
 
                                 <a href="https://aisk.chat/docs"
@@ -193,7 +193,7 @@ const SettingsApp = () => {
                                    className={buttonVariants({ variant: "outline" })}
                                 >
                                     <ExternalLink className="w-4 h-4 mr-2" />
-                                    {__('Documentation', 'aisk-ai-chat')}
+                                    {__('Documentation', 'promo-bar-x')}
                                 </a>
                             </div>
                         </div>
@@ -209,37 +209,37 @@ const SettingsApp = () => {
                     <TabsList className="mb-4">
                         <TabsTrigger value="general" className="flex items-center gap-2">
                             <Settings className="w-4 h-4" />
-                            {__('General', 'aisk-ai-chat')}
+                            {__('General', 'promo-bar-x')}
                         </TabsTrigger>
                         <TabsTrigger value="chatwidget" className="flex items-center gap-2">
                             <MessageSquare className="w-4 h-4" />
-                            {__('Chat Widget', 'aisk-ai-chat')}
+                            {__('Chat Widget', 'promo-bar-x')}
                         </TabsTrigger>
                         <TabsTrigger value="ai_config" className="flex items-center gap-2">
                             <Wand2 className="w-4 h-4" />
-                            {__('AI Config', 'aisk-ai-chat')}
+                            {__('AI Config', 'promo-bar-x')}
                         </TabsTrigger>
                         <TabsTrigger value="integrations" className="flex items-center gap-2">
                             <Share2 className="w-4 h-4" />
-                            {__('Integrations', 'aisk-ai-chat')}
+                            {__('Integrations', 'promo-bar-x')}
                         </TabsTrigger>
                         <TabsTrigger value="misc" className="flex items-center gap-2">
                             <MoreHorizontal className="w-4 h-4" />
-                            {__('Misc', 'aisk-ai-chat')}
+                            {__('Misc', 'promo-bar-x')}
                         </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="general">
                         <Card>
                             <CardHeader>
-                                <CardTitle>{__('General Settings', 'aisk-ai-chat')}</CardTitle>
+                                <CardTitle>{__('General Settings', 'promo-bar-x')}</CardTitle>
                                 <CardDescription>
-                                    {__('Configure your API keys and general settings', 'aisk-ai-chat')}
+                                    {__('Configure your API keys and general settings', 'promo-bar-x')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4 max-w-2xl">
                                 <div className="space-y-2">
-                                    <Label htmlFor="auth_key">{__('Aisk Auth Key', 'aisk-ai-chat')}</Label>
+                                    <Label htmlFor="auth_key">{__('Aisk Auth Key', 'promo-bar-x')}</Label>
                                     <Input
                                         id="auth_key"
                                         value={settings.general.auth_key}
@@ -248,7 +248,7 @@ const SettingsApp = () => {
                                         className="max-w-xl"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        {__('Get your auth key from', 'aisk-ai-chat')}{" "}
+                                        {__('Get your auth key from', 'promo-bar-x')}{" "}
                                         <a
                                             href="https://app.aisk.chat/dashboard/"
                                             target="_blank"
@@ -261,7 +261,7 @@ const SettingsApp = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="openai_key">{__('OpenAI API Key', 'aisk-ai-chat')}</Label>
+                                    <Label htmlFor="openai_key">{__('OpenAI API Key', 'promo-bar-x')}</Label>
                                     <Input
                                         id="openai_key"
                                         value={settings.general.openai_key}
@@ -270,7 +270,7 @@ const SettingsApp = () => {
                                         className="max-w-xl"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        {__('Generate your API key at', 'aisk-ai-chat')}{" "}
+                                        {__('Generate your API key at', 'promo-bar-x')}{" "}
                                         <a
                                             href="https://platform.openai.com/api-keys"
                                             target="_blank"
@@ -352,7 +352,7 @@ const SettingsApp = () => {
                         onClick={saveSettings}
                         disabled={isSaving}
                     >
-                        {isSaving ? __('Saving...', 'aisk-ai-chat') : __('Save Settings', 'aisk-ai-chat')}
+                        {isSaving ? __('Saving...', 'promo-bar-x') : __('Save Settings', 'promo-bar-x')}
                     </Button>
                 </div>
             </div>
