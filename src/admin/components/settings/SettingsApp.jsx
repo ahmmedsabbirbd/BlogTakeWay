@@ -172,7 +172,7 @@ const SettingsApp = () => {
                     <CardHeader>
                         <div className="flex justify-between items-start">
                             <div>
-                                <CardTitle className="text-2xl">{__('Aisk Settings', 'promo-bar-x')}</CardTitle>
+                                <CardTitle className="text-2xl">{__('PromoBarX Settings', 'promo-bar-x')}</CardTitle>
                                 <CardDescription>
                                     {__('Configure your chatbot and integration settings', 'promo-bar-x')}
                                 </CardDescription>
