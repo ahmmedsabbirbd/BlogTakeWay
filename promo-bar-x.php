@@ -336,6 +336,10 @@ class AISK_AI_Chatbot {
         include_once PromoBarX_PLUGIN_DIR . 'includes/class-aisk-admin.php';
         include_once PromoBarX_PLUGIN_DIR . 'includes/services/queue/class-pdf-queue-handler.php';
 
+        // Load Promo Bar X classes
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-topbar-database.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-topbar-manager.php';
+
         // Initialize admin class
         if (is_admin()) {
             add_action('admin_init', function() {
@@ -348,6 +352,9 @@ class AISK_AI_Chatbot {
 
         // Initialize PDF Queue Handler
         new AISK_PDF_Queue_Handler();
+
+        // Initialize Top Bar Manager
+        PromoBarX_Manager::get_instance();
     }
 
     /**

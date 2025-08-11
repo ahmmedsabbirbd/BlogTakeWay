@@ -1,0 +1,525 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+
+/**
+ * Main Top Bar Manager Class
+ *
+ * @category WordPress
+ * @package  PromoBarX
+ * @author   WPPOOL Team <support@wppool.com>
+ * @license  GPL-2.0+ https://www.gnu.org/licenses/gpl-2.0.html
+ */
+
+class PromoBarX_Manager {
+
+    private $database;
+    private static $instance = null;
+
+    /**
+     * Get singleton instance
+     */
+    public static function get_instance() {
+        if (null === self::$instance) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
+     * Constructor
+     */
+    private function __construct() {
+        $this->database = new PromoBarX_Database();
+        $this->init_hooks();
+    }
+
+    /**
+     * Initialize WordPress hooks
+     */
+    private function init_hooks() {
+        add_action('wp_head', [$this, 'render_topbar']);
+        add_action('wp_footer', [$this, 'render_topbar_scripts']);
+        add_action('wp_ajax_promobarx_save', [$this, 'ajax_save_promo_bar']);
+        add_action('wp_ajax_promobarx_delete', [$this, 'ajax_delete_promo_bar']);
+        add_action('wp_ajax_promobarx_track_event', [$this, 'ajax_track_event']);
+        add_action('wp_ajax_nopriv_promobarx_track_event', [$this, 'ajax_track_event']);
+        add_action('wp_ajax_promobarx_get_promo_bars', [$this, 'ajax_get_promo_bars']);
+        add_action('wp_ajax_promobarx_get_templates', [$this, 'ajax_get_templates']);
+    }
+
+    /**
+     * Get active promo bar for current page
+     */
+    public function get_active_promo_bar() {
+        global $wp_query;
+        
+        $current_url = $_SERVER['REQUEST_URI'] ?? '';
+        $post_id = get_queried_object_id();
+        $post_type = get_post_type();
+        
+        // Get all active promo bars
+        $promo_bars = $this->database->get_promo_bars(['status' => 'active']);
+        
+        $candidates = [];
+        
+        foreach ($promo_bars as $promo_bar) {
+            $score = $this->calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type);
+            if ($score > 0) {
+                $candidates[] = [
+                    'promo_bar' => $promo_bar,
+                    'score' => $score
+                ];
+            }
+        }
+        
+        // Sort by score and priority
+        usort($candidates, function($a, $b) {
+            if ($a['score'] !== $b['score']) {
+                return $b['score'] - $a['score'];
+            }
+            return $b['promo_bar']->priority - $a['promo_bar']->priority;
+        });
+        
+        if (!empty($candidates)) {
+            $selected = $candidates[0]['promo_bar'];
+            
+            // Check if promo bar is scheduled
+            if ($this->is_promo_bar_scheduled($selected)) {
+                return $selected;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Calculate page match score for a promo bar
+     */
+    private function calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type) {
+        global $wpdb;
+        
+        $score = 0;
+        $assignments = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}promo_bar_assignments WHERE promo_bar_id = %d ORDER BY priority DESC",
+            $promo_bar->id
+        ));
+        
+        foreach ($assignments as $assignment) {
+            switch ($assignment->assignment_type) {
+                case 'global':
+                    $score = 100;
+                    break;
+                    
+                case 'page':
+                    if ($assignment->target_id == $post_id) {
+                        $score = 90;
+                    }
+                    break;
+                    
+                case 'post_type':
+                    if ($assignment->target_value === $post_type) {
+                        $score = 80;
+                    }
+                    break;
+                    
+                case 'category':
+                    if (has_category($assignment->target_value, $post_id)) {
+                        $score = 70;
+                    }
+                    break;
+                    
+                case 'tag':
+                    if (has_tag($assignment->target_value, $post_id)) {
+                        $score = 60;
+                    }
+                    break;
+                    
+                case 'custom':
+                    if ($this->matches_custom_condition($assignment->target_value, $current_url, $post_id)) {
+                        $score = 50;
+                    }
+                    break;
+            }
+        }
+        
+        return $score;
+    }
+
+    /**
+     * Check if promo bar matches custom condition
+     */
+    private function matches_custom_condition($condition, $current_url, $post_id) {
+        // Simple URL matching for now
+        return strpos($current_url, $condition) !== false;
+    }
+
+    /**
+     * Check if promo bar is scheduled to show
+     */
+    private function is_promo_bar_scheduled($promo_bar) {
+        global $wpdb;
+        
+        $schedule = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}promo_bar_schedules WHERE promo_bar_id = %d",
+            $promo_bar->id
+        ));
+        
+        if (!$schedule) {
+            return true; // No schedule means always show
+        }
+        
+        $now = current_time('mysql');
+        
+        // Check date range
+        if ($schedule->start_date && $now < $schedule->start_date) {
+            return false;
+        }
+        
+        if ($schedule->end_date && $now > $schedule->end_date) {
+            return false;
+        }
+        
+        // Check time range
+        if ($schedule->start_time && $schedule->end_time) {
+            $current_time = date('H:i:s');
+            if ($current_time < $schedule->start_time || $current_time > $schedule->end_time) {
+                return false;
+            }
+        }
+        
+        // Check days of week
+        if ($schedule->days_of_week) {
+            $days = json_decode($schedule->days_of_week, true);
+            $current_day = date('N'); // 1 (Monday) to 7 (Sunday)
+            if (!in_array($current_day, $days)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    /**
+     * Render top bar in head
+     */
+    public function render_topbar() {
+        $promo_bar = $this->get_active_promo_bar();
+        
+        if (!$promo_bar) {
+            return;
+        }
+        
+        // Check if user has closed this promo bar
+        $cookie_name = 'promobarx_closed_' . $promo_bar->id;
+        if (isset($_COOKIE[$cookie_name])) {
+            return;
+        }
+        
+        $this->render_topbar_html($promo_bar);
+    }
+
+    /**
+     * Render top bar HTML
+     */
+    private function render_topbar_html($promo_bar) {
+        $styling = json_decode($promo_bar->styling, true) ?: [];
+        $cta_style = json_decode($promo_bar->cta_style, true) ?: [];
+        $countdown_style = json_decode($promo_bar->countdown_style, true) ?: [];
+        $close_style = json_decode($promo_bar->close_button_style, true) ?: [];
+        
+        // Get template config if applicable
+        $template_config = [];
+        if ($promo_bar->template_id > 0) {
+            global $wpdb;
+            $template = $wpdb->get_row($wpdb->prepare(
+                "SELECT config FROM {$wpdb->prefix}promo_bar_templates WHERE id = %d",
+                $promo_bar->template_id
+            ));
+            if ($template) {
+                $template_config = json_decode($template->config, true) ?: [];
+            }
+        }
+        
+        // Render container for React component
+        ?>
+        <div id="promo-bar-x-topbar"></div>
+        
+        <style>
+        .promobarx-topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .promobarx-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .promobarx-title {
+            font-weight: 600;
+        }
+        
+        .promobarx-subtitle {
+            opacity: 0.9;
+        }
+        
+        .promobarx-countdown {
+            font-weight: 600;
+            font-family: monospace;
+        }
+        
+        .promobarx-cta {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .promobarx-cta:hover {
+            transform: translateY(-1px);
+        }
+        
+        .promobarx-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+        }
+        
+        .promobarx-close:hover {
+            opacity: 1;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .promobarx-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .promobarx-topbar {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+        }
+        </style>
+        <?php
+    }
+
+    /**
+     * Generate inline styles from array
+     */
+    private function generate_inline_styles($styles) {
+        $css = '';
+        foreach ($styles as $property => $value) {
+            $css .= str_replace('_', '-', $property) . ': ' . $value . '; ';
+        }
+        return $css;
+    }
+
+    /**
+     * Render top bar scripts
+     */
+    public function render_topbar_scripts() {
+        $promo_bar = $this->get_active_promo_bar();
+        
+        if (!$promo_bar) {
+            return;
+        }
+        
+        // Localize data for React component
+        ?>
+        <script>
+        window.promobarxData = {
+            promoBar: <?php echo json_encode($promo_bar); ?>,
+            nonce: '<?php echo wp_create_nonce('promobarx_track'); ?>',
+            ajaxurl: '<?php echo admin_url('admin-ajax.php'); ?>'
+        };
+        
+        function promobarxTrackEvent(promoId, eventType) {
+            fetch(ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=promobarx_track_event&promo_id=' + promoId + '&event_type=' + eventType + '&nonce=<?php echo wp_create_nonce('promobarx_track'); ?>'
+            });
+        }
+        
+        function promobarxCloseBar(promoId) {
+            const bar = document.getElementById('promobarx-topbar-' + promoId);
+            if (bar) {
+                bar.style.transform = 'translateY(-100%)';
+                setTimeout(() => {
+                    bar.style.display = 'none';
+                }, 300);
+            }
+            
+            // Set cookie
+            const date = new Date();
+            date.setTime(date.getTime() + (24 * 60 * 60 * 1000)); // 24 hours
+            document.cookie = 'promobarx_closed_' + promoId + '=1; expires=' + date.toUTCString() + '; path=/';
+            
+            // Track close event
+            promobarxTrackEvent(promoId, 'close');
+        }
+        
+        // Countdown timer
+        document.addEventListener('DOMContentLoaded', function() {
+            const countdowns = document.querySelectorAll('.promobarx-countdown');
+            countdowns.forEach(function(countdown) {
+                const endDate = new Date(countdown.dataset.end).getTime();
+                
+                function updateCountdown() {
+                    const now = new Date().getTime();
+                    const distance = endDate - now;
+                    
+                    if (distance < 0) {
+                        countdown.innerHTML = 'EXPIRED';
+                        return;
+                    }
+                    
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    
+                    countdown.querySelector('.countdown-days').textContent = days.toString().padStart(2, '0');
+                    countdown.querySelector('.countdown-hours').textContent = hours.toString().padStart(2, '0');
+                    countdown.querySelector('.countdown-minutes').textContent = minutes.toString().padStart(2, '0');
+                    countdown.querySelector('.countdown-seconds').textContent = seconds.toString().padStart(2, '0');
+                }
+                
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            });
+        });
+        
+        // Track impression
+        promobarxTrackEvent(<?php echo esc_js($promo_bar->id); ?>, 'impression');
+        </script>
+        <?php
+    }
+
+    /**
+     * AJAX save promo bar
+     */
+    public function ajax_save_promo_bar() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $data = $_POST;
+        $result = $this->database->save_promo_bar($data);
+        
+        if ($result) {
+            wp_send_json_success(['id' => $result]);
+        } else {
+            wp_send_json_error('Failed to save promo bar');
+        }
+    }
+
+    /**
+     * AJAX delete promo bar
+     */
+    public function ajax_delete_promo_bar() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $id = intval($_POST['id']);
+        $result = $this->database->delete_promo_bar($id);
+        
+        if ($result) {
+            wp_send_json_success();
+        } else {
+            wp_send_json_error('Failed to delete promo bar');
+        }
+    }
+
+    /**
+     * AJAX track event
+     */
+    public function ajax_track_event() {
+        check_ajax_referer('promobarx_track', 'nonce');
+        
+        $promo_id = intval($_POST['promo_id']);
+        $event_type = sanitize_text_field($_POST['event_type']);
+        
+        $data = [
+            'page_url' => $_SERVER['HTTP_REFERER'] ?? '',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+            'user_id' => get_current_user_id()
+        ];
+        
+        $result = $this->database->track_event($promo_id, $event_type, $data);
+        
+        if ($result) {
+            wp_send_json_success();
+        } else {
+            wp_send_json_error('Failed to track event');
+        }
+    }
+
+    /**
+     * AJAX get promo bars
+     */
+    public function ajax_get_promo_bars() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $args = [
+            'status' => isset($_POST['status']) ? sanitize_text_field($_POST['status']) : 'all',
+            'limit' => isset($_POST['limit']) ? intval($_POST['limit']) : -1
+        ];
+        
+        $promo_bars = $this->database->get_promo_bars($args);
+        wp_send_json_success($promo_bars);
+    }
+
+    /**
+     * AJAX get templates
+     */
+    public function ajax_get_templates() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
+        $templates = $this->database->get_templates($category);
+        wp_send_json_success($templates);
+    }
+}

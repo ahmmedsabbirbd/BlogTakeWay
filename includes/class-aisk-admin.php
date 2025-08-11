@@ -84,6 +84,16 @@ class AISK_Admin {
             30
         );
 
+        // Add Top Bar Manager submenu
+        add_submenu_page(
+            $this->plugin_slug,
+            esc_html__( 'Top Bar Manager', 'promo-bar-x' ),
+            esc_html__( 'Top Bar Manager', 'promo-bar-x' ),
+            'manage_options',
+            $this->plugin_slug . '-topbar-manager',
+            [ $this, 'render_topbar_manager_page' ]
+        );
+
         // Add Settings submenu
         add_submenu_page(
             $this->plugin_slug,
@@ -107,14 +117,20 @@ class AISK_Admin {
      * @return void
      */
     public function enqueue_admin_scripts($hook) {
+        // Debug: Log the current hook
+        error_log('PromoBarX Admin Hook: ' . $hook);
+        
         // Check if we're on any of our plugin pages
         $allowed_hooks = [
             'toplevel_page_' . $this->plugin_slug,
             $this->plugin_slug . '_page_' . $this->plugin_slug . '-settings',
+            $this->plugin_slug . '_page_' . $this->plugin_slug . '-topbar-manager',
         ];
 
         // Also check if the hook contains our plugin slug (more flexible approach)
         $is_plugin_page = in_array($hook, $allowed_hooks) || strpos($hook, $this->plugin_slug) !== false;
+
+        error_log('PromoBarX Is Plugin Page: ' . ($is_plugin_page ? 'true' : 'false'));
 
         if (!$is_plugin_page) {
             return;
@@ -142,8 +158,7 @@ class AISK_Admin {
             ['wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n'],
             PromoBarX_VERSION,
             [
-                'in_footer' => true,
-                'strategy' => 'defer'
+                'in_footer' => false
             ]
         );
         wp_enqueue_script('promo-bar-x-admin');
@@ -157,6 +172,24 @@ class AISK_Admin {
                 'pluginUrl' => PromoBarX_PLUGIN_URL,
                 'isWooCommerceActive' => class_exists('WooCommerce'),
                 'maxUploadSize' => wp_max_upload_size(),
+            ]
+        );
+
+        // Localize script data for Promo Bar X admin functionality
+        wp_localize_script(
+            'promo-bar-x-admin',
+            'promobarxAdmin',
+            [
+                'ajaxurl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('promobarx_admin_nonce'),
+                'pluginUrl' => PromoBarX_PLUGIN_URL,
+                'strings' => [
+                    'saving' => __('Saving...', 'promo-bar-x'),
+                    'saved' => __('Saved successfully!', 'promo-bar-x'),
+                    'error' => __('Error occurred. Please try again.', 'promo-bar-x'),
+                    'confirmDelete' => __('Are you sure you want to delete this promo bar?', 'promo-bar-x'),
+                    'confirmClose' => __('Are you sure you want to close without saving?', 'promo-bar-x'),
+                ]
             ]
         );
         wp_set_script_translations('promo-bar-x-admin', 'promo-bar-x');
@@ -264,6 +297,34 @@ class AISK_Admin {
      */
     public function render_settings_page() {
         echo '<div id="promo-bar-x-settings-app"></div>';
+    }
+
+    /**
+     * Render top bar manager admin page
+     *
+     * @since 1.0.0
+     *
+     * @return void
+     */
+    public function render_topbar_manager_page() {
+        echo '<div id="promo-bar-x-topbar-manager"></div>';
+        echo '<script>
+            console.log("TopBar Manager Page Loaded");
+            // Ensure promobarxAdmin is available immediately
+            window.promobarxAdmin = window.promobarxAdmin || {
+                ajaxurl: "' . admin_url('admin-ajax.php') . '",
+                nonce: "' . wp_create_nonce('promobarx_admin_nonce') . '",
+                pluginUrl: "' . PromoBarX_PLUGIN_URL . '",
+                strings: {
+                    saving: "Saving...",
+                    saved: "Saved successfully!",
+                    error: "Error occurred. Please try again.",
+                    confirmDelete: "Are you sure you want to delete this promo bar?",
+                    confirmClose: "Are you sure you want to close without saving?"
+                }
+            };
+            console.log("PromoBarX Admin Data Set:", window.promobarxAdmin);
+        </script>';
     }
 
     /**

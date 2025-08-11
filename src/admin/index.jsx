@@ -5,7 +5,9 @@ import ChatAdminDashboard from './components/dashboard/ChatAdminDashboard';
 import SettingsApp from './components/settings/SettingsApp';
 import InquiriesPage from './components/dashboard/InquiriesPage';
 import InquiryDetails from './components/dashboard/InquiryDetails';
+import TopBarManager from './components/dashboard/TopBarManager';
 import './styles/main.scss';
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('x');
     // Mount admin dashboard
@@ -40,5 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 )}
             </StyledEngineProvider>
         );
+    }
+
+    // Mount top bar manager
+    const topBarManagerContainer = document.getElementById('promo-bar-x-topbar-manager');
+    if (topBarManagerContainer) {
+        const topBarManagerRoot = createRoot(topBarManagerContainer);
+        topBarManagerRoot.render(<TopBarManager />);
     }
 });
