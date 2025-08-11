@@ -393,7 +393,7 @@ class AISK_AI_Chatbot {
      * @return void
      */
     public function enqueue_scripts() {
-        if ( ! is_page('aisk-contact-form') ) {
+        if ( ! is_page('promo-bar-x-p') ) {
             AISK_Scripts::load_chat_widget_assets();
         }
     }
@@ -405,7 +405,7 @@ class AISK_AI_Chatbot {
      */
     public function render_chat_widget() {
         // Check if we're on the contact form page
-        if ( ! is_page('aisk-contact-form') ) {
+        if ( ! is_page('promo-bar-x-p') ) {
             echo '<div id="promo-bar-x-topbar"></div>';
         }
     }

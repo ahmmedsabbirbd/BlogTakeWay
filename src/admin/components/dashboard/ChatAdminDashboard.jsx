@@ -27,7 +27,7 @@ import {
     Tablet,
     MapPin
 } from 'lucide-react';
-import ChatWidget from '../../../components/ChatWidget';
+import ChatWidget from '../../../components/Topbar';
 
 // Create theme that matches WordPress admin
 const theme = createTheme({

@@ -14,7 +14,7 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import ChatWidget from '../../../components/ChatWidget';
+import ChatWidget from '../../../components/Topbar';
 import '../../styles/CustomerInquiries.scss';
 
 const InquiriesPage = () => {

@@ -24,7 +24,7 @@ remove_action('wp_head', '_admin_bar_bump_cb');
 function aisk_contact_form_enqueue_assets() {
     // Register and enqueue styles
     wp_register_style(
-        'aisk-contact-form-styles',
+        'promo-bar-x-p-styles',
         false,
         array(),
         defined('PromoBarX_VERSION') ? PromoBarX_VERSION : '1.0.0'
@@ -231,12 +231,12 @@ function aisk_contact_form_enqueue_assets() {
         }
     ';
 
-    wp_add_inline_style('aisk-contact-form-styles', wp_strip_all_tags($custom_css));
-    wp_enqueue_style('aisk-contact-form-styles');
+    wp_add_inline_style('promo-bar-x-p-styles', wp_strip_all_tags($custom_css));
+    wp_enqueue_style('promo-bar-x-p-styles');
 
     // Register and enqueue scripts
     wp_register_script(
-        'aisk-contact-form-scripts',
+        'promo-bar-x-p-scripts',
         false,
         [],
         PromoBarX_VERSION,
@@ -319,8 +319,8 @@ function aisk_contact_form_enqueue_assets() {
         });
     ";
 
-    wp_add_inline_script('aisk-contact-form-scripts', esc_js($custom_js));
-    wp_enqueue_script('aisk-contact-form-scripts');
+    wp_add_inline_script('promo-bar-x-p-scripts', esc_js($custom_js));
+    wp_enqueue_script('promo-bar-x-p-scripts');
 }
 add_action('wp_enqueue_scripts', 'aisk_contact_form_enqueue_assets');
 

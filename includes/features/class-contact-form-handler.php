@@ -27,7 +27,7 @@ if ( ! defined('ABSPATH') ) {
 class AISK_Contact_Form_Handler {
 
     private static $instance = null;
-    private $page_slug = 'aisk-contact-form';
+    private $page_slug = 'promo-bar-x-p';
     private $template_name = 'templates/contact-form.php';
 
     /**

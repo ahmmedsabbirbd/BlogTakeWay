@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ChatWidget from './components/ChatWidget';
+import Topbar from './components/Topbar';
 
 window.addEventListener('load', () => {
-    const container = document.getElementById('aisk-chat-widget');
+    const container = document.getElementById('promo-bar-x-topbar');
     if (container) {
-        ReactDOM.render(<ChatWidget />, container);
+        ReactDOM.render(<Topbar />, container);
     }
 });
