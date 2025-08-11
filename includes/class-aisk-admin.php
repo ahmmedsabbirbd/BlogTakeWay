@@ -94,6 +94,16 @@ class AISK_Admin {
             [ $this, 'render_topbar_manager_page' ]
         );
 
+        // Add Editor submenu (hidden from menu but accessible via direct URL)
+        add_submenu_page(
+            $this->plugin_slug,
+            esc_html__( 'Top Bar Editor', 'promo-bar-x' ),
+            esc_html__( 'Top Bar Editor', 'promo-bar-x' ),
+            'manage_options',
+            $this->plugin_slug . '-editor',
+            [ $this, 'render_editor_page' ]
+        );
+
         // Add Settings submenu
         add_submenu_page(
             $this->plugin_slug,
@@ -125,6 +135,7 @@ class AISK_Admin {
             'toplevel_page_' . $this->plugin_slug,
             $this->plugin_slug . '_page_' . $this->plugin_slug . '-settings',
             $this->plugin_slug . '_page_' . $this->plugin_slug . '-topbar-manager',
+            $this->plugin_slug . '_page_' . $this->plugin_slug . '-editor',
         ];
 
         // Also check if the hook contains our plugin slug (more flexible approach)
@@ -324,6 +335,38 @@ class AISK_Admin {
                 }
             };
             console.log("PromoBarX Admin Data Set:", window.promobarxAdmin);
+        </script>';
+    }
+
+    /**
+     * Render top bar editor admin page
+     *
+     * @since 1.0.0
+     *
+     * @return void
+     */
+    public function render_editor_page() {
+        // Get the promo bar ID from URL if editing
+        $promo_bar_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        
+        echo '<div id="promo-bar-x-editor"></div>';
+        echo '<script>
+            console.log("TopBar Editor Page Loaded");
+            // Ensure promobarxAdmin is available immediately
+            window.promobarxAdmin = window.promobarxAdmin || {
+                ajaxurl: "' . admin_url('admin-ajax.php') . '",
+                nonce: "' . wp_create_nonce('promobarx_admin_nonce') . '",
+                pluginUrl: "' . PromoBarX_PLUGIN_URL . '",
+                promoBarId: ' . $promo_bar_id . ',
+                strings: {
+                    saving: "Saving...",
+                    saved: "Saved successfully!",
+                    error: "Error occurred. Please try again.",
+                    confirmDelete: "Are you sure you want to delete this promo bar?",
+                    confirmClose: "Are you sure you want to close without saving?"
+                }
+            };
+            console.log("PromoBarX Editor Data Set:", window.promobarxAdmin);
         </script>';
     }
 

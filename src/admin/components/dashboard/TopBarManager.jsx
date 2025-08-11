@@ -1,33 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff, Calendar, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Settings } from 'lucide-react';
 import TopBarEditor from './TopBarEditor';
-import TemplateLibrary from './TemplateLibrary';
-import SchedulingPanel from './SchedulingPanel';
-import PageAssignmentManager from './PageAssignmentManager';
-import AnalyticsDashboard from './AnalyticsDashboard';
 
+// Simple component without complex state management
 const TopBarManager = () => {
     const [promoBars, setPromoBars] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedPromoBar, setSelectedPromoBar] = useState(null);
     const [showEditor, setShowEditor] = useState(false);
-    const [showTemplates, setShowTemplates] = useState(false);
-    const [showScheduling, setShowScheduling] = useState(false);
-    const [showAssignments, setShowAssignments] = useState(false);
-    const [showAnalytics, setShowAnalytics] = useState(false);
     const [activeTab, setActiveTab] = useState('manage');
 
+    // Single useEffect for initialization
     useEffect(() => {
-        loadPromoBars();
+        initializeManager();
     }, []);
+
+    const initializeManager = async () => {
+        try {
+            if (window.promobarxAdmin && window.promobarxAdmin.ajaxurl && window.promobarxAdmin.nonce) {
+                await loadPromoBars();
+            } else {
+                console.log('PromoBarX Admin Data:', {
+                    promobarxAdmin: window.promobarxAdmin,
+                    ajaxurl: window.promobarxAdmin?.ajaxurl,
+                    nonce: window.promobarxAdmin?.nonce
+                });
+                setLoading(false);
+            }
+        } catch (error) {
+            console.error('Error initializing manager:', error);
+            setLoading(false);
+        }
+    };
 
     const loadPromoBars = async () => {
         try {
-            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl || !window.promobarxAdmin.nonce) {
-                console.error('PromoBarX admin data not available');
-                return;
-            }
-            
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
                 method: 'POST',
                 headers: {
@@ -63,11 +70,6 @@ const TopBarManager = () => {
         }
 
         try {
-            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl || !window.promobarxAdmin.nonce) {
-                console.error('PromoBarX admin data not available');
-                return;
-            }
-            
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
                 method: 'POST',
                 headers: {
@@ -78,7 +80,7 @@ const TopBarManager = () => {
             
             const data = await response.json();
             if (data.success) {
-                loadPromoBars();
+                await loadPromoBars();
             }
         } catch (error) {
             console.error('Error deleting promo bar:', error);
@@ -89,11 +91,6 @@ const TopBarManager = () => {
         const newStatus = promoBar.status === 'active' ? 'paused' : 'active';
         
         try {
-            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl || !window.promobarxAdmin.nonce) {
-                console.error('PromoBarX admin data not available');
-                return;
-            }
-            
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
                 method: 'POST',
                 headers: {
@@ -104,11 +101,16 @@ const TopBarManager = () => {
             
             const data = await response.json();
             if (data.success) {
-                loadPromoBars();
+                await loadPromoBars();
             }
         } catch (error) {
             console.error('Error updating status:', error);
         }
+    };
+
+    const handleTemplateSelect = (templateData) => {
+        setSelectedPromoBar(templateData);
+        setShowEditor(true);
     };
 
     const getStatusBadge = (status) => {
@@ -132,6 +134,7 @@ const TopBarManager = () => {
         return new Date(dateString).toLocaleDateString();
     };
 
+    // Loading state
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -140,24 +143,7 @@ const TopBarManager = () => {
         );
     }
 
-    // Check if admin data is available
-    if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl || !window.promobarxAdmin.nonce) {
-        console.log('PromoBarX Admin Data:', {
-            promobarxAdmin: window.promobarxAdmin,
-            ajaxurl: window.promobarxAdmin?.ajaxurl,
-            nonce: window.promobarxAdmin?.nonce
-        });
-        return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading PromoBarX admin...</p>
-                    <p className="text-xs text-gray-500 mt-2">Admin data not available</p>
-                </div>
-            </div>
-        );
-    }
-
+    // Main render
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -180,8 +166,7 @@ const TopBarManager = () => {
                 <nav className="-mb-px flex space-x-8">
                     {[
                         { id: 'manage', label: 'Manage Promo Bars', icon: Settings },
-                        { id: 'templates', label: 'Templates', icon: Eye },
-                        { id: 'analytics', label: 'Analytics', icon: EyeOff }
+                        { id: 'quick-templates', label: 'Quick Templates', icon: Eye }
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -201,8 +186,44 @@ const TopBarManager = () => {
 
             {/* Tab Content */}
             {activeTab === 'manage' && (
+                <ManageTab 
+                    promoBars={promoBars}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onToggleStatus={handleToggleStatus}
+                    onCreateNew={handleCreateNew}
+                    getStatusBadge={getStatusBadge}
+                    formatDate={formatDate}
+                />
+            )}
+
+            {activeTab === 'quick-templates' && (
+                <QuickTemplatesTab onTemplateSelect={handleTemplateSelect} />
+            )}
+
+            {/* Editor Modal */}
+            {showEditor && (
+                <TopBarEditor
+                    promoBar={selectedPromoBar}
+                    onClose={() => {
+                        setShowEditor(false);
+                        setSelectedPromoBar(null);
+                    }}
+                    onSave={() => {
+                        setShowEditor(false);
+                        setSelectedPromoBar(null);
+                        loadPromoBars();
+                    }}
+                />
+            )}
+        </div>
+    );
+};
+
+// Separate component for Manage tab
+const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, getStatusBadge, formatDate }) => {
+    return (
                 <div className="space-y-4">
-                    {/* Promo Bars List */}
                     <div className="bg-white shadow rounded-lg">
                         <div className="px-6 py-4 border-b border-gray-200">
                             <h3 className="text-lg font-medium text-gray-900">All Promo Bars</h3>
@@ -216,7 +237,7 @@ const TopBarManager = () => {
                                     <h3 className="text-lg font-medium text-gray-900 mb-2">No promo bars yet</h3>
                                     <p className="text-gray-600 mb-4">Create your first promotional top bar to get started</p>
                                     <button
-                                        onClick={handleCreateNew}
+                                onClick={onCreateNew}
                                         className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                                     >
                                         <Plus className="w-4 h-4 mr-2" />
@@ -269,7 +290,7 @@ const TopBarManager = () => {
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <div className="flex items-center justify-end space-x-2">
                                                         <button
-                                                            onClick={() => handleToggleStatus(promoBar)}
+                                                    onClick={() => onToggleStatus(promoBar)}
                                                             className="text-gray-400 hover:text-gray-600"
                                                             title={promoBar.status === 'active' ? 'Pause' : 'Activate'}
                                                         >
@@ -280,14 +301,14 @@ const TopBarManager = () => {
                                                             )}
                                                         </button>
                                                         <button
-                                                            onClick={() => handleEdit(promoBar)}
+                                                    onClick={() => onEdit(promoBar)}
                                                             className="text-blue-600 hover:text-blue-900"
                                                             title="Edit"
                                                         >
                                                             <Edit className="w-4 h-4" />
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDelete(promoBar.id)}
+                                                    onClick={() => onDelete(promoBar.id)}
                                                             className="text-red-600 hover:text-red-900"
                                                             title="Delete"
                                                         >
@@ -303,68 +324,90 @@ const TopBarManager = () => {
                         </div>
                     </div>
                 </div>
-            )}
+    );
+};
 
-            {activeTab === 'templates' && (
-                <TemplateLibrary onSelectTemplate={(template) => {
-                    setSelectedPromoBar({ template_id: template.id });
-                    setShowEditor(true);
-                }} />
-            )}
+// Separate component for Quick Templates tab
+const QuickTemplatesTab = ({ onTemplateSelect }) => {
+    const templates = [
+        {
+            name: 'Minimal Promo Bar',
+            title: 'Special Offer',
+            subtitle: 'Get 20% off on all products',
+            cta_text: 'Shop Now',
+            cta_url: '#',
+            styling: {
+                background: '#ffffff',
+                color: '#333333',
+                font_family: 'Inter, sans-serif',
+                font_size: '14px',
+                padding: '12px 20px',
+                border_bottom: '1px solid #e5e7eb'
+            },
+            preview: { bg: 'bg-white', text: 'text-gray-600', label: 'Minimal Design' }
+        },
+        {
+            name: 'Bold Promo Bar',
+            title: 'Flash Sale!',
+            subtitle: 'Limited time offer - 50% off',
+            cta_text: 'Buy Now',
+            cta_url: '#',
+            styling: {
+                background: '#dc2626',
+                color: '#ffffff',
+                font_family: 'Inter, sans-serif',
+                font_size: '16px',
+                padding: '16px 24px',
+                border_bottom: 'none'
+            },
+            preview: { bg: 'bg-red-600', text: 'text-white', label: 'Bold Design' }
+        },
+        {
+            name: 'E-commerce Promo Bar',
+            title: 'Free Shipping',
+            subtitle: 'On orders over $50',
+            cta_text: 'Shop Now',
+            cta_url: '#',
+            styling: {
+                background: '#059669',
+                color: '#ffffff',
+                font_family: 'Inter, sans-serif',
+                font_size: '14px',
+                padding: '12px 20px',
+                border_bottom: 'none'
+            },
+            preview: { bg: 'bg-green-600', text: 'text-white', label: 'E-commerce Design' }
+        }
+    ];
 
-            {activeTab === 'analytics' && (
-                <AnalyticsDashboard promoBars={promoBars} />
-            )}
-
-            {/* Modals */}
-            {showEditor && (
-                <TopBarEditor
-                    promoBar={selectedPromoBar}
-                    onClose={() => {
-                        setShowEditor(false);
-                        setSelectedPromoBar(null);
-                    }}
-                    onSave={() => {
-                        setShowEditor(false);
-                        setSelectedPromoBar(null);
-                        loadPromoBars();
-                    }}
-                />
-            )}
-
-            {showTemplates && (
-                <TemplateLibrary
-                    onClose={() => setShowTemplates(false)}
-                    onSelectTemplate={(template) => {
-                        setShowTemplates(false);
-                        setSelectedPromoBar({ template_id: template.id });
-                        setShowEditor(true);
-                    }}
-                />
-            )}
-
-            {showScheduling && selectedPromoBar && (
-                <SchedulingPanel
-                    promoBar={selectedPromoBar}
-                    onClose={() => setShowScheduling(false)}
-                    onSave={() => setShowScheduling(false)}
-                />
-            )}
-
-            {showAssignments && selectedPromoBar && (
-                <PageAssignmentManager
-                    promoBar={selectedPromoBar}
-                    onClose={() => setShowAssignments(false)}
-                    onSave={() => setShowAssignments(false)}
-                />
-            )}
-
-            {showAnalytics && selectedPromoBar && (
-                <AnalyticsDashboard
-                    promoBar={selectedPromoBar}
-                    onClose={() => setShowAnalytics(false)}
-                />
-            )}
+    return (
+        <div className="space-y-4">
+            <div className="bg-white shadow rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Templates</h3>
+                <p className="text-gray-600 mb-6">Choose from pre-designed templates to get started quickly.</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {templates.map((template, index) => (
+                        <div 
+                            key={index}
+                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                            onClick={() => onTemplateSelect(template)}
+                        >
+                            <div className={`w-full h-20 ${template.preview.bg} border-2 border-gray-200 rounded mb-3 flex items-center justify-center`}>
+                                <span className={`text-sm ${template.preview.text} font-medium`}>
+                                    {template.preview.label}
+                                </span>
+                            </div>
+                            <h4 className="font-medium text-gray-900">{template.name.split(' ')[0]}</h4>
+                            <p className="text-sm text-gray-600">
+                                {template.name.includes('Minimal') ? 'Clean and simple design' :
+                                 template.name.includes('Bold') ? 'Eye-catching and attention-grabbing' :
+                                 'Perfect for online stores'}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };

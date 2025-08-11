@@ -30,6 +30,8 @@ class PromoBarX_Database {
         $this->wpdb = $wpdb;
         $this->table_prefix = $this->wpdb->prefix;
         $charset_collate = $this->wpdb->get_charset_collate();
+        
+        error_log('PromoBarX Database: Creating tables with prefix: ' . $this->table_prefix);
 
         // Main top bars table
         $sql_promo_bars = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bars (
@@ -57,6 +59,11 @@ class PromoBarX_Database {
             KEY priority (priority),
             KEY template_id (template_id)
         ) $charset_collate;";
+
+        error_log('PromoBarX Database: Creating promo_bars table');
+        $result = $this->wpdb->query($sql_promo_bars);
+        error_log('PromoBarX Database: promo_bars table creation result: ' . $result);
+        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
 
         // Templates table
         $sql_templates = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bar_templates (
@@ -250,6 +257,8 @@ class PromoBarX_Database {
      * Create or update promo bar
      */
     public function save_promo_bar($data) {
+        error_log('PromoBarX Database: Save method called with data: ' . print_r($data, true));
+        
         $defaults = [
             'name' => '',
             'title' => '',
@@ -270,6 +279,7 @@ class PromoBarX_Database {
         ];
 
         $data = wp_parse_args($data, $defaults);
+        error_log('PromoBarX Database: Parsed data: ' . print_r($data, true));
 
         if (isset($data['id'])) {
             // Update existing
@@ -277,11 +287,17 @@ class PromoBarX_Database {
             unset($data['id']);
             $data['updated_at'] = current_time('mysql');
             
+            error_log('PromoBarX Database: Updating existing promo bar with ID: ' . $id);
+            error_log('PromoBarX Database: Update data: ' . print_r($data, true));
+            
             $result = $this->wpdb->update(
                 $this->table_prefix . 'promo_bars',
                 $data,
                 ['id' => $id]
             );
+            
+            error_log('PromoBarX Database: Update result: ' . print_r($result, true));
+            error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
             
             return $result !== false ? $id : false;
         } else {
@@ -289,10 +305,17 @@ class PromoBarX_Database {
             $data['created_at'] = current_time('mysql');
             $data['updated_at'] = current_time('mysql');
             
+            error_log('PromoBarX Database: Creating new promo bar');
+            error_log('PromoBarX Database: Insert data: ' . print_r($data, true));
+            
             $result = $this->wpdb->insert(
                 $this->table_prefix . 'promo_bars',
                 $data
             );
+            
+            error_log('PromoBarX Database: Insert result: ' . print_r($result, true));
+            error_log('PromoBarX Database: Insert ID: ' . $this->wpdb->insert_id);
+            error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
             
             return $result ? $this->wpdb->insert_id : false;
         }

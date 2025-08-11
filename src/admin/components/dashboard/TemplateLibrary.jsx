@@ -57,7 +57,16 @@ const TemplateLibrary = ({ onSelectTemplate, onClose }) => {
     };
 
     const renderTemplatePreview = (template) => {
-        const config = template.config ? JSON.parse(template.config) : {};
+        let config = {};
+        try {
+            if (template.config) {
+                config = typeof template.config === 'string'
+                    ? JSON.parse(template.config)
+                    : template.config;
+            }
+        } catch (err) {
+            console.error('Invalid template config JSON:', err);
+        }
         
         return (
             <div 
@@ -151,7 +160,7 @@ const TemplateLibrary = ({ onSelectTemplate, onClose }) => {
                                     onClick={() => handleTemplateSelect(template)}
                                 >
                                     {/* Template Preview */}
-                                    {renderTemplatePreview(template)}
+                                    {/* {renderTemplatePreview(template)} */}
                                     
                                     {/* Template Info */}
                                     <div className="mt-4">

@@ -47,13 +47,35 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
 
     useEffect(() => {
         if (promoBar) {
+            console.log('PromoBar data received:', promoBar);
+            
+            // Handle template styling data
+            let templateStyling = {};
+            if (promoBar.styling) {
+                if (typeof promoBar.styling === 'string') {
+                    templateStyling = JSON.parse(promoBar.styling);
+                } else {
+                    templateStyling = promoBar.styling;
+                }
+            }
+            
+            // Map template styling to form styling
+            const mappedStyling = {
+                background: templateStyling.background || templateStyling.backgroundColor,
+                color: templateStyling.color || templateStyling.text_color,
+                font_family: templateStyling.font_family || templateStyling.fontFamily,
+                font_size: templateStyling.font_size || templateStyling.fontSize,
+                padding: templateStyling.padding,
+                border_bottom: templateStyling.border_bottom || templateStyling.borderBottom
+            };
+            
             setFormData({
                 ...formData,
                 ...promoBar,
-                styling: { ...formData.styling, ...(promoBar.styling ? JSON.parse(promoBar.styling) : {}) },
-                cta_style: { ...formData.cta_style, ...(promoBar.cta_style ? JSON.parse(promoBar.cta_style) : {}) },
-                countdown_style: { ...formData.countdown_style, ...(promoBar.countdown_style ? JSON.parse(promoBar.countdown_style) : {}) },
-                close_button_style: { ...formData.close_button_style, ...(promoBar.close_button_style ? JSON.parse(promoBar.close_button_style) : {}) }
+                styling: { ...formData.styling, ...mappedStyling },
+                cta_style: { ...formData.cta_style, ...(promoBar.cta_style ? (typeof promoBar.cta_style === 'string' ? JSON.parse(promoBar.cta_style) : promoBar.cta_style) : {}) },
+                countdown_style: { ...formData.countdown_style, ...(promoBar.countdown_style ? (typeof promoBar.countdown_style === 'string' ? JSON.parse(promoBar.countdown_style) : promoBar.countdown_style) : {}) },
+                close_button_style: { ...formData.close_button_style, ...(promoBar.close_button_style ? (typeof promoBar.close_button_style === 'string' ? JSON.parse(promoBar.close_button_style) : promoBar.close_button_style) : {}) }
             });
         }
     }, [promoBar]);

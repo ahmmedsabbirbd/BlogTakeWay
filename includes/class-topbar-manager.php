@@ -44,6 +44,7 @@ class PromoBarX_Manager {
         add_action('wp_ajax_promobarx_track_event', [$this, 'ajax_track_event']);
         add_action('wp_ajax_nopriv_promobarx_track_event', [$this, 'ajax_track_event']);
         add_action('wp_ajax_promobarx_get_promo_bars', [$this, 'ajax_get_promo_bars']);
+        add_action('wp_ajax_promobarx_get_promo_bar', [$this, 'ajax_get_promo_bar']);
         add_action('wp_ajax_promobarx_get_templates', [$this, 'ajax_get_templates']);
     }
 
@@ -428,14 +429,22 @@ class PromoBarX_Manager {
      * AJAX save promo bar
      */
     public function ajax_save_promo_bar() {
+        // Debug logging
+        error_log('PromoBarX: Save request received');
+        error_log('PromoBarX: POST data: ' . print_r($_POST, true));
+        
         check_ajax_referer('promobarx_admin_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
+            error_log('PromoBarX: Unauthorized access attempt');
             wp_die('Unauthorized');
         }
         
         $data = $_POST;
+        error_log('PromoBarX: Data to save: ' . print_r($data, true));
+        
         $result = $this->database->save_promo_bar($data);
+        error_log('PromoBarX: Save result: ' . print_r($result, true));
         
         if ($result) {
             wp_send_json_success(['id' => $result]);
@@ -506,6 +515,26 @@ class PromoBarX_Manager {
         
         $promo_bars = $this->database->get_promo_bars($args);
         wp_send_json_success($promo_bars);
+    }
+
+    /**
+     * AJAX get single promo bar
+     */
+    public function ajax_get_promo_bar() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $id = intval($_POST['id']);
+        $promo_bar = $this->database->get_promo_bar($id);
+        
+        if ($promo_bar) {
+            wp_send_json_success($promo_bar);
+        } else {
+            wp_send_json_error('Promo bar not found');
+        }
     }
 
     /**
