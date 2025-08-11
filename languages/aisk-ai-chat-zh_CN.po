@@ -18,7 +18,7 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: promo-bar-x.php
-msgid "Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat"
+msgid "Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA"
 msgstr ""
 
 #. Plugin URI of the plugin

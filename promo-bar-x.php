@@ -107,8 +107,8 @@ class AISK_AI_Chatbot {
         add_action('init', [ $this, 'aisk_increase_upload_limits' ]);
         register_activation_hook(__FILE__, [ $this, 'activate' ]);
         
-        $this->include_appsero_client();
-        $this->appsero_init_tracker_aisk_ai_chat();
+        // $this->include_appsero_client();
+        // $this->appsero_init_tracker_aisk_ai_chat();
 
         // Load required files
         $this->load_dependencies();
@@ -116,7 +116,7 @@ class AISK_AI_Chatbot {
         // Initialize PDF queue handler
         $this->init_pdf_queue_handler();
 
-        add_action( 'admin_enqueue_scripts', [ $this, 'gleap_widget_script' ] );
+        // add_action( 'admin_enqueue_scripts', [ $this, 'gleap_widget_script' ] );
     }
 
     /**
@@ -191,7 +191,7 @@ class AISK_AI_Chatbot {
      * @return void
      */
     public function appsero_init_tracker_aisk_ai_chat() {
-        $client = new Aisk_Ai_Chat\Appsero\Client( 'e46991ff-ae9b-42f3-bf87-1ec87ab8bb77', 'Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat', PromoBarX_PLUGIN_FILE );
+        $client = new Aisk_Ai_Chat\Appsero\Client( 'e46991ff-ae9b-42f3-bf87-1ec87ab8bb77', 'Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA', PromoBarX_PLUGIN_FILE );
 
         // Active insights.
         $client->insights()->init();

@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat 1.0.0\n"
+"Project-Id-Version: Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/promo-bar-x\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: promo-bar-x.php
-msgid "Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat"
+msgid "Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA"
 msgstr ""
 
 #. Plugin URI of the plugin
