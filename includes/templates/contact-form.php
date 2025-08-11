@@ -27,7 +27,7 @@ function aisk_contact_form_enqueue_assets() {
         'aisk-contact-form-styles',
         false,
         array(),
-        defined('AISK_VERSION') ? AISK_VERSION : '1.0.0'
+        defined('PromoBarX_VERSION') ? PromoBarX_VERSION : '1.0.0'
     );
 
     $custom_css = '
@@ -239,7 +239,7 @@ function aisk_contact_form_enqueue_assets() {
         'aisk-contact-form-scripts',
         false,
         [],
-        AISK_VERSION,
+        PromoBarX_VERSION,
         true
     );
 

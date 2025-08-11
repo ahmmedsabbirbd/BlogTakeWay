@@ -116,7 +116,7 @@ class AISK_External_Embeddings_Handler {
                 'aisk-upload-instructions',
                 false,
                 ['jquery'],
-                AISK_VERSION,
+                PromoBarX_VERSION,
                 true
             );
             

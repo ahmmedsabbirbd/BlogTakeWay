@@ -38,18 +38,18 @@ class AISK_Scripts {
         // Register and enqueue chat widget styles
         wp_register_style(
             'aisk-chat-widget-styles',
-            AISK_PLUGIN_URL . 'build/chat-widget.css',
+            PromoBarX_PLUGIN_URL . 'build/chat-widget.css',
             [],
-            AISK_VERSION
+            PromoBarX_VERSION
         );
         wp_enqueue_style('aisk-chat-widget-styles');
 
         // Register and enqueue chat widget scripts
         wp_register_script(
             'aisk-chat-widget',
-            AISK_PLUGIN_URL . 'build/chat-widget.js',
+            PromoBarX_PLUGIN_URL . 'build/chat-widget.js',
             ['wp-element', 'react', 'react-dom'],
-            AISK_VERSION,
+            PromoBarX_VERSION,
             [
                 'in_footer' => true,
                 'strategy' => 'defer'
@@ -101,7 +101,7 @@ class AISK_Scripts {
                 'text' => isset($settings['colors']['text']) ? $settings['colors']['text'] : '#FFFFFF',
             ],
             // Essential system paths/urls
-            'pluginUrl' => AISK_PLUGIN_URL,
+            'pluginUrl' => PromoBarX_PLUGIN_URL,
             'apiUrl' => rest_url('aisk/v1'),
             'adminUrl' => admin_url('admin.php'),
             'nonce' => wp_create_nonce('wp_rest'),

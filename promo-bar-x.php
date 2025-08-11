@@ -85,20 +85,20 @@ class AISK_AI_Chatbot {
      */
     private function __construct() {
         // Define constants
-        define('AISK_PLUGIN_FILE', __FILE__);
-        define('AISK_VERSION', '2.2.1');
-        define('AISK_PLUGIN_DIR', plugin_dir_path(__FILE__));
-        define('AISK_PLUGIN_URL', plugin_dir_url(__FILE__));
-        define('AISK_TEXT_DOMAIN', 'promo-bar-x');
-        define('AISK_CHAT_SESSION_COOKIE', 'aisk_chat_session');
-        define('AISK_GREAP_KEY', 'zcP5AsW6bwGApWF5NdyF4TvyKZs6w7KP');
+        define('PromoBarX_PLUGIN_FILE', __FILE__);
+        define('PromoBarX_VERSION', '2.2.1');
+        define('PromoBarX_PLUGIN_DIR', plugin_dir_path(__FILE__));
+        define('PromoBarX_PLUGIN_URL', plugin_dir_url(__FILE__));
+        define('PromoBarX_TEXT_DOMAIN', 'promo-bar-x');
+        define('PromoBarX_CHAT_SESSION_COOKIE', 'aisk_chat_session');
+        define('PromoBarX_GREAP_KEY', 'zcP5AsW6bwGApWF5NdyF4TvyKZs6w7KP');
 
         // Define the app server
-        if ( ! defined('AISK_APP_BASE') ) {
+        if ( ! defined('PromoBarX_APP_BASE') ) {
             if ( defined('AISK_ENV') && AISK_ENV === 'local' ) {
-                define( 'AISK_APP_BASE', 'http://aisk.chat.admin.test' );
+                define( 'PromoBarX_APP_BASE', 'http://aisk.chat.admin.test' );
             } else {
-                define( 'AISK_APP_BASE', 'https://app.aisk.chat' );
+                define( 'PromoBarX_APP_BASE', 'https://app.aisk.chat' );
             }
         }
 
@@ -148,13 +148,13 @@ class AISK_AI_Chatbot {
             esc_js( $user->user_email ),
             esc_js( $user->display_name ),
             esc_js( $user_role ),
-            esc_js( defined('AISK_VERSION') ? AISK_VERSION : '' ),
+            esc_js( defined('PromoBarX_VERSION') ? PromoBarX_VERSION : '' ),
             esc_js( function_exists('get_site_url') ? get_site_url() : '' ),
             esc_js( function_exists('is_multisite') && is_multisite() ? 'Yes' : 'No' ),
             esc_js( function_exists('get_bloginfo') ? get_bloginfo('version') : '' ),
             esc_js( defined('PHP_VERSION') ? PHP_VERSION : '' ),
             esc_js( function_exists('get_bloginfo') ? get_bloginfo('name') : '' ),
-            esc_js( defined('AISK_GREAP_KEY') ? AISK_GREAP_KEY : '' )
+            esc_js( defined('PromoBarX_GREAP_KEY') ? PromoBarX_GREAP_KEY : '' )
         );
     }
 
@@ -191,7 +191,7 @@ class AISK_AI_Chatbot {
      * @return void
      */
     public function appsero_init_tracker_aisk_ai_chat() {
-        $client = new Aisk_Ai_Chat\Appsero\Client( 'e46991ff-ae9b-42f3-bf87-1ec87ab8bb77', 'Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat', AISK_PLUGIN_FILE );
+        $client = new Aisk_Ai_Chat\Appsero\Client( 'e46991ff-ae9b-42f3-bf87-1ec87ab8bb77', 'Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat', PromoBarX_PLUGIN_FILE );
 
         // Active insights.
         $client->insights()->init();
@@ -325,16 +325,16 @@ class AISK_AI_Chatbot {
      * @return void
      */
     private function load_dependencies() {
-        include_once AISK_PLUGIN_DIR . 'includes/class-database.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-embeddings-handler.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-external-embeddings-handler.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-product-handler.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-order-handler.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-chat-storage.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-chat-handler.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-script-loader.php';
-        include_once AISK_PLUGIN_DIR . 'includes/class-aisk-admin.php';
-        include_once AISK_PLUGIN_DIR . 'includes/services/queue/class-pdf-queue-handler.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-database.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-embeddings-handler.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-external-embeddings-handler.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-product-handler.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-order-handler.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-chat-storage.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-chat-handler.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-script-loader.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/class-aisk-admin.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/services/queue/class-pdf-queue-handler.php';
 
         // Initialize admin class
         if (is_admin()) {
@@ -344,7 +344,7 @@ class AISK_AI_Chatbot {
         }
 
         // Load contact form feature handlers
-        include_once AISK_PLUGIN_DIR . 'includes/features/class-contact-form-handler.php';
+        include_once PromoBarX_PLUGIN_DIR . 'includes/features/class-contact-form-handler.php';
 
         // Initialize PDF Queue Handler
         new AISK_PDF_Queue_Handler();
@@ -360,13 +360,13 @@ class AISK_AI_Chatbot {
 
         // Load WhatsApp class if enabled
         if ( ! empty($settings['integrations']['whatsapp']['enabled']) ) {
-            include_once AISK_PLUGIN_DIR . 'includes/messenger/class-whatsapp-handler.php';
+            include_once PromoBarX_PLUGIN_DIR . 'includes/messenger/class-whatsapp-handler.php';
             new AISK_WhatsApp_Handler();
         }
 
         // Load Telegram class if enabled
         if ( ! empty($settings['integrations']['telegram']['enabled']) ) {
-            include_once AISK_PLUGIN_DIR . 'includes/messenger/class-telegram-handler.php';
+            include_once PromoBarX_PLUGIN_DIR . 'includes/messenger/class-telegram-handler.php';
             new AISK_Telegram_Handler();
         }
     }

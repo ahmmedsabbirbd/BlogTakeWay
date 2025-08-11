@@ -259,7 +259,7 @@ class AISK_Chat_Handler {
         }
 
         // Allow if user is logged in or has a valid chat session
-        if (is_user_logged_in() || ! empty( $_COOKIE[ AISK_CHAT_SESSION_COOKIE ])) {
+        if (is_user_logged_in() || ! empty( $_COOKIE[ PromoBarX_CHAT_SESSION_COOKIE ])) {
             return true;
         }
 
@@ -504,7 +504,7 @@ class AISK_Chat_Handler {
             $message_history = $this->chat_storage->get_recent_message_history($conversation_id);
 
             $response = wp_remote_post(
-                AISK_APP_BASE . '/wp-json/aisk/v1/classify-intent',
+                PromoBarX_APP_BASE . '/wp-json/aisk/v1/classify-intent',
                 [
                     'headers' => [
                         'Content-Type' => 'application/json',

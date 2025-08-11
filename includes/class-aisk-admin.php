@@ -61,7 +61,7 @@ class AISK_Admin {
             'aisk-admin-style', 
             plugin_dir_url( dirname( __FILE__ ) ) . 'assets/css/admin-style.css',
             [],
-            AISK_VERSION
+            PromoBarX_VERSION
         );
     }
 
@@ -146,18 +146,18 @@ class AISK_Admin {
         // Register and enqueue admin styles
         wp_register_style(
             'aisk-admin',
-            AISK_PLUGIN_URL . 'build/chat-admin.css',
+            PromoBarX_PLUGIN_URL . 'build/chat-admin.css',
             [],
-            AISK_VERSION
+            PromoBarX_VERSION
         );
         wp_enqueue_style('aisk-admin');
 
         // Register and enqueue admin scripts
         wp_register_script(
             'aisk-admin',
-            AISK_PLUGIN_URL . 'build/chat-admin.js',
+            PromoBarX_PLUGIN_URL . 'build/chat-admin.js',
             ['wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n'],
-            AISK_VERSION,
+            PromoBarX_VERSION,
             [
                 'in_footer' => true,
                 'strategy' => 'defer'
@@ -171,7 +171,7 @@ class AISK_Admin {
             [
                 'apiUrl' => rest_url('aisk/v1'),
                 'nonce' => wp_create_nonce('wp_rest'),
-                'pluginUrl' => AISK_PLUGIN_URL,
+                'pluginUrl' => PromoBarX_PLUGIN_URL,
                 'isWooCommerceActive' => class_exists('WooCommerce'),
                 'maxUploadSize' => wp_max_upload_size(),
             ]

@@ -169,7 +169,7 @@ class AISK_Contact_Form_Handler {
             wp_mkdir_p(dirname($theme_template_path));
 
             // Copy template from plugin
-            $plugin_template = AISK_PLUGIN_DIR . '/includes/' . $this->template_name;
+            $plugin_template = PromoBarX_PLUGIN_DIR . '/includes/' . $this->template_name;
             if ( file_exists($plugin_template) ) {
                 copy($plugin_template, $theme_template_path);
             }
