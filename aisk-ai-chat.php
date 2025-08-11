@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Plugin Name:  Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat
- * Plugin URI:  https://aisk.chat
- * Description: AI chatbot for WordPress & WooCommerce with WhatsApp & Telegram integration. Provides instant answers, product recommendations, order status, inquiry submit and much more.
- * Version:     2.2.1
+ * Plugin Name:  Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA
+ * Plugin URI:   https://wppool.com/plugins/promo-bar-x
+ * Description:  Customizable and minimal top bar for WordPress with title, countdown timer, CTA button, and close option. Built in block style for easy CMS/product team editing, scheduling, and campaign management without code.
+ * Version:      1.0.0
  * Requires PHP: 7.4
- * Author:      Aisk Team <support@aisk.chat>
- * Author URI:  https://aisk.chat/
- * Contributors: aisk, zrshishir, ahmmedsabbirbd
- * Text Domain:  aisk-ai-chat
- * Domain Path: /languages/
- * License: GPL2
- * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * Author:       WPPOOL Team <support@wppool.com>
+ * Author URI:   https://wppool.com/
+ * Contributors: ahmmedsabbirbd
+ * Text Domain:  promo-bar-x
+ * Domain Path:  /languages/
+ * License:      GPL2
+ * License URI:  http://www.gnu.org/licenses/gpl-2.0.txt
  *
  * @category WordPress
- * @package  AISK
- * @author   Aisk Team <support@aisk.chat>
+ * @package  PromoBarX
+ * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
- * @link     https://aisk.chat
+ * @link     https://wppool.com/
  *
  * Third-party Libraries:
- * - Smalot/PdfParser: Required for PDF text extraction and processing
- 
+ * - (Optional) Any countdown or block editor library you integrate for timer and UI features
  */
+
 
 
 if (defined('WP_DEBUG') && WP_DEBUG) {

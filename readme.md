@@ -1,344 +1,106 @@
-=== Aisk – AI Powered Chatbot | Support Assistant | Support Bot | Live Chat ===
-Contributors: aisk, zrshishir, ahmmedsabbirbd
-Tags: chatbot, live chat, customer support, live support, woocommerce
-Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 2.2.1
-Requires PHP: 7.4
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+=== Promo Bar X – Customizable Campaign Top Bar | Countdown Timer | CTA ===  
+Contributors: wppool, ahmmedsabbirbd  
+Tags: top bar, countdown, call to action, campaign, banner, notification, marketing  
+Requires at least: 5.0  
+Tested up to: 6.8  
+Stable tag: 1.0.0  
+Requires PHP: 7.4  
+License: GPLv2 or later  
+License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
-AI chatbot for WordPress & WooCommerce with WhatsApp & Telegram integration. Provides instant answers, product recommendations, order status, inquiry submit and much more.
+Minimal and customizable top bar for WordPress, featuring a title, countdown timer, CTA button, and close option. Built with block-style editing for easy no-code campaign management by product and CMS teams.
 
 == Description ==
 
-Aisk is a revolutionary AI-powered WhatsApp & Telegram supported chatbot designed specifically for WooCommerce stores and WordPress websites. Say goodbye to repetitive support tickets and hello to automated, intelligent customer service that works around the clock.
+Promo Bar X is a lightweight and fully customizable top bar plugin designed to help you display campaign messages, countdown timers, and call-to-action buttons on your WordPress site.  
 
-= 🚀 Why Choose AISK? =
+Built with a block-based approach, it empowers non-developers to easily customize text, colors, fonts, and schedule top bars for different campaigns — all without writing a single line of code.
 
-* AISK Chat is 100% FREE!
-* Reduce support tickets by up to 80%
-* Provide instant 24/7 customer support
-* Free up your team's time for complex issues
-* Increase customer satisfaction with quick responses
-* Boost sales with intelligent product recommendations
-* Seamlessly integrate with WhatsApp and Telegram
-* Enhanced sitemap processing for better content discovery
-* Improved URL handling and content extraction
-* Advanced error handling and logging
+= 🚀 Why Choose Promo Bar X? =
 
-= 🛍️ WooCommerce Integration =
-
-AISK is built from the ground up for WooCommerce stores:
-
-* **Smart Product Search**: Helps customers find products based on descriptions, colors, sizes, categories, and more
-* **Order Management**: Customers can track orders, view status, and access invoices using their order number and email
-* **Intelligent Recommendations**: Suggests relevant products based on customer queries and browsing history
-* **Shopping Cart Assistance**: Helps with cart-related questions and checkout process
-* **Real-time Inventory**: Provides accurate stock information and availability
-* **Enhanced Content Discovery**: Improved sitemap processing for better product and content indexing
-
-= 🔍 Content Processing =
-
-* Let your chatbot answer from your website content, woocommerce products, as well as your PDF and external site URLs. All the data are processed right in your server. 
+* 100% no-code customization through WordPress block editor  
+* Easily schedule and manage multiple campaigns  
+* Minimal and clean design to avoid clutter  
+* Countdown timer for urgency and event-based campaigns  
+* CTA button to boost engagement and conversions  
+* Close button to improve user experience  
+* Fully responsive and lightweight performance  
+* Easy integration with any WordPress theme  
 
 = 🎯 Key Features =
 
-**Smart Customer Support**
-* Instant responses to common customer queries
-* Natural language understanding for human-like conversations
-* Learning capability to improve responses over time
-* Multi-language support
-* Custom response templates
-* Enhanced content discovery and processing
-
-**Multi-Channel Integration**
-* WhatsApp integration for direct messaging
-* Telegram bot integration
-* Contact form integration
-* Email notification system
-* Seamless channel switching
-* Improved error handling across all channels
-
-**Advanced Administration**
-* Intuitive dashboard for managing conversations
-* Detailed analytics and insights
-* Customizable chat widget
-* Knowledge base management
-* Custom branding options
-* Enhanced logging and monitoring
-
-**Security & Privacy**
-* GDPR compliant
-* Secure data handling
-* Advanced encryption
-* Role-based access control
-* Data retention policies
-* Enhanced URL validation and sanitization
-
-= 🔥 Features =
-
-* Advanced WooCommerce integration
-* WhatsApp and Telegram integration
-* Custom branding and themes
-* Advanced analytics and reporting
-* Priority support
-* Custom AI training
-* Multiple language support
-* Unlimited conversations
+* Title text with customizable fonts, colors, and styles  
+* Countdown timer block with flexible formatting  
+* CTA button with customizable text, link, and style  
+* Close button to dismiss the top bar  
+* Scheduling options to show top bars on specific dates/times  
+* Block editor support for easy editing and preview  
+* Campaign management UI for non-technical users  
 
 = 💡 Use Cases =
 
-1. **Product Support**
-    * Answer product-specific questions
-    * Provide sizing guides
-    * Share product recommendations
-    * Handle availability inquiries
+1. **Promotions and Sales**  
+   * Announce flash sales or special discounts  
+   * Show countdowns to sale end times  
 
-2. **Order Management**
-    * Track order status
-    * Handle shipping inquiries
+2. **Events and Launches**  
+   * Promote upcoming webinars, product launches, or events  
+   * Create urgency with countdown timers  
 
-3. **Customer Service**
-    * Answer FAQs
-    * Handle common support issues
-    * Provide store policies
-    * Collect customer feedback
-
-4. **Sales Assistance**
-    * Recommend products
-    * Answer pricing questions
-    * Handle discount inquiries
-    * Guide through checkout
+3. **Announcements**  
+   * Display critical updates or notices  
+   * Link users to important pages or forms  
 
 = 🔧 Easy Setup =
 
-1. Install and activate the plugin
-2. Enter your API credentials
-3. Customize your chat widget
-4. Configure your knowledge base
-5. Start automating your customer support!
-
-= 🌟 Benefits =
-
-For Store Owners:
-* Reduce support costs
-* Increase customer satisfaction
-* Boost sales through smart recommendations
-* Save time on repetitive queries
-* Get valuable customer insights
-
-For Customers:
-* 24/7 instant support
-* Quick access to order information
-* Personalized product recommendations
-* Seamless shopping experience
-* Multiple communication channels
+1. Install and activate the plugin  
+2. Use the WordPress block editor to add and customize the Promo Bar X block  
+3. Configure text, timer, CTA, and styles easily without coding  
+4. Schedule your campaign for automatic display  
+5. Save and publish  
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/aisk-ai-chat` directory, or install the plugin through the WordPress plugins screen directly.
-2. Activate the plugin through the 'Plugins' screen in WordPress
-3. Use the Settings->AISK screen to configure the plugin
-4. Configure your API credentials in the plugin settings
-
-== Development Setup ==
-
-For developers who want to contribute or modify the plugin:
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   # Install PHP dependencies
-   composer install
-   
-   # Install Node.js dependencies
-   npm install
-   ```
-3. Build the plugin:
-   ```bash
-   # Development build with hot reloading
-   npm run dev
-   
-   # Production build
-   npm run build
-   
-   # Build for WordPress.org submission
-   npm run build:wp
-   ```
-
-The build process uses:
-- Vite for bundling and development
-- React for UI components
-- Tailwind CSS for styling
-- TypeScript for type safety
-
-Source files are located in:
-- `src/components/` - React components
-- `src/styles/` - CSS and styling files
-- `src/admin/` - Admin interface components
-- `src/lib/` - Utility functions and shared code
-
-The build process will:
-- Compile frontend assets (React, CSS)
-- Install production PHP dependencies
-- Create a WordPress.org-ready zip file
+1. Upload the plugin files to the `/wp-content/plugins/promo-bar-x` directory, or install the plugin through the WordPress plugins screen directly.  
+2. Activate the plugin through the 'Plugins' screen in WordPress.  
+3. Add the Promo Bar X block in your pages or templates via the block editor.  
+4. Configure text, timer, CTA, and appearance settings as needed.  
 
 == Frequently Asked Questions ==
 
-= Is AISK compatible with my theme? =
+= Is Promo Bar X compatible with my theme? =  
+Yes, Promo Bar X is designed to work seamlessly with any WordPress theme.  
 
-Yes, AISK is designed to work with any WordPress theme. The chat widget is fully responsive and customizable to match your site's design.
+= Do I need coding skills to use Promo Bar X? =  
+No, the plugin is fully block-based with an intuitive interface, so no coding is required.  
 
-= Do I need coding knowledge to use AISK? =
+= Can I schedule different top bars for different campaigns? =  
+Yes, scheduling is built in to manage multiple campaigns with different timing.  
 
-No, AISK is designed to be user-friendly and requires no coding knowledge. The intuitive admin interface makes it easy to set up and manage.
-
-= Can I customize the chatbot's responses? =
-
-Yes, you can customize responses, train the AI with your specific knowledge base, and set up custom response templates.
-
-= Does AISK support multiple languages? =
-
-Yes, AISK supports multiple languages and can detect and respond in the customer's preferred language.
-
-= Is AISK GDPR compliant? =
-
-Yes, AISK is fully GDPR compliant and includes features for data privacy and protection.
+= Can I customize colors and fonts? =  
+Absolutely, all text, buttons, and colors are fully customizable via the block editor.  
 
 == Screenshots ==
 
-1. Modern chat widget interface
-2. Admin dashboard overview
-3. WooCommerce order management
-4. WhatsApp integration
-5. Analytics dashboard
-6. Settings panel
+1. Minimal top bar with title, timer, CTA, and close button  
+2. Block editor customization UI  
+3. Campaign scheduling interface  
+4. Mobile responsive design preview  
+5. Various color and style presets  
 
 == Changelog ==
 
-= 2.2.1 =
-* Add: Integrated Gleap AI for enhanced support and user feedback. 
-
-= 2.2.0 =
-* Add: Integrated Appsero to track plugin installs, uninstalls, and collect uninstall feedback.
-
-= 2.1.0 =
-* Fixed: Error when clicking "Generate Embeddings" (embedding generation now works as expected).
-* Fixed: Issue where "Unprocessed items: 1" always showed, even after generating embeddings (unprocessed item count now updates correctly).
-
-= 2.0.9 =
-* Improved: Widget Header Logo displays correctly on both the chatbot and dashboard.
-* Improved: Add an option to remove the Widget Header Logo.
-* Improved: Add an option to remove the Chat Bubble Icon.
-
-= 2.0.8 =
-* Improved: UX for rolling messages in ChatWidgetSettings: Empty lines are now automatically removed when saving, making message management smoother for admins.
-
-= 2.0.7 =
-* Improved: Update readme.txt to streamline feature descriptions and remove outdated sections
-
-= 2.0.6 =
-* Improved: After updating "Contact Information & Custom Content," notify user to regenerate embedding.
-* Fix: Excluded Post/Page feature not working.
-
-= 2.0.5 =
-* Fix: Incognito mode chatbot support
-
-
-= 2.0.4 =
-* Update documentation on readme
-
-= 2.0.3 =
-* Version bump for maintenance and compliance with WordPress.org guidelines
-* Improved input sanitization for chat messages
-* Improved error exception message to make clear about the error
-
-= 2.0.2 =
-* Updated version number for maintenance release
-* Removed openai api key from classify intent api call
-
-= 2.0.1 =
-* Improved Composer dependency handling
-* Enhanced error logging for missing dependencies
-* Better initialization of admin class
-* More robust plugin activation process
-* Updated Composer autoloader check to be more graceful
-* Improved error handling during plugin initialization
-* Enhanced admin menu registration process
-* Better handling of plugin dependencies
-* Fixed issue with admin menu not appearing in WordPress dashboard
-* Resolved plugin initialization timing issues
-* Fixed silent failures in plugin activation
-* Improved error reporting for missing dependencies
-
-= 2.0.0 =
-* Major performance improvements in PDF processing
-* Enhanced text extraction and cleaning capabilities
-* Optimized memory management for large files
-* Improved batch processing for embeddings
-* Advanced caching system for processed content
-* Better error handling and recovery mechanisms
-* Upgraded PDF processing engine for better reliability
-* Improved text cleaning algorithms
-* Enhanced memory usage optimization
-* Streamlined embedding generation process
-* Better handling of large PDF files
-* More efficient database operations
-
-= 1.2.3 =
-* Replaced discouraged `set_time_limit()` function with WordPress filters
-* Improved time limit handling in PDF processing and URL crawling
-* Enhanced error handling for time-sensitive operations
-* Fixed PHP warnings related to time limit management
-* Improved compatibility with strict PHP settings
-* Enhanced reliability of long-running operations
-
-= 1.2.2 =
-* Fixed missing version parameter in wp_register_style() calls
-* Improved asset versioning for better cache control
-* Enhanced style loading reliability
-* Fixed product image sequential display issues
-* Added support for managing unsupported image extensions
-* Updated version number across all plugin files
-* Improved code documentation
-
-= 1.2.1 =
-* Removed PDF queue handler system
-* Cleaned up and refactored PDF processing
-* Removed debug logging
-* Updated property and variable names
-* Verified PDF upload and status flows
-* Ensured consistent behavior across PDF features
-
-= 1.2.0 =
-* All date/time fields now stored in UTC
-* Backend API returns ISO 8601 UTC strings
-* Frontend displays dates in user's local timezone
-* Fixed timezone inconsistencies across environments
-* Improved date parsing and handling
+= 1.0.0 =  
+* Initial release with title, countdown timer, CTA, and close button blocks  
+* Scheduling support for campaigns  
+* Full block editor integration  
+* Responsive and minimal design  
 
 == Upgrade Notice ==
 
-= 2.0.1 =
-This update improves Composer dependency handling and plugin initialization. Includes enhanced error logging, more robust activation process, and fixes for admin menu visibility issues. Recommended update for all installations.
-
-= 2.0.0 =
-Major update with performance improvements for PDF processing and content handling. Includes optimized memory management, advanced caching, and improved text extraction. Better error handling and resource management for large files.
-
-= 1.2.3 =
-Improves time limit management by replacing set_time_limit() with WordPress filters. Enhances compatibility with strict PHP settings and improves reliability of long-running operations.
-
-= 1.2.2 =
-This update fixes missing version parameters in style registrations, improving asset caching and loading reliability. Also includes fixes for product image display and unsupported image extensions.
-
-= 1.2.1 =
-This update removes the PDF queue handler system and simplifies the PDF processing workflow. The changes include cleanup of backend code, improved frontend component organization, and verification of PDF functionality.
-
-= 1.2.0 =
-This update ensures all date/time fields are stored and displayed consistently in UTC and the user's local timezone, fixing issues with inconsistent times across different servers.
+= 1.0.0 =  
+Initial launch of Promo Bar X with core features for campaign top bars and countdown timers.
 
 == Support ==
 
-Visit [aisk.chat](https://aisk.chat) for documentation and support.#   p r o m o - b a r - x  
- 
+Visit [WPPOOL](https://wppool.com) for documentation and support.
