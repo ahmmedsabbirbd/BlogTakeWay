@@ -51,6 +51,9 @@ class AISK_Admin {
         add_action('admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ]);
 
         add_action('rest_api_init', [ $this, 'aisk_register_settings_endpoints' ]);
+        
+        // Add AJAX handler for creating default promo bar
+        add_action('wp_ajax_promobarx_create_default', [ $this, 'ajax_create_default_promo_bar' ]);
     }
     
     /**
@@ -395,6 +398,28 @@ class AISK_Admin {
         $settings = $request->get_json_params();
         update_option('aisk_settings', $settings);
         return rest_ensure_response([ 'success' => true ]);
+    }
+
+    /**
+     * AJAX create default promo bar
+     */
+    public function ajax_create_default_promo_bar() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        // Initialize database and create default promo bar
+        $database = new PromoBarX_Database();
+        
+        // Force create default promo bar by calling the method directly
+        $reflection = new ReflectionClass($database);
+        $method = $reflection->getMethod('insert_default_promo_bar');
+        $method->setAccessible(true);
+        $method->invoke($database);
+        
+        wp_send_json_success(['message' => 'Default promo bar created successfully']);
     }
 }
 

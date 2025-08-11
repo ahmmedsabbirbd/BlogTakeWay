@@ -58,13 +58,21 @@ class PromoBarX_Manager {
         $post_id = get_queried_object_id();
         $post_type = get_post_type();
         
+        error_log('PromoBarX: get_active_promo_bar() called');
+        error_log('PromoBarX: Current URL: ' . $current_url);
+        error_log('PromoBarX: Post ID: ' . $post_id);
+        error_log('PromoBarX: Post Type: ' . $post_type);
+        
         // Get all active promo bars
         $promo_bars = $this->database->get_promo_bars(['status' => 'active']);
+        error_log('PromoBarX: Found ' . count($promo_bars) . ' active promo bars');
         
         $candidates = [];
         
         foreach ($promo_bars as $promo_bar) {
+            error_log('PromoBarX: Checking promo bar ID: ' . $promo_bar->id . ', Name: ' . $promo_bar->name);
             $score = $this->calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type);
+            error_log('PromoBarX: Score for promo bar ' . $promo_bar->id . ': ' . $score);
             if ($score > 0) {
                 $candidates[] = [
                     'promo_bar' => $promo_bar,
@@ -72,6 +80,8 @@ class PromoBarX_Manager {
                 ];
             }
         }
+        
+        error_log('PromoBarX: Found ' . count($candidates) . ' candidates');
         
         // Sort by score and priority
         usort($candidates, function($a, $b) {
@@ -83,11 +93,17 @@ class PromoBarX_Manager {
         
         if (!empty($candidates)) {
             $selected = $candidates[0]['promo_bar'];
+            error_log('PromoBarX: Selected promo bar ID: ' . $selected->id . ', Name: ' . $selected->name);
             
             // Check if promo bar is scheduled
             if ($this->is_promo_bar_scheduled($selected)) {
+                error_log('PromoBarX: Promo bar is scheduled to show');
                 return $selected;
+            } else {
+                error_log('PromoBarX: Promo bar is not scheduled to show');
             }
+        } else {
+            error_log('PromoBarX: No candidates found');
         }
         
         return null;
@@ -105,44 +121,54 @@ class PromoBarX_Manager {
             $promo_bar->id
         ));
         
+        error_log('PromoBarX: Found ' . count($assignments) . ' assignments for promo bar ' . $promo_bar->id);
+        
         foreach ($assignments as $assignment) {
+            error_log('PromoBarX: Assignment type: ' . $assignment->assignment_type . ', Target ID: ' . $assignment->target_id . ', Target Value: ' . $assignment->target_value);
             switch ($assignment->assignment_type) {
                 case 'global':
                     $score = 100;
+                    error_log('PromoBarX: Global assignment - score set to 100');
                     break;
                     
                 case 'page':
                     if ($assignment->target_id == $post_id) {
                         $score = 90;
+                        error_log('PromoBarX: Page match - score set to 90');
                     }
                     break;
                     
                 case 'post_type':
                     if ($assignment->target_value === $post_type) {
                         $score = 80;
+                        error_log('PromoBarX: Post type match - score set to 80');
                     }
                     break;
                     
                 case 'category':
                     if (has_category($assignment->target_value, $post_id)) {
                         $score = 70;
+                        error_log('PromoBarX: Category match - score set to 70');
                     }
                     break;
                     
                 case 'tag':
                     if (has_tag($assignment->target_value, $post_id)) {
                         $score = 60;
+                        error_log('PromoBarX: Tag match - score set to 60');
                     }
                     break;
                     
                 case 'custom':
                     if ($this->matches_custom_condition($assignment->target_value, $current_url, $post_id)) {
                         $score = 50;
+                        error_log('PromoBarX: Custom condition match - score set to 50');
                     }
                     break;
             }
         }
         
+        error_log('PromoBarX: Final score for promo bar ' . $promo_bar->id . ': ' . $score);
         return $score;
     }
 
@@ -204,18 +230,25 @@ class PromoBarX_Manager {
      * Render top bar in head
      */
     public function render_topbar() {
+        error_log('PromoBarX: render_topbar() called');
+        
         $promo_bar = $this->get_active_promo_bar();
         
         if (!$promo_bar) {
+            error_log('PromoBarX: No active promo bar found');
             return;
         }
+        
+        error_log('PromoBarX: Found active promo bar - ID: ' . $promo_bar->id . ', Name: ' . $promo_bar->name);
         
         // Check if user has closed this promo bar
         $cookie_name = 'promobarx_closed_' . $promo_bar->id;
         if (isset($_COOKIE[$cookie_name])) {
+            error_log('PromoBarX: Promo bar closed by user cookie');
             return;
         }
         
+        error_log('PromoBarX: Rendering promo bar HTML');
         $this->render_topbar_html($promo_bar);
     }
 
@@ -241,9 +274,46 @@ class PromoBarX_Manager {
             }
         }
         
-        // Render container for React component
+        // Generate inline styles
+        $topbar_styles = $this->generate_inline_styles($styling);
+        $cta_styles = $this->generate_inline_styles($cta_style);
+        $countdown_styles = $this->generate_inline_styles($countdown_style);
+        $close_styles = $this->generate_inline_styles($close_style);
+        
+        // Render the actual promo bar HTML
         ?>
-        <div id="promo-bar-x-topbar"></div>
+        <div id="promobarx-topbar-<?php echo esc_attr($promo_bar->id); ?>" class="promobarx-topbar" style="<?php echo esc_attr($topbar_styles); ?>">
+            <div class="promobarx-content">
+                <?php if (!empty($promo_bar->title)): ?>
+                    <div class="promobarx-title"><?php echo esc_html($promo_bar->title); ?></div>
+                <?php endif; ?>
+                
+                <?php if (!empty($promo_bar->subtitle)): ?>
+                    <div class="promobarx-subtitle"><?php echo esc_html($promo_bar->subtitle); ?></div>
+                <?php endif; ?>
+                
+                <?php if ($promo_bar->countdown_enabled && !empty($promo_bar->countdown_end_date)): ?>
+                    <div class="promobarx-countdown" style="<?php echo esc_attr($countdown_styles); ?>" data-end="<?php echo esc_attr($promo_bar->countdown_end_date); ?>">
+                        <span class="countdown-days">00</span>d 
+                        <span class="countdown-hours">00</span>h 
+                        <span class="countdown-minutes">00</span>m 
+                        <span class="countdown-seconds">00</span>s
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (!empty($promo_bar->cta_text) && !empty($promo_bar->cta_url)): ?>
+                    <a href="<?php echo esc_url($promo_bar->cta_url); ?>" class="promobarx-cta" style="<?php echo esc_attr($cta_styles); ?>" onclick="promobarxTrackEvent(<?php echo esc_js($promo_bar->id); ?>, 'click')">
+                        <?php echo esc_html($promo_bar->cta_text); ?>
+                    </a>
+                <?php endif; ?>
+            </div>
+            
+            <?php if ($promo_bar->close_button_enabled): ?>
+                <button class="promobarx-close" style="<?php echo esc_attr($close_styles); ?>" onclick="promobarxCloseBar(<?php echo esc_js($promo_bar->id); ?>)">
+                    ×
+                </button>
+            <?php endif; ?>
+        </div>
         
         <style>
         .promobarx-topbar {
@@ -261,6 +331,8 @@ class PromoBarX_Manager {
             line-height: 1.4;
             text-align: center;
             transition: all 0.3s ease;
+            background: #2563eb;
+            color: white;
         }
         
         .promobarx-content {
@@ -293,10 +365,13 @@ class PromoBarX_Manager {
             font-weight: 500;
             transition: all 0.2s ease;
             white-space: nowrap;
+            background: rgba(255,255,255,0.2);
+            color: white;
         }
         
         .promobarx-cta:hover {
             transform: translateY(-1px);
+            background: rgba(255,255,255,0.3);
         }
         
         .promobarx-close {
@@ -308,11 +383,12 @@ class PromoBarX_Manager {
             border-radius: 4px;
             transition: all 0.2s ease;
             opacity: 0.7;
+            color: white;
         }
         
         .promobarx-close:hover {
             opacity: 1;
-            background: rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.1);
         }
         
         @media (max-width: 768px) {
@@ -351,17 +427,10 @@ class PromoBarX_Manager {
             return;
         }
         
-        // Localize data for React component
         ?>
         <script>
-        window.promobarxData = {
-            promoBar: <?php echo json_encode($promo_bar); ?>,
-            nonce: '<?php echo wp_create_nonce('promobarx_track'); ?>',
-            ajaxurl: '<?php echo admin_url('admin-ajax.php'); ?>'
-        };
-        
         function promobarxTrackEvent(promoId, eventType) {
-            fetch(ajaxurl, {
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -408,10 +477,15 @@ class PromoBarX_Manager {
                     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
                     
-                    countdown.querySelector('.countdown-days').textContent = days.toString().padStart(2, '0');
-                    countdown.querySelector('.countdown-hours').textContent = hours.toString().padStart(2, '0');
-                    countdown.querySelector('.countdown-minutes').textContent = minutes.toString().padStart(2, '0');
-                    countdown.querySelector('.countdown-seconds').textContent = seconds.toString().padStart(2, '0');
+                    const daysEl = countdown.querySelector('.countdown-days');
+                    const hoursEl = countdown.querySelector('.countdown-hours');
+                    const minutesEl = countdown.querySelector('.countdown-minutes');
+                    const secondsEl = countdown.querySelector('.countdown-seconds');
+                    
+                    if (daysEl) daysEl.textContent = days.toString().padStart(2, '0');
+                    if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+                    if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+                    if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
                 }
                 
                 updateCountdown();

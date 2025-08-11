@@ -145,6 +145,9 @@ class PromoBarX_Database {
 
         // Insert default templates
         $this->insert_default_templates();
+        
+        // Insert default promo bar
+        $this->insert_default_promo_bar();
     }
 
     /**
@@ -206,6 +209,90 @@ class PromoBarX_Database {
                     $this->table_prefix . 'promo_bar_templates',
                     $template
                 );
+            }
+        }
+    }
+
+    /**
+     * Insert default promo bar
+     */
+    private function insert_default_promo_bar() {
+        // Check if default promo bar already exists
+        $exists = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SELECT id FROM {$this->table_prefix}promo_bars WHERE name = %s",
+                'Welcome Promo Bar'
+            )
+        );
+
+        if (!$exists) {
+            $default_promo_bar = [
+                'name' => 'Welcome Promo Bar',
+                'title' => '🎉 Welcome to ' . get_bloginfo('name') . '!',
+                'subtitle' => 'Discover amazing products and exclusive offers',
+                'cta_text' => 'Explore Now',
+                'cta_url' => home_url('/'),
+                'cta_style' => json_encode([
+                    'background' => '#ffffff',
+                    'color' => '#3b82f6',
+                    'padding' => '8px 16px',
+                    'border_radius' => '4px',
+                    'font_weight' => '500'
+                ]),
+                'countdown_enabled' => 0,
+                'countdown_date' => null,
+                'countdown_style' => json_encode([
+                    'color' => '#dc2626',
+                    'font_weight' => '600',
+                    'font_family' => 'monospace'
+                ]),
+                'close_button_enabled' => 1,
+                'close_button_style' => json_encode([
+                    'color' => '#6b7280',
+                    'font_size' => '20px',
+                    'padding' => '4px 8px'
+                ]),
+                'styling' => json_encode([
+                    'background' => '#3b82f6',
+                    'color' => '#ffffff',
+                    'font_family' => 'Inter, sans-serif',
+                    'font_size' => '14px',
+                    'padding' => '12px 20px',
+                    'position' => 'top'
+                ]),
+                'template_id' => 0,
+                'status' => 'active',
+                'priority' => 10,
+                'created_by' => get_current_user_id(),
+                'created_at' => current_time('mysql'),
+                'updated_at' => current_time('mysql')
+            ];
+
+            $result = $this->wpdb->insert(
+                $this->table_prefix . 'promo_bars',
+                $default_promo_bar
+            );
+
+            if ($result) {
+                $promo_bar_id = $this->wpdb->insert_id;
+                
+                // Add global assignment for home page
+                $this->wpdb->insert(
+                    $this->table_prefix . 'promo_bar_assignments',
+                    [
+                        'promo_bar_id' => $promo_bar_id,
+                        'assignment_type' => 'global',
+                        'target_id' => 0,
+                        'target_value' => '',
+                        'priority' => 10,
+                        'created_at' => current_time('mysql'),
+                        'updated_at' => current_time('mysql')
+                    ]
+                );
+                
+                error_log('PromoBarX: Default promo bar created with ID: ' . $promo_bar_id);
+            } else {
+                error_log('PromoBarX: Failed to create default promo bar');
             }
         }
     }

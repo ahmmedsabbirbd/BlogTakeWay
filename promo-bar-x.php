@@ -307,6 +307,9 @@ class AISK_AI_Chatbot {
      * @return void
      */
     public function init() {
+        // Load dependencies first
+        $this->load_dependencies();
+        
         // Enqueue scripts
         add_action('wp_enqueue_scripts', [ $this, 'enqueue_scripts' ]);
 
@@ -392,6 +395,9 @@ class AISK_AI_Chatbot {
         }
 
         new AISK_Database();
+        
+        // Initialize PromoBarX database and create default promo bar
+        new PromoBarX_Database();
     }
 
     /**
@@ -413,7 +419,7 @@ class AISK_AI_Chatbot {
     public function render_chat_widget() {
         // Check if we're on the contact form page
         if ( ! is_page('promo-bar-x-p') ) {
-            echo '<div id="promo-bar-x-topbar"></div>';
+            // Chat widget will be rendered by AISK_Scripts::load_chat_widget_assets()
         }
     }
 
