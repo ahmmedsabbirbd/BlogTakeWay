@@ -301,7 +301,7 @@ class AISK_Admin {
      * @return void
      */
     public function render_settings_page() {
-        echo '<div id="aisk-settings-app"></div>';
+        echo '<div id="promo-bar-x-settings-app"></div>';
     }
 
     /**

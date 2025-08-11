@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Mount settings page
-    const settingsContainer = document.getElementById('aisk-settings-app');
+    const settingsContainer = document.getElementById('promo-bar-x-settings-app');
     if (settingsContainer) {
         const settingsRoot = createRoot(settingsContainer);
         settingsRoot.render(<SettingsApp />);
