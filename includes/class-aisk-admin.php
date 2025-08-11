@@ -25,7 +25,7 @@ if ( ! defined('ABSPATH') ) {
 class AISK_Admin {
 
 
-    private $plugin_slug = 'aisk';
+    private $plugin_slug = 'promo-bar-x';
     private static $instance = null;
 
     /**
@@ -58,7 +58,7 @@ class AISK_Admin {
      */
     public function enqueue_admin_styles( $hook_suffix ) {
         wp_enqueue_style( 
-            'aisk-admin-style', 
+            'promo-bar-x-admin-style', 
             plugin_dir_url( dirname( __FILE__ ) ) . 'assets/css/admin-style.css',
             [],
             PromoBarX_VERSION
@@ -75,32 +75,13 @@ class AISK_Admin {
     public function register_admin_menu() {
 
         add_menu_page(
-            esc_html__( 'Aisk', 'promo-bar-x' ),
-            esc_html__( 'Aisk', 'promo-bar-x' ),
+            esc_html__( 'PromoBarX', 'promo-bar-x' ),
+            esc_html__( 'PromoBarX', 'promo-bar-x' ),
             'manage_options',
             $this->plugin_slug,
             [ $this, 'render_dashboard_page' ],
             plugin_dir_url( dirname( __FILE__ ) ) . 'assets/images/icons/menu-icon-short.svg', 
             30
-        );
-
-        add_submenu_page(
-            $this->plugin_slug,
-            esc_html__( 'Inquiries', 'promo-bar-x' ),
-            esc_html__( 'Inquiries', 'promo-bar-x' ),
-            'manage_options',
-            $this->plugin_slug . '-inquiries',
-            [ $this, 'render_inquiries_page' ]
-        );
-
-        // Add Chat History submenu
-        add_submenu_page(
-            $this->plugin_slug,
-            esc_html__( 'Chat History', 'promo-bar-x' ),
-            esc_html__( 'Chat History', 'promo-bar-x' ),
-            'manage_options',
-            $this->plugin_slug . '-history',
-            [ $this, 'render_history_page' ]
         );
 
         // Add Settings submenu
@@ -126,14 +107,16 @@ class AISK_Admin {
      * @return void
      */
     public function enqueue_admin_scripts($hook) {
+        // Check if we're on any of our plugin pages
         $allowed_hooks = [
             'toplevel_page_' . $this->plugin_slug,
-            $this->plugin_slug . '_page_' . $this->plugin_slug . '-inquiries',
-            $this->plugin_slug . '_page_' . $this->plugin_slug . '-history',
             $this->plugin_slug . '_page_' . $this->plugin_slug . '-settings',
         ];
 
-        if (!in_array($hook, $allowed_hooks)) {
+        // Also check if the hook contains our plugin slug (more flexible approach)
+        $is_plugin_page = in_array($hook, $allowed_hooks) || strpos($hook, $this->plugin_slug) !== false;
+
+        if (!$is_plugin_page) {
             return;
         }
 
@@ -145,16 +128,16 @@ class AISK_Admin {
 
         // Register and enqueue admin styles
         wp_register_style(
-            'aisk-admin',
+            'promo-bar-x-admin',
             PromoBarX_PLUGIN_URL . 'build/chat-admin.css',
             [],
             PromoBarX_VERSION
         );
-        wp_enqueue_style('aisk-admin');
+        wp_enqueue_style('promo-bar-x-admin');
 
         // Register and enqueue admin scripts
         wp_register_script(
-            'aisk-admin',
+            'promo-bar-x-admin',
             PromoBarX_PLUGIN_URL . 'build/chat-admin.js',
             ['wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n'],
             PromoBarX_VERSION,
@@ -163,10 +146,10 @@ class AISK_Admin {
                 'strategy' => 'defer'
             ]
         );
-        wp_enqueue_script('aisk-admin');
+        wp_enqueue_script('promo-bar-x-admin');
 
         wp_localize_script(
-            'aisk-admin',
+            'promo-bar-x-admin',
             'AiskSettings',
             [
                 'apiUrl' => rest_url('aisk/v1'),
@@ -176,7 +159,7 @@ class AISK_Admin {
                 'maxUploadSize' => wp_max_upload_size(),
             ]
         );
-        wp_set_script_translations('aisk-admin', 'promo-bar-x');
+        wp_set_script_translations('promo-bar-x-admin', 'promo-bar-x');
     }
 
     /**
@@ -271,28 +254,7 @@ class AISK_Admin {
             'isActive' => true,
         );
     }
-    /**
-     * Render inquiries admin page
-     *
-     * @since 1.0.0
-     *
-     * @return void
-     */
-    public function render_inquiries_page() {
-        echo '<div id="aisk-inquiries"></div>';
-    }
-
-    /**
-     * Render chat history admin page
-     *
-     * @since 1.0.0
-     *
-     * @return void
-     */
-    public function render_history_page() {
-        echo '<div id="aisk-history"></div>';
-    }
-
+ 
     /**
      * Render settings admin page
      *

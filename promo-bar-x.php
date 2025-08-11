@@ -406,7 +406,7 @@ class AISK_AI_Chatbot {
     public function render_chat_widget() {
         // Check if we're on the contact form page
         if ( ! is_page('aisk-contact-form') ) {
-            echo '<div id="aisk-chat-widget"></div>';
+            echo '<div id="promo-bar-x-topbar"></div>';
         }
     }
 

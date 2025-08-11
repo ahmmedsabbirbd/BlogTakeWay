@@ -37,16 +37,16 @@ class AISK_Scripts {
     public static function load_chat_widget_assets() {
         // Register and enqueue chat widget styles
         wp_register_style(
-            'aisk-chat-widget-styles',
+            'promo-bar-x-topbar-styles',
             PromoBarX_PLUGIN_URL . 'build/chat-widget.css',
             [],
             PromoBarX_VERSION
         );
-        wp_enqueue_style('aisk-chat-widget-styles');
+        wp_enqueue_style('promo-bar-x-topbar-styles');
 
         // Register and enqueue chat widget scripts
         wp_register_script(
-            'aisk-chat-widget',
+            'promo-bar-x-topbar',
             PromoBarX_PLUGIN_URL . 'build/chat-widget.js',
             ['wp-element', 'react', 'react-dom'],
             PromoBarX_VERSION,
@@ -55,7 +55,7 @@ class AISK_Scripts {
                 'strategy' => 'defer'
             ]
         );
-        wp_enqueue_script('aisk-chat-widget');
+        wp_enqueue_script('promo-bar-x-topbar');
 
         // Get settings
         $settings = get_option('aisk_settings', []);
@@ -110,7 +110,7 @@ class AISK_Scripts {
         // Add custom CSS if exists
         if ( ! empty($settings['misc']['custom_css']) ) {
             wp_add_inline_style(
-                'aisk-chat-widget-styles',
+                'promo-bar-x-topbar-styles',
                 esc_html( $settings['misc']['custom_css'] )
             );
         }
@@ -119,7 +119,7 @@ class AISK_Scripts {
         $settings = apply_filters('aisk_script_data', $frontend_settings);
 
         // Localize script
-        wp_localize_script('aisk-chat-widget', 'AiskData', $settings);
+        wp_localize_script('promo-bar-x-topbar', 'AiskData', $settings);
 
         return $settings;
     }
