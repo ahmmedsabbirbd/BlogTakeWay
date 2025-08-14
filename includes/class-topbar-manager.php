@@ -507,23 +507,59 @@ class PromoBarX_Manager {
         error_log('PromoBarX: Save request received');
         error_log('PromoBarX: POST data: ' . print_r($_POST, true));
         
-        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'promobarx_admin_nonce')) {
+            error_log('PromoBarX: Nonce verification failed');
+            wp_send_json_error('Security check failed. Please refresh the page and try again.');
+            return;
+        }
         
+        // Check user permissions
         if (!current_user_can('manage_options')) {
             error_log('PromoBarX: Unauthorized access attempt');
-            wp_die('Unauthorized');
+            wp_send_json_error('You do not have permission to perform this action.');
+            return;
+        }
+        
+        // Validate required fields
+        $required_fields = ['name', 'title'];
+        $missing_fields = [];
+        foreach ($required_fields as $field) {
+            if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+                $missing_fields[] = $field;
+            }
+        }
+        
+        if (!empty($missing_fields)) {
+            error_log('PromoBarX: Missing required fields: ' . implode(', ', $missing_fields));
+            wp_send_json_error('Please fill in all required fields: ' . implode(', ', $missing_fields));
+            return;
         }
         
         $data = $_POST;
         error_log('PromoBarX: Data to save: ' . print_r($data, true));
         
-        $result = $this->database->save_promo_bar($data);
-        error_log('PromoBarX: Save result: ' . print_r($result, true));
-        
-        if ($result) {
-            wp_send_json_success(['id' => $result]);
-        } else {
-            wp_send_json_error('Failed to save promo bar');
+        try {
+            $result = $this->database->save_promo_bar($data);
+            error_log('PromoBarX: Save result: ' . print_r($result, true));
+            
+            if ($result) {
+                wp_send_json_success(['id' => $result]);
+            } else {
+                // Get the last database error for debugging
+                global $wpdb;
+                $db_error = $wpdb->last_error;
+                error_log('PromoBarX: Database error: ' . $db_error);
+                
+                if (!empty($db_error)) {
+                    wp_send_json_error('Database error: ' . $db_error);
+                } else {
+                    wp_send_json_error('Failed to save promo bar. Please check the data and try again.');
+                }
+            }
+        } catch (Exception $e) {
+            error_log('PromoBarX: Exception during save: ' . $e->getMessage());
+            wp_send_json_error('An error occurred while saving: ' . $e->getMessage());
         }
     }
 

@@ -23,6 +23,46 @@ class PromoBarX_Database {
     }
 
     /**
+     * Test database connectivity and table existence
+     */
+    public function test_database_connection() {
+        error_log('PromoBarX Database: Testing database connection');
+        
+        // Test basic connectivity
+        $test_query = $this->wpdb->get_var("SELECT 1");
+        if ($test_query !== '1') {
+            error_log('PromoBarX Database: Basic connectivity test failed');
+            return false;
+        }
+        
+        // Test if promo_bars table exists
+        $table_exists = $this->wpdb->get_var(
+            $this->wpdb->prepare(
+                "SHOW TABLES LIKE %s",
+                $this->table_prefix . 'promo_bars'
+            )
+        );
+        
+        if (!$table_exists) {
+            error_log('PromoBarX Database: promo_bars table does not exist');
+            return false;
+        }
+        
+        // Test table structure
+        $columns = $this->wpdb->get_results(
+            "DESCRIBE {$this->table_prefix}promo_bars"
+        );
+        
+        if (empty($columns)) {
+            error_log('PromoBarX Database: Could not get table structure');
+            return false;
+        }
+        
+        error_log('PromoBarX Database: Database connection test passed');
+        return true;
+    }
+
+    /**
      * Create required database tables
      */
     public function create_tables() {
@@ -346,6 +386,19 @@ class PromoBarX_Database {
     public function save_promo_bar($data) {
         error_log('PromoBarX Database: Save method called with data: ' . print_r($data, true));
         
+        // Test database connection first
+        if (!$this->test_database_connection()) {
+            error_log('PromoBarX Database: Database connection test failed');
+            return false;
+        }
+        
+        // Validate and sanitize input data
+        $sanitized_data = $this->sanitize_promo_bar_data($data);
+        if (is_wp_error($sanitized_data)) {
+            error_log('PromoBarX Database: Data validation failed: ' . $sanitized_data->get_error_message());
+            return false;
+        }
+        
         $defaults = [
             'name' => '',
             'title' => '',
@@ -365,17 +418,30 @@ class PromoBarX_Database {
             'created_by' => get_current_user_id()
         ];
 
-        $data = wp_parse_args($data, $defaults);
+        $data = wp_parse_args($sanitized_data, $defaults);
         error_log('PromoBarX Database: Parsed data: ' . print_r($data, true));
+
+        // Ensure required fields are not empty
+        if (empty($data['name'])) {
+            error_log('PromoBarX Database: Name is required but empty');
+            return false;
+        }
 
         if (isset($data['id'])) {
             // Update existing
-            $id = $data['id'];
+            $id = intval($data['id']);
             unset($data['id']);
             $data['updated_at'] = current_time('mysql');
             
             error_log('PromoBarX Database: Updating existing promo bar with ID: ' . $id);
             error_log('PromoBarX Database: Update data: ' . print_r($data, true));
+            
+            // Check if promo bar exists
+            $existing = $this->get_promo_bar($id);
+            if (!$existing) {
+                error_log('PromoBarX Database: Promo bar with ID ' . $id . ' does not exist');
+                return false;
+            }
             
             $result = $this->wpdb->update(
                 $this->table_prefix . 'promo_bars',
@@ -386,7 +452,12 @@ class PromoBarX_Database {
             error_log('PromoBarX Database: Update result: ' . print_r($result, true));
             error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
             
-            return $result !== false ? $id : false;
+            if ($result === false) {
+                error_log('PromoBarX Database: Update failed with error: ' . $this->wpdb->last_error);
+                return false;
+            }
+            
+            return $id;
         } else {
             // Create new
             $data['created_at'] = current_time('mysql');
@@ -404,8 +475,84 @@ class PromoBarX_Database {
             error_log('PromoBarX Database: Insert ID: ' . $this->wpdb->insert_id);
             error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
             
-            return $result ? $this->wpdb->insert_id : false;
+            if ($result === false) {
+                error_log('PromoBarX Database: Insert failed with error: ' . $this->wpdb->last_error);
+                return false;
+            }
+            
+            return $this->wpdb->insert_id;
         }
+    }
+
+    /**
+     * Sanitize and validate promo bar data
+     */
+    private function sanitize_promo_bar_data($data) {
+        $sanitized = [];
+        
+        // Sanitize basic text fields
+        $text_fields = ['name', 'title', 'subtitle', 'cta_text', 'cta_url'];
+        foreach ($text_fields as $field) {
+            if (isset($data[$field])) {
+                $sanitized[$field] = sanitize_text_field($data[$field]);
+            }
+        }
+        
+        // Sanitize numeric fields
+        $numeric_fields = ['template_id', 'priority', 'created_by'];
+        foreach ($numeric_fields as $field) {
+            if (isset($data[$field])) {
+                $sanitized[$field] = intval($data[$field]);
+            }
+        }
+        
+        // Sanitize boolean fields
+        $boolean_fields = ['countdown_enabled', 'close_button_enabled'];
+        foreach ($boolean_fields as $field) {
+            if (isset($data[$field])) {
+                $sanitized[$field] = $data[$field] ? 1 : 0;
+            }
+        }
+        
+        // Sanitize status field
+        if (isset($data['status'])) {
+            $allowed_statuses = ['draft', 'active', 'paused', 'archived'];
+            $sanitized['status'] = in_array($data['status'], $allowed_statuses) ? $data['status'] : 'draft';
+        }
+        
+        // Sanitize date fields
+        if (isset($data['countdown_date']) && !empty($data['countdown_date'])) {
+            $sanitized['countdown_date'] = sanitize_text_field($data['countdown_date']);
+        }
+        
+        // Sanitize JSON fields
+        $json_fields = ['cta_style', 'countdown_style', 'close_button_style', 'styling'];
+        foreach ($json_fields as $field) {
+            if (isset($data[$field])) {
+                if (is_string($data[$field])) {
+                    // If it's already a JSON string, validate it
+                    $decoded = json_decode($data[$field], true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $sanitized[$field] = $data[$field];
+                    } else {
+                        error_log('PromoBarX Database: Invalid JSON in field ' . $field . ': ' . json_last_error_msg());
+                        $sanitized[$field] = json_encode([]);
+                    }
+                } elseif (is_array($data[$field])) {
+                    // If it's an array, encode it
+                    $sanitized[$field] = json_encode($data[$field]);
+                } else {
+                    $sanitized[$field] = json_encode([]);
+                }
+            }
+        }
+        
+        // Handle ID field for updates
+        if (isset($data['id'])) {
+            $sanitized['id'] = intval($data['id']);
+        }
+        
+        return $sanitized;
     }
 
     /**
