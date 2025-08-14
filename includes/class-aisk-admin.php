@@ -107,15 +107,7 @@ class AISK_Admin {
             [ $this, 'render_editor_page' ]
         );
 
-        // Add Settings submenu
-        add_submenu_page(
-            $this->plugin_slug,
-            esc_html__( 'Settings', 'promo-bar-x' ),
-            esc_html__( 'Settings', 'promo-bar-x' ),
-            'manage_options',
-            $this->plugin_slug . '-settings',
-            [ $this, 'render_settings_page' ]
-        );
+
 
         // Remove default submenu page
         remove_submenu_page($this->plugin_slug, $this->plugin_slug);
@@ -136,7 +128,6 @@ class AISK_Admin {
         // Check if we're on any of our plugin pages
         $allowed_hooks = [
             'toplevel_page_' . $this->plugin_slug,
-            $this->plugin_slug . '_page_' . $this->plugin_slug . '-settings',
             $this->plugin_slug . '_page_' . $this->plugin_slug . '-topbar-manager',
             $this->plugin_slug . '_page_' . $this->plugin_slug . '-editor',
         ];
