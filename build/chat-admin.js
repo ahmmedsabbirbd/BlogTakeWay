@@ -152,7 +152,7 @@
                 </div>
             </div>
         `}window.simpleTopBarManager={init:i,loadPromoBars:l,deletePromoBar:d,toggleStatus:p,createNew:u,editPromoBar:c,switchTab:s}})(),document.addEventListener("DOMContentLoaded",()=>{try{let e=function(c){const a=new URLSearchParams(window.location.search).get("id");console.log("Simple Editor: URL params:",window.location.search),console.log("Simple Editor: Promo bar ID from URL:",a),c.innerHTML=`
-                <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+                <div style="padding: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                         <h1 style="font-size: 24px; font-weight: 600; color: #111827;">
                             ${a?"Edit Promo Bar":"Create New Promo Bar"}
@@ -185,7 +185,15 @@
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <!-- Preview -->
+                        <div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                            <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #111827;">Live Preview</h2>
+                            <div id="promo-preview" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; min-height: 200px;">
+                                <div style="text-align: center; color: #64748b;">Preview will appear here</div>
+                            </div>
+                        </div>
+
                         <!-- Editor Form -->
                         <div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                             <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #111827;">Promo Bar Settings</h2>
@@ -275,14 +283,6 @@
                                     <option value="top">Top of Page</option>
                                     <option value="bottom">Bottom of Page</option>
                                 </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Preview -->
-                        <div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                            <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #111827;">Live Preview</h2>
-                            <div id="promo-preview" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; min-height: 200px;">
-                                <div style="text-align: center; color: #64748b;">Preview will appear here</div>
                             </div>
                         </div>
                     </div>
