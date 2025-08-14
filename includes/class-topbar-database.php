@@ -633,4 +633,104 @@ class PromoBarX_Database {
 
         return $this->wpdb->get_results($sql);
     }
+
+    /**
+     * Get assignments for a promo bar
+     */
+    public function get_assignments($promo_bar_id) {
+        $sql = $this->wpdb->prepare(
+            "SELECT * FROM {$this->table_prefix}promo_bar_assignments 
+            WHERE promo_bar_id = %d 
+            ORDER BY priority DESC, created_at ASC",
+            $promo_bar_id
+        );
+
+        return $this->wpdb->get_results($sql);
+    }
+
+    /**
+     * Save assignments for a promo bar
+     */
+    public function save_assignments($promo_bar_id, $assignments) {
+        // First, delete existing assignments
+        $this->wpdb->delete(
+            $this->table_prefix . 'promo_bar_assignments',
+            ['promo_bar_id' => $promo_bar_id],
+            ['%d']
+        );
+
+        // If no assignments provided, we're done
+        if (empty($assignments)) {
+            return true;
+        }
+
+        // Insert new assignments
+        $values = [];
+        $placeholders = [];
+
+        foreach ($assignments as $assignment) {
+            $values[] = $promo_bar_id;
+            $values[] = sanitize_text_field($assignment['assignment_type']);
+            $values[] = isset($assignment['target_id']) ? intval($assignment['target_id']) : 0;
+            $values[] = isset($assignment['target_value']) ? sanitize_text_field($assignment['target_value']) : '';
+            $values[] = isset($assignment['priority']) ? intval($assignment['priority']) : 0;
+            $values[] = current_time('mysql');
+            $values[] = current_time('mysql');
+
+            $placeholders[] = "(%d, %s, %d, %s, %d, %s, %s)";
+        }
+
+        $sql = "INSERT INTO {$this->table_prefix}promo_bar_assignments 
+                (promo_bar_id, assignment_type, target_id, target_value, priority, created_at, updated_at) 
+                VALUES " . implode(', ', $placeholders);
+
+        $result = $this->wpdb->query($this->wpdb->prepare($sql, $values));
+
+        return $result !== false;
+    }
+
+    /**
+     * Get assignment summary for a promo bar
+     */
+    public function get_assignment_summary($promo_bar_id) {
+        $assignments = $this->get_assignments($promo_bar_id);
+        $summary = [];
+
+        foreach ($assignments as $assignment) {
+            switch ($assignment->assignment_type) {
+                case 'global':
+                    $summary[] = 'All Pages';
+                    break;
+                case 'page':
+                    $post = get_post($assignment->target_id);
+                    if ($post) {
+                        $summary[] = 'Page: ' . $post->post_title;
+                    }
+                    break;
+                case 'post_type':
+                    $post_type_obj = get_post_type_object($assignment->target_value);
+                    if ($post_type_obj) {
+                        $summary[] = 'All ' . $post_type_obj->labels->name;
+                    }
+                    break;
+                case 'category':
+                    $term = get_term($assignment->target_id, 'category');
+                    if ($term && !is_wp_error($term)) {
+                        $summary[] = 'Category: ' . $term->name;
+                    }
+                    break;
+                case 'tag':
+                    $term = get_term($assignment->target_id, 'post_tag');
+                    if ($term && !is_wp_error($term)) {
+                        $summary[] = 'Tag: ' . $term->name;
+                    }
+                    break;
+                case 'custom':
+                    $summary[] = 'Custom: ' . $assignment->target_value;
+                    break;
+            }
+        }
+
+        return $summary;
+    }
 }

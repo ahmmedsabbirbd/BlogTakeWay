@@ -46,6 +46,13 @@ class PromoBarX_Manager {
         add_action('wp_ajax_promobarx_get_promo_bars', [$this, 'ajax_get_promo_bars']);
         add_action('wp_ajax_promobarx_get_promo_bar', [$this, 'ajax_get_promo_bar']);
         add_action('wp_ajax_promobarx_get_templates', [$this, 'ajax_get_templates']);
+        
+        // Page assignment AJAX handlers
+        add_action('wp_ajax_promobarx_get_pages', [$this, 'ajax_get_pages']);
+        add_action('wp_ajax_promobarx_get_post_types', [$this, 'ajax_get_post_types']);
+        add_action('wp_ajax_promobarx_get_taxonomies', [$this, 'ajax_get_taxonomies']);
+        add_action('wp_ajax_promobarx_get_assignments', [$this, 'ajax_get_assignments']);
+        add_action('wp_ajax_promobarx_save_assignments', [$this, 'ajax_save_assignments']);
     }
 
     /**
@@ -656,5 +663,150 @@ class PromoBarX_Manager {
         $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
         $templates = $this->database->get_templates($category);
         wp_send_json_success($templates);
+    }
+
+    /**
+     * AJAX get available pages and posts
+     */
+    public function ajax_get_pages() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : 'page';
+        
+        $args = [
+            'post_type' => $post_type,
+            'post_status' => 'publish',
+            'posts_per_page' => 50,
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ];
+        
+        if (!empty($search)) {
+            $args['s'] = $search;
+        }
+        
+        $posts = get_posts($args);
+        $pages = [];
+        
+        foreach ($posts as $post) {
+            $pages[] = [
+                'id' => $post->ID,
+                'title' => $post->post_title,
+                'type' => $post->post_type,
+                'url' => get_permalink($post->ID)
+            ];
+        }
+        
+        wp_send_json_success($pages);
+    }
+
+    /**
+     * AJAX get post types
+     */
+    public function ajax_get_post_types() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $post_types = get_post_types(['public' => true], 'objects');
+        $types = [];
+        
+        foreach ($post_types as $post_type) {
+            $types[] = [
+                'name' => $post_type->name,
+                'label' => $post_type->labels->name,
+                'singular_label' => $post_type->labels->singular_name
+            ];
+        }
+        
+        wp_send_json_success($types);
+    }
+
+    /**
+     * AJAX get categories and tags
+     */
+    public function ajax_get_taxonomies() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $taxonomy = isset($_POST['taxonomy']) ? sanitize_text_field($_POST['taxonomy']) : 'category';
+        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        
+        $args = [
+            'taxonomy' => $taxonomy,
+            'hide_empty' => false,
+            'number' => 50,
+            'orderby' => 'name',
+            'order' => 'ASC'
+        ];
+        
+        if (!empty($search)) {
+            $args['name__like'] = $search;
+        }
+        
+        $terms = get_terms($args);
+        $taxonomies = [];
+        
+        foreach ($terms as $term) {
+            $taxonomies[] = [
+                'id' => $term->term_id,
+                'name' => $term->name,
+                'slug' => $term->slug,
+                'taxonomy' => $term->taxonomy
+            ];
+        }
+        
+        wp_send_json_success($taxonomies);
+    }
+
+    /**
+     * AJAX get assignments for a promo bar
+     */
+    public function ajax_get_assignments() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $promo_bar_id = intval($_POST['promo_bar_id']);
+        $assignments = $this->database->get_assignments($promo_bar_id);
+        wp_send_json_success($assignments);
+    }
+
+    /**
+     * AJAX save assignments for a promo bar
+     */
+    public function ajax_save_assignments() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $promo_bar_id = intval($_POST['promo_bar_id']);
+        $assignments = isset($_POST['assignments']) ? $_POST['assignments'] : [];
+        
+        if (!is_array($assignments)) {
+            wp_send_json_error('Invalid assignments data');
+        }
+        
+        $result = $this->database->save_assignments($promo_bar_id, $assignments);
+        
+        if ($result) {
+            wp_send_json_success('Assignments saved successfully');
+        } else {
+            wp_send_json_error('Failed to save assignments');
+        }
     }
 }

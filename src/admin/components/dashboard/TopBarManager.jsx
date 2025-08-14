@@ -286,6 +286,9 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                                 Status
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Assignments
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Priority
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -311,6 +314,9 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     {getStatusBadge(promoBar.status)}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    <AssignmentSummary promoBarId={promoBar.id} />
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     {promoBar.priority}
@@ -444,6 +450,88 @@ const QuickTemplatesTab = ({ onTemplateSelect }) => {
                     ))}
                 </div>
             </div>
+        </div>
+    );
+};
+
+// Assignment Summary Component
+const AssignmentSummary = ({ promoBarId }) => {
+    const [assignments, setAssignments] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        loadAssignments();
+    }, [promoBarId]);
+
+    const loadAssignments = async () => {
+        console.log('AssignmentSummary: Loading assignments for promo bar:', promoBarId);
+        
+        try {
+            const body = `action=promobarx_get_assignments&promo_bar_id=${promoBarId}&nonce=${window.promobarxAdmin.nonce}`;
+            console.log('AssignmentSummary: Request body:', body);
+            
+            const response = await fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: body
+            });
+            
+            const data = await response.json();
+            console.log('AssignmentSummary: Response:', data);
+            
+            if (data.success) {
+                setAssignments(data.data || []);
+            } else {
+                console.error('AssignmentSummary: Failed to load assignments:', data);
+            }
+        } catch (error) {
+            console.error('AssignmentSummary: Error loading assignments:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return <span className="text-gray-400">Loading...</span>;
+    }
+
+    if (assignments.length === 0) {
+        return <span className="text-gray-400">No assignments</span>;
+    }
+
+    const getAssignmentLabel = (assignment) => {
+        switch (assignment.assignment_type) {
+            case 'global':
+                return 'All Pages';
+            case 'page':
+                return `Page: ${assignment.target_value || 'Unknown'}`;
+            case 'post_type':
+                return `All ${assignment.target_value || 'Posts'}`;
+            case 'category':
+                return `Category: ${assignment.target_value || 'Unknown'}`;
+            case 'tag':
+                return `Tag: ${assignment.target_value || 'Unknown'}`;
+            case 'custom':
+                return `Custom: ${assignment.target_value || 'Unknown'}`;
+            default:
+                return 'Unknown';
+        }
+    };
+
+    return (
+        <div className="space-y-1">
+            {assignments.slice(0, 2).map((assignment, index) => (
+                <div key={assignment.id || index} className="text-xs">
+                    {getAssignmentLabel(assignment)}
+                </div>
+            ))}
+            {assignments.length > 2 && (
+                <div className="text-xs text-gray-400">
+                    +{assignments.length - 2} more
+                </div>
+            )}
         </div>
     );
 };

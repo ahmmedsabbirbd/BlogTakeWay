@@ -166,6 +166,53 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <option value="bottom">Bottom of Page</option>
                                 </select>
                             </div>
+                            
+                            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+                            
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Page Assignment</h3>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Show on Pages</label>
+                                <select id="promo-assignment-type" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="global">All Pages (Global)</option>
+                                    <option value="specific">Specific Pages</option>
+                                    <option value="post_type">All Posts/Pages</option>
+                                    <option value="category">Specific Categories</option>
+                                    <option value="custom">Custom URL Pattern</option>
+                                </select>
+                            </div>
+                            
+                            <div id="assignment-options" style="display: none;">
+                                <div id="specific-pages-option" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Search Pages</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="text" id="page-search" placeholder="Search pages..." style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                        <button onclick="searchPages()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Search</button>
+                                    </div>
+                                    <div id="page-results" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+                                </div>
+                                
+                                <div id="category-option" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Select Categories</label>
+                                    <div id="category-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 6px; padding: 10px;"></div>
+                                </div>
+                                
+                                <div id="custom-url-option" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">URL Pattern</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="text" id="custom-url-pattern" placeholder="e.g., /shop/*, /blog/2024/*" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                        <button onclick="addCustomUrlPattern()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Add Pattern</button>
+                                    </div>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Use * for wildcards. Example: /shop/* will match all shop pages</p>
+                                </div>
+                            </div>
+                            
+                            <div id="current-assignments" style="margin-top: 20px;">
+                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #111827;">Current Assignments</h4>
+                                <div id="assignments-list" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; min-height: 50px;">
+                                    <div style="text-align: center; color: #6b7280; font-size: 14px;">No assignments yet</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -211,9 +258,211 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
+            // Page assignment events
+            const assignmentType = document.getElementById('promo-assignment-type');
+            if (assignmentType) {
+                assignmentType.addEventListener('change', handleAssignmentTypeChange);
+            }
+            
+            // Load categories on page load
+            loadCategories();
+            
             // Initial preview
             updatePreview();
         }
+        
+        // Page assignment functions
+        let currentAssignments = [];
+        
+        function handleAssignmentTypeChange() {
+            const assignmentType = document.getElementById('promo-assignment-type').value;
+            const assignmentOptions = document.getElementById('assignment-options');
+            const specificPagesOption = document.getElementById('specific-pages-option');
+            const categoryOption = document.getElementById('category-option');
+            const customUrlOption = document.getElementById('custom-url-option');
+            
+            // Hide all options first
+            specificPagesOption.style.display = 'none';
+            categoryOption.style.display = 'none';
+            customUrlOption.style.display = 'none';
+            assignmentOptions.style.display = 'none';
+            
+            if (assignmentType === 'global') {
+                // Add global assignment
+                addAssignment('global', { value: 'All Pages' });
+            } else if (assignmentType === 'specific') {
+                assignmentOptions.style.display = 'block';
+                specificPagesOption.style.display = 'block';
+            } else if (assignmentType === 'post_type') {
+                addAssignment('post_type', { value: 'post' });
+            } else if (assignmentType === 'category') {
+                assignmentOptions.style.display = 'block';
+                categoryOption.style.display = 'block';
+            } else if (assignmentType === 'custom') {
+                assignmentOptions.style.display = 'block';
+                customUrlOption.style.display = 'block';
+            }
+        }
+        
+        function addAssignment(type, data) {
+            const assignment = {
+                id: Date.now(),
+                assignment_type: type,
+                target_id: data.id || 0,
+                target_value: data.value || data.name || '',
+                priority: currentAssignments.length + 1
+            };
+            
+            currentAssignments.push(assignment);
+            updateAssignmentsList();
+        }
+        
+        function removeAssignment(id) {
+            currentAssignments = currentAssignments.filter(a => a.id !== id);
+            updateAssignmentsList();
+        }
+        
+        function updateAssignmentsList() {
+            const assignmentsList = document.getElementById('assignments-list');
+            if (!assignmentsList) return;
+            
+            if (currentAssignments.length === 0) {
+                assignmentsList.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 14px;">No assignments yet</div>';
+                return;
+            }
+            
+            assignmentsList.innerHTML = currentAssignments.map(assignment => {
+                const label = getAssignmentLabel(assignment);
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 8px;">
+                        <span style="font-size: 14px; color: #374151;">${label}</span>
+                        <button onclick="removeAssignment(${assignment.id})" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px;">×</button>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getAssignmentLabel(assignment) {
+            switch (assignment.assignment_type) {
+                case 'global':
+                    return '🌐 All Pages';
+                case 'page':
+                    return `📄 Page: ${assignment.target_value}`;
+                case 'post_type':
+                    return `📝 All ${assignment.target_value}s`;
+                case 'category':
+                    return `🏷️ Category: ${assignment.target_value}`;
+                case 'tag':
+                    return `🏷️ Tag: ${assignment.target_value}`;
+                case 'custom':
+                    return `🔗 Custom: ${assignment.target_value}`;
+                default:
+                    return 'Unknown Assignment';
+            }
+        }
+        
+        function searchPages() {
+            const searchTerm = document.getElementById('page-search').value;
+            if (!searchTerm.trim()) return;
+            
+            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl) {
+                alert('Admin data not available');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'promobarx_get_pages');
+            formData.append('search', searchTerm);
+            formData.append('nonce', window.promobarxAdmin.nonce);
+            
+            fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayPageResults(data.data);
+                } else {
+                    alert('Error searching pages: ' + (data.data || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error searching pages:', error);
+                alert('Error searching pages');
+            });
+        }
+        
+        function displayPageResults(pages) {
+            const resultsContainer = document.getElementById('page-results');
+            if (!resultsContainer) return;
+            
+            if (pages.length === 0) {
+                resultsContainer.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No pages found</div>';
+                return;
+            }
+            
+            resultsContainer.innerHTML = pages.map(page => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 8px; background: white;">
+                    <div>
+                        <div style="font-weight: 500; color: #111827;">${page.title}</div>
+                        <div style="font-size: 12px; color: #6b7280;">${page.type} • ${page.url}</div>
+                    </div>
+                    <button onclick="addAssignment('page', { id: ${page.id}, value: '${page.title}' })" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Add</button>
+                </div>
+            `).join('');
+        }
+        
+        function loadCategories() {
+            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl) return;
+            
+            const formData = new FormData();
+            formData.append('action', 'promobarx_get_taxonomies');
+            formData.append('taxonomy', 'category');
+            formData.append('nonce', window.promobarxAdmin.nonce);
+            
+            fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayCategories(data.data);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading categories:', error);
+            });
+        }
+        
+        function displayCategories(categories) {
+            const categoryList = document.getElementById('category-list');
+            if (!categoryList) return;
+            
+            categoryList.innerHTML = categories.map(category => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #e5e7eb;">
+                    <span style="font-size: 14px; color: #374151;">${category.name}</span>
+                    <button onclick="addAssignment('category', { id: ${category.id}, value: '${category.name}' })" style="padding: 4px 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Add</button>
+                </div>
+            `).join('');
+        }
+        
+        // Make functions globally accessible
+        window.searchPages = searchPages;
+        window.addAssignment = addAssignment;
+        window.removeAssignment = removeAssignment;
+        
+        // Add custom URL pattern handler
+        window.addCustomUrlPattern = function() {
+            const pattern = document.getElementById('custom-url-pattern').value.trim();
+            if (pattern) {
+                addAssignment('custom', { value: pattern });
+                document.getElementById('custom-url-pattern').value = '';
+            } else {
+                alert('Please enter a URL pattern');
+            }
+        };
         
         function updatePreview() {
             const preview = document.getElementById('promo-preview');
@@ -288,7 +537,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 cta_style: JSON.stringify({
                     background: document.getElementById('promo-cta-color')?.value || '#ffffff',
                     color: document.getElementById('promo-bg-color')?.value || '#3b82f6'
-                })
+                }),
+                assignments: JSON.stringify(currentAssignments)
             };
             
             // Add ID if editing existing promo bar
@@ -480,6 +730,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         updatePreview(); // Update preview with loaded data
+                        
+                        // Load assignments if they exist
+                        if (promoBar.assignments) {
+                            try {
+                                const assignments = typeof promoBar.assignments === 'string' ? JSON.parse(promoBar.assignments) : promoBar.assignments;
+                                currentAssignments = assignments;
+                                updateAssignmentsList();
+                            } catch (e) {
+                                console.error('Error parsing assignments:', e);
+                            }
+                        }
                         
                         console.log('Successfully loaded promo bar data:', promoBar);
                     } else {
