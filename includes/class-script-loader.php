@@ -71,7 +71,7 @@ class AISK_Scripts {
                 'widget_greeting' => isset($settings['chatwidget']['widget_greeting']) && "" !== $settings['chatwidget']['widget_greeting'] ? $settings['chatwidget']['widget_greeting'] : 'Hi there! How can I help you?',
                 'widget_placeholder' => isset($settings['chatwidget']['widget_placeholder']) && "" !== $settings['chatwidget']['widget_placeholder'] ? $settings['chatwidget']['widget_placeholder'] : 'Type your message...',
                 'widget_title' => isset($settings['chatwidget']['widget_title']) ? $settings['chatwidget']['widget_title'] : '',
-                'widget_subtitle' => isset($settings['chatwidget']['widget_subtitle']) ? $settings['chatwidget']['widget_subtitle'] : '',
+    
                 'bubble_type' => isset($settings['chatwidget']['bubble_type']) ? $settings['chatwidget']['bubble_type'] : 'default',
                 'default_message' => isset($settings['chatwidget']['default_message']) ? $settings['chatwidget']['default_message'] : 'Hey, need help? 👋',
                 'rolling_messages' => isset($settings['chatwidget']['rolling_messages']) ? $settings['chatwidget']['rolling_messages'] : [

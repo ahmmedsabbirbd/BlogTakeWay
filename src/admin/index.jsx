@@ -94,12 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Title</label>
                                 <input type="text" id="promo-title" placeholder="Enter main title" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                             </div>
-                            
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Subtitle</label>
-                                <input type="text" id="promo-subtitle" placeholder="Enter subtitle (optional)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                            </div>
-                            
+                                                      
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Button Text</label>
                                 <input type="text" id="promo-cta-text" placeholder="e.g., Shop Now" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
@@ -199,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Real-time preview updates
-            const inputs = ['promo-name', 'promo-title', 'promo-subtitle', 'promo-cta-text', 'promo-cta-url'];
+            const inputs = ['promo-name', 'promo-title', 'promo-cta-text', 'promo-cta-url'];
             inputs.forEach(id => {
                 const input = document.getElementById(id);
                 if (input) {
@@ -225,7 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!preview) return;
             
             const title = document.getElementById('promo-title')?.value || 'Sample Title';
-            const subtitle = document.getElementById('promo-subtitle')?.value || '';
             const ctaText = document.getElementById('promo-cta-text')?.value || 'Shop Now';
             const countdownEnabled = document.getElementById('promo-countdown-enabled')?.checked || false;
             const closeEnabled = document.getElementById('promo-close-enabled')?.checked || false;
@@ -242,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
                         <div>
                             <div style="font-weight: 600;">${title}</div>
-                            ${subtitle ? `<div style="font-size: 0.85em; opacity: 0.9; margin-top: 2px;">${subtitle}</div>` : ''}
                         </div>
                         ${countdownEnabled ? '<div style="font-weight: 600; font-family: monospace; font-size: 0.85em;">23:59:59</div>' : ''}
                         <a href="#" style="background: ${ctaColor}; color: ${bgColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 0.85em;">${ctaText}</a>
@@ -280,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = {
                 name: name,
                 title: title,
-                subtitle: document.getElementById('promo-subtitle')?.value || '',
                 cta_text: document.getElementById('promo-cta-text')?.value || '',
                 cta_url: document.getElementById('promo-cta-url')?.value || '',
                 countdown_enabled: document.getElementById('promo-countdown-enabled')?.checked || false,
@@ -360,7 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const testData = {
                 name: 'Test Promo Bar',
                 title: 'Test Title',
-                subtitle: 'Test Subtitle',
                 cta_text: 'Test Button',
                 cta_url: 'https://example.com',
                 status: 'draft'
@@ -468,7 +459,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Fill form fields
                         document.getElementById('promo-name').value = promoBar.name || '';
                         document.getElementById('promo-title').value = promoBar.title || '';
-                        document.getElementById('promo-subtitle').value = promoBar.subtitle || '';
                         document.getElementById('promo-cta-text').value = promoBar.cta_text || '';
                         document.getElementById('promo-cta-url').value = promoBar.cta_url || '';
                         document.getElementById('promo-countdown-enabled').checked = Boolean(promoBar.countdown_enabled);

@@ -44,7 +44,7 @@ const SettingsApp = () => {
             widget_greeting: '',
             widget_placeholder: '',
             widget_title: '',
-            widget_subtitle: '',
+    
         },
         ai_config: {
             woocommerce_enabled: false,

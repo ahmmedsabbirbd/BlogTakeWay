@@ -288,10 +288,6 @@ class PromoBarX_Manager {
                     <div class="promobarx-title"><?php echo esc_html($promo_bar->title); ?></div>
                 <?php endif; ?>
                 
-                <?php if (!empty($promo_bar->subtitle)): ?>
-                    <div class="promobarx-subtitle"><?php echo esc_html($promo_bar->subtitle); ?></div>
-                <?php endif; ?>
-                
                 <?php if ($promo_bar->countdown_enabled && !empty($promo_bar->countdown_end_date)): ?>
                     <div class="promobarx-countdown" style="<?php echo esc_attr($countdown_styles); ?>" data-end="<?php echo esc_attr($promo_bar->countdown_end_date); ?>">
                         <span class="countdown-days">00</span>d 
@@ -346,10 +342,6 @@ class PromoBarX_Manager {
         
         .promobarx-title {
             font-weight: 600;
-        }
-        
-        .promobarx-subtitle {
-            opacity: 0.9;
         }
         
         .promobarx-countdown {

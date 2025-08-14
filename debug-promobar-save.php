@@ -68,7 +68,6 @@ if ($table_exists) {
     $test_data = [
         'name' => 'Test Promo Bar ' . time(),
         'title' => 'Test Title',
-        'subtitle' => 'Test Subtitle',
         'cta_text' => 'Test CTA',
         'cta_url' => 'https://example.com',
         'cta_style' => json_encode(['background' => '#000000']),
@@ -99,7 +98,6 @@ if (class_exists('PromoBarX_Database')) {
     $test_data = [
         'name' => 'Test Save Method ' . time(),
         'title' => 'Test Title',
-        'subtitle' => 'Test Subtitle',
         'cta_text' => 'Test CTA',
         'cta_url' => 'https://example.com',
         'styling' => json_encode(['background' => '#ffffff']),

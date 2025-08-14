@@ -78,7 +78,6 @@ class PromoBarX_Database {
             id bigint(20) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
             title varchar(500),
-            subtitle varchar(500),
             cta_text varchar(255),
             cta_url varchar(500),
             cta_style JSON,
@@ -269,7 +268,6 @@ class PromoBarX_Database {
             $default_promo_bar = [
                 'name' => 'Welcome Promo Bar',
                 'title' => '🎉 Welcome to ' . get_bloginfo('name') . '!',
-                'subtitle' => 'Discover amazing products and exclusive offers',
                 'cta_text' => 'Explore Now',
                 'cta_url' => home_url('/'),
                 'cta_style' => json_encode([
@@ -411,7 +409,6 @@ class PromoBarX_Database {
         $defaults = [
             'name' => '',
             'title' => '',
-            'subtitle' => '',
             'cta_text' => '',
             'cta_url' => '',
             'cta_style' => json_encode([]),
@@ -500,7 +497,7 @@ class PromoBarX_Database {
         $sanitized = [];
         
         // Sanitize basic text fields
-        $text_fields = ['name', 'title', 'subtitle', 'cta_text', 'cta_url'];
+        $text_fields = ['name', 'title', 'cta_text', 'cta_url'];
         foreach ($text_fields as $field) {
             if (isset($data[$field])) {
                 $sanitized[$field] = sanitize_text_field($data[$field]);

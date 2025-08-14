@@ -369,7 +369,7 @@ const QuickTemplatesTab = ({ onTemplateSelect }) => {
         {
             name: 'Minimal Promo Bar',
             title: 'Special Offer',
-            subtitle: 'Get 20% off on all products',
+
             cta_text: 'Shop Now',
             cta_url: '#',
             styling: {
@@ -385,7 +385,7 @@ const QuickTemplatesTab = ({ onTemplateSelect }) => {
         {
             name: 'Bold Promo Bar',
             title: 'Flash Sale!',
-            subtitle: 'Limited time offer - 50% off',
+
             cta_text: 'Buy Now',
             cta_url: '#',
             styling: {
@@ -401,7 +401,7 @@ const QuickTemplatesTab = ({ onTemplateSelect }) => {
         {
             name: 'E-commerce Promo Bar',
             title: 'Free Shipping',
-            subtitle: 'On orders over $50',
+
             cta_text: 'Shop Now',
             cta_url: '#',
             styling: {

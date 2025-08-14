@@ -6,7 +6,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
     const [formData, setFormData] = useState({
         name: '',
         title: '',
-        subtitle: '',
         cta_text: '',
         cta_url: '',
         countdown_enabled: false,
@@ -123,7 +122,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 ...formData,
                 name: promoBar.name || '',
                 title: promoBar.title || '',
-                subtitle: promoBar.subtitle || '',
                 cta_text: promoBar.cta_text || '',
                 cta_url: promoBar.cta_url || '',
                 countdown_enabled: Boolean(promoBar.countdown_enabled),
@@ -367,19 +365,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                                             onChange={(e) => handleInputChange('title', e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             placeholder="Enter main title"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Subtitle
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.subtitle}
-                                            onChange={(e) => handleInputChange('subtitle', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Enter subtitle (optional)"
                                         />
                                     </div>
 
@@ -651,11 +636,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                                         {formData.title && (
                                             <div className="font-semibold">{formData.title}</div>
                                         )}
-                                        
-                                        {formData.subtitle && (
-                                            <div className="opacity-90">{formData.subtitle}</div>
-                                        )}
-                                        
+
                                         {formData.countdown_enabled && formData.countdown_date && (
                                             <div 
                                                 className="font-mono font-semibold"

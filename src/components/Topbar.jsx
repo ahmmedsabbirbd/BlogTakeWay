@@ -83,10 +83,6 @@ const Topbar = React.forwardRef((props, ref) => {
                     <div className="promobarx-title">{promoBar.title}</div>
                 )}
                 
-                {promoBar.subtitle && (
-                    <div className="promobarx-subtitle">{promoBar.subtitle}</div>
-                )}
-                
                 {promoBar.countdown_enabled && promoBar.countdown_date && (
                     <div 
                         className="promobarx-countdown"
