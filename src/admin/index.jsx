@@ -184,17 +184,27 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             <div id="assignment-options" style="display: none;">
                                 <div id="specific-pages-option" style="display: none; margin-bottom: 20px;">
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Search Pages</label>
-                                    <div style="display: flex; gap: 10px;">
-                                        <input type="text" id="page-search" placeholder="Search pages..." style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                        <button onclick="searchPages()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Search</button>
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Select Pages</label>
+                                    <div style="margin-bottom: 10px;">
+                                        <button onclick="selectAllPages()" style="padding: 8px 16px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 10px;">Select All Pages</button>
+                                        <button onclick="clearPageSelection()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Clear Selection</button>
                                     </div>
-                                    <div id="page-results" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+                                    <select id="pages-dropdown" multiple style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; min-height: 200px;">
+                                        <option value="" disabled>Loading pages...</option>
+                                    </select>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Hold Ctrl (or Cmd on Mac) to select multiple pages</p>
                                 </div>
                                 
                                 <div id="category-option" style="display: none; margin-bottom: 20px;">
                                     <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Select Categories</label>
-                                    <div id="category-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 6px; padding: 10px;"></div>
+                                    <div style="margin-bottom: 10px;">
+                                        <button onclick="selectAllCategories()" style="padding: 8px 16px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 10px;">Select All Categories</button>
+                                        <button onclick="clearCategorySelection()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Clear Selection</button>
+                                    </div>
+                                    <select id="categories-dropdown" multiple style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; min-height: 200px;">
+                                        <option value="" disabled>Loading categories...</option>
+                                    </select>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Hold Ctrl (or Cmd on Mac) to select multiple categories</p>
                                 </div>
                                 
                                 <div id="custom-url-option" style="display: none; margin-bottom: 20px;">
@@ -293,11 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (assignmentType === 'specific') {
                 assignmentOptions.style.display = 'block';
                 specificPagesOption.style.display = 'block';
+                loadAllPages();
             } else if (assignmentType === 'post_type') {
                 addAssignment('post_type', { value: 'post' });
             } else if (assignmentType === 'category') {
                 assignmentOptions.style.display = 'block';
                 categoryOption.style.display = 'block';
+                loadAllCategories();
             } else if (assignmentType === 'custom') {
                 assignmentOptions.style.display = 'block';
                 customUrlOption.style.display = 'block';
@@ -361,18 +373,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        function searchPages() {
-            const searchTerm = document.getElementById('page-search').value;
-            if (!searchTerm.trim()) return;
+
+        
+        function loadAllPages() {
+            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl) return;
             
-            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl) {
-                alert('Admin data not available');
-                return;
-            }
+            const pagesDropdown = document.getElementById('pages-dropdown');
+            if (!pagesDropdown) return;
+            
+            pagesDropdown.innerHTML = '<option value="" disabled>Loading pages...</option>';
             
             const formData = new FormData();
             formData.append('action', 'promobarx_get_pages');
-            formData.append('search', searchTerm);
             formData.append('nonce', window.promobarxAdmin.nonce);
             
             fetch(window.promobarxAdmin.ajaxurl, {
@@ -382,39 +394,52 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    displayPageResults(data.data);
+                    displayPagesDropdown(data.data);
                 } else {
-                    alert('Error searching pages: ' + (data.data || 'Unknown error'));
+                    pagesDropdown.innerHTML = '<option value="" disabled>Error loading pages</option>';
                 }
             })
             .catch(error => {
-                console.error('Error searching pages:', error);
-                alert('Error searching pages');
+                console.error('Error loading pages:', error);
+                pagesDropdown.innerHTML = '<option value="" disabled>Error loading pages</option>';
             });
         }
         
-        function displayPageResults(pages) {
-            const resultsContainer = document.getElementById('page-results');
-            if (!resultsContainer) return;
+        function displayPagesDropdown(pages) {
+            const pagesDropdown = document.getElementById('pages-dropdown');
+            if (!pagesDropdown) return;
             
-            if (pages.length === 0) {
-                resultsContainer.innerHTML = '<div style="text-align: center; color: #6b7280; padding: 20px;">No pages found</div>';
-                return;
-            }
+            pagesDropdown.innerHTML = pages.map(page => 
+                `<option value="${page.id}" data-title="${page.title}">${page.title} (${page.type})</option>`
+            ).join('');
             
-            resultsContainer.innerHTML = pages.map(page => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 8px; background: white;">
-                    <div>
-                        <div style="font-weight: 500; color: #111827;">${page.title}</div>
-                        <div style="font-size: 12px; color: #6b7280;">${page.type} • ${page.url}</div>
-                    </div>
-                    <button onclick="addAssignment('page', { id: ${page.id}, value: '${page.title}' })" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Add</button>
-                </div>
-            `).join('');
+            // Add change event listener to handle selections
+            pagesDropdown.addEventListener('change', handlePageSelection);
         }
         
-        function loadCategories() {
+        function handlePageSelection() {
+            const pagesDropdown = document.getElementById('pages-dropdown');
+            const selectedOptions = Array.from(pagesDropdown.selectedOptions);
+            
+            // Remove existing page assignments
+            currentAssignments = currentAssignments.filter(a => a.assignment_type !== 'page');
+            
+            // Add new page assignments
+            selectedOptions.forEach(option => {
+                addAssignment('page', { 
+                    id: parseInt(option.value), 
+                    value: option.getAttribute('data-title') || option.text 
+                });
+            });
+        }
+        
+        function loadAllCategories() {
             if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl) return;
+            
+            const categoriesDropdown = document.getElementById('categories-dropdown');
+            if (!categoriesDropdown) return;
+            
+            categoriesDropdown.innerHTML = '<option value="" disabled>Loading categories...</option>';
             
             const formData = new FormData();
             formData.append('action', 'promobarx_get_taxonomies');
@@ -428,28 +453,56 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    displayCategories(data.data);
+                    displayCategoriesDropdown(data.data);
+                } else {
+                    categoriesDropdown.innerHTML = '<option value="" disabled>Error loading categories</option>';
                 }
             })
             .catch(error => {
                 console.error('Error loading categories:', error);
+                categoriesDropdown.innerHTML = '<option value="" disabled>Error loading categories</option>';
             });
         }
         
-        function displayCategories(categories) {
-            const categoryList = document.getElementById('category-list');
-            if (!categoryList) return;
+        function displayCategoriesDropdown(categories) {
+            const categoriesDropdown = document.getElementById('categories-dropdown');
+            if (!categoriesDropdown) return;
             
-            categoryList.innerHTML = categories.map(category => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #e5e7eb;">
-                    <span style="font-size: 14px; color: #374151;">${category.name}</span>
-                    <button onclick="addAssignment('category', { id: ${category.id}, value: '${category.name}' })" style="padding: 4px 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Add</button>
-                </div>
-            `).join('');
+            categoriesDropdown.innerHTML = categories.map(category => 
+                `<option value="${category.id}" data-name="${category.name}">${category.name}</option>`
+            ).join('');
+            
+            // Add change event listener to handle selections
+            categoriesDropdown.addEventListener('change', handleCategorySelection);
+        }
+        
+        function handleCategorySelection() {
+            const categoriesDropdown = document.getElementById('categories-dropdown');
+            const selectedOptions = Array.from(categoriesDropdown.selectedOptions);
+            
+            // Remove existing category assignments
+            currentAssignments = currentAssignments.filter(a => a.assignment_type !== 'category');
+            
+            // Add new category assignments
+            selectedOptions.forEach(option => {
+                addAssignment('category', { 
+                    id: parseInt(option.value), 
+                    value: option.getAttribute('data-name') || option.text 
+                });
+            });
+        }
+        
+        function loadCategories() {
+            // This function is kept for backward compatibility
+            loadAllCategories();
+        }
+        
+        function displayCategories(categories) {
+            // This function is kept for backward compatibility
+            displayCategoriesDropdown(categories);
         }
         
         // Make functions globally accessible
-        window.searchPages = searchPages;
         window.addAssignment = addAssignment;
         window.removeAssignment = removeAssignment;
         
@@ -462,6 +515,61 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 alert('Please enter a URL pattern');
             }
+        };
+        
+        // Select All functions
+        window.selectAllPages = function() {
+            const pagesDropdown = document.getElementById('pages-dropdown');
+            if (!pagesDropdown) return;
+            
+            // Select all options
+            Array.from(pagesDropdown.options).forEach(option => {
+                option.selected = true;
+            });
+            
+            // Trigger the change event
+            handlePageSelection();
+        };
+        
+        window.clearPageSelection = function() {
+            const pagesDropdown = document.getElementById('pages-dropdown');
+            if (!pagesDropdown) return;
+            
+            // Clear all selections
+            Array.from(pagesDropdown.options).forEach(option => {
+                option.selected = false;
+            });
+            
+            // Remove all page assignments
+            currentAssignments = currentAssignments.filter(a => a.assignment_type !== 'page');
+            updateAssignmentsList();
+        };
+        
+        window.selectAllCategories = function() {
+            const categoriesDropdown = document.getElementById('categories-dropdown');
+            if (!categoriesDropdown) return;
+            
+            // Select all options
+            Array.from(categoriesDropdown.options).forEach(option => {
+                option.selected = true;
+            });
+            
+            // Trigger the change event
+            handleCategorySelection();
+        };
+        
+        window.clearCategorySelection = function() {
+            const categoriesDropdown = document.getElementById('categories-dropdown');
+            if (!categoriesDropdown) return;
+            
+            // Clear all selections
+            Array.from(categoriesDropdown.options).forEach(option => {
+                option.selected = false;
+            });
+            
+            // Remove all category assignments
+            currentAssignments = currentAssignments.filter(a => a.assignment_type !== 'category');
+            updateAssignmentsList();
         };
         
         function updatePreview() {
