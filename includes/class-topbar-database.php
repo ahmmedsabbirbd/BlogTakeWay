@@ -372,12 +372,21 @@ class PromoBarX_Database {
      * Get promo bar by ID
      */
     public function get_promo_bar($id) {
-        return $this->wpdb->get_row(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->table_prefix}promo_bars WHERE id = %d",
-                $id
-            )
+        error_log('PromoBarX Database: Getting promo bar with ID: ' . $id);
+        
+        $sql = $this->wpdb->prepare(
+            "SELECT * FROM {$this->table_prefix}promo_bars WHERE id = %d",
+            $id
         );
+        
+        error_log('PromoBarX Database: SQL query: ' . $sql);
+        
+        $result = $this->wpdb->get_row($sql);
+        
+        error_log('PromoBarX Database: Query result: ' . print_r($result, true));
+        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        
+        return $result;
     }
 
     /**

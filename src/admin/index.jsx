@@ -31,10 +31,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         function renderSimpleEditor(container) {
+            // Check if we have a promo bar ID from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const promoBarId = urlParams.get('id');
+            
+            console.log('Simple Editor: URL params:', window.location.search);
+            console.log('Simple Editor: Promo bar ID from URL:', promoBarId);
+            
             container.innerHTML = `
                 <div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                        <h1 style="font-size: 24px; font-weight: 600; color: #111827;">Top Bar Editor</h1>
+                        <h1 style="font-size: 24px; font-weight: 600; color: #111827;">
+                            ${promoBarId ? 'Edit Promo Bar' : 'Create New Promo Bar'}
+                        </h1>
                         <div style="display: flex; gap: 12px;">
                             <button onclick="savePromoBar()" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
                                 <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,8 +51,17 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </svg>
                                 Save Promo Bar
                             </button>
-                            <button onclick="testSave()" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; margin-left: 8px;">
-                                Test Save
+                            <button onclick="loadPromoBarData()" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Load Data
+                            </button>
+                            <button onclick="testLoadPromoBar()" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Test Load
                             </button>
                             <button onclick="window.location.href='admin.php?page=promo-bar-x-topbar-manager'" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
                                 <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,52 +117,52 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </label>
                             </div>
                             
-                                                         <div style="margin-bottom: 20px;">
-                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Status</label>
-                                 <select id="promo-status" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                     <option value="draft">Draft</option>
-                                     <option value="active">Active</option>
-                                     <option value="paused">Paused</option>
-                                     <option value="archived">Archived</option>
-                                 </select>
-                             </div>
-                             
-                             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-                             
-                             <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Styling Options</h3>
-                             
-                             <div style="margin-bottom: 20px;">
-                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Background Color</label>
-                                 <input type="color" id="promo-bg-color" value="#3b82f6" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
-                             </div>
-                             
-                             <div style="margin-bottom: 20px;">
-                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Text Color</label>
-                                 <input type="color" id="promo-text-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
-                             </div>
-                             
-                             <div style="margin-bottom: 20px;">
-                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Button Color</label>
-                                 <input type="color" id="promo-cta-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
-                             </div>
-                             
-                             <div style="margin-bottom: 20px;">
-                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Font Size</label>
-                                 <select id="promo-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                     <option value="12px">Small (12px)</option>
-                                     <option value="14px" selected>Medium (14px)</option>
-                                     <option value="16px">Large (16px)</option>
-                                     <option value="18px">Extra Large (18px)</option>
-                                 </select>
-                             </div>
-                             
-                             <div style="margin-bottom: 20px;">
-                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Position</label>
-                                 <select id="promo-position" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                     <option value="top">Top of Page</option>
-                                     <option value="bottom">Bottom of Page</option>
-                                 </select>
-                             </div>
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Status</label>
+                                <select id="promo-status" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="draft">Draft</option>
+                                    <option value="active">Active</option>
+                                    <option value="paused">Paused</option>
+                                    <option value="archived">Archived</option>
+                                </select>
+                            </div>
+                            
+                            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+                            
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Styling Options</h3>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Background Color</label>
+                                <input type="color" id="promo-bg-color" value="#3b82f6" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Text Color</label>
+                                <input type="color" id="promo-text-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Button Color</label>
+                                <input type="color" id="promo-cta-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Font Size</label>
+                                <select id="promo-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="12px">Small (12px)</option>
+                                    <option value="14px" selected>Medium (14px)</option>
+                                    <option value="16px">Large (16px)</option>
+                                    <option value="18px">Extra Large (18px)</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Position</label>
+                                <select id="promo-position" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="top">Top of Page</option>
+                                    <option value="bottom">Bottom of Page</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <!-- Preview -->
@@ -160,6 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Add event listeners
             setupEditorEvents();
+            
+            // Load promo bar data if ID is provided
+            if (promoBarId) {
+                console.log('Simple Editor: Loading promo bar data for ID:', promoBarId);
+                loadPromoBarData();
+            }
         }
         
         function setupEditorEvents() {
@@ -235,6 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.savePromoBar = function() {
             console.log('Save button clicked');
             
+            // Get promo bar ID from URL if editing
+            const urlParams = new URLSearchParams(window.location.search);
+            const promoBarId = urlParams.get('id');
+            
             // Validate required fields
             const title = document.getElementById('promo-title')?.value || '';
             const name = document.getElementById('promo-name')?.value || '';
@@ -270,6 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     color: document.getElementById('promo-bg-color')?.value || '#3b82f6'
                 })
             };
+            
+            // Add ID if editing existing promo bar
+            if (promoBarId) {
+                data.id = promoBarId;
+            }
             
             console.log('Data to save:', data);
             console.log('Admin data:', window.promobarxAdmin);
@@ -373,6 +406,125 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Test error:', error);
                 alert('Test save error: ' + error.message);
             });
+        }
+
+        window.loadPromoBarData = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const promoBarId = urlParams.get('id');
+            
+            if (!promoBarId) {
+                alert('No promo bar ID found in the URL.');
+                return;
+            }
+
+            console.log('Loading promo bar data for ID:', promoBarId);
+
+            if (window.promobarxAdmin && window.promobarxAdmin.ajaxurl) {
+                const formData = new URLSearchParams();
+                formData.append('action', 'promobarx_get_promo_bar');
+                formData.append('nonce', window.promobarxAdmin.nonce);
+                formData.append('id', promoBarId);
+
+                console.log('Form data for loading:', formData.toString());
+
+                fetch(window.promobarxAdmin.ajaxurl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData.toString()
+                })
+                .then(response => {
+                    console.log('Load response status:', response.status);
+                    return response.json();
+                })
+                .then(result => {
+                    console.log('Load result:', result);
+                    if (result.success && result.data) {
+                        const promoBar = result.data;
+                        
+                        // Parse styling data
+                        let styling = {};
+                        if (promoBar.styling) {
+                            try {
+                                styling = typeof promoBar.styling === 'string' ? JSON.parse(promoBar.styling) : promoBar.styling;
+                            } catch (e) {
+                                console.error('Error parsing styling:', e);
+                                styling = {};
+                            }
+                        }
+                        
+                        // Parse CTA style data
+                        let ctaStyle = {};
+                        if (promoBar.cta_style) {
+                            try {
+                                ctaStyle = typeof promoBar.cta_style === 'string' ? JSON.parse(promoBar.cta_style) : promoBar.cta_style;
+                            } catch (e) {
+                                console.error('Error parsing CTA style:', e);
+                                ctaStyle = {};
+                            }
+                        }
+                        
+                        // Fill form fields
+                        document.getElementById('promo-name').value = promoBar.name || '';
+                        document.getElementById('promo-title').value = promoBar.title || '';
+                        document.getElementById('promo-subtitle').value = promoBar.subtitle || '';
+                        document.getElementById('promo-cta-text').value = promoBar.cta_text || '';
+                        document.getElementById('promo-cta-url').value = promoBar.cta_url || '';
+                        document.getElementById('promo-countdown-enabled').checked = Boolean(promoBar.countdown_enabled);
+                        document.getElementById('promo-countdown-date').value = promoBar.countdown_date || '';
+                        document.getElementById('promo-close-enabled').checked = Boolean(promoBar.close_button_enabled);
+                        document.getElementById('promo-status').value = promoBar.status || 'draft';
+                        
+                        // Fill styling fields
+                        document.getElementById('promo-bg-color').value = styling.background || '#3b82f6';
+                        document.getElementById('promo-text-color').value = styling.color || '#ffffff';
+                        document.getElementById('promo-font-size').value = styling.font_size || '14px';
+                        document.getElementById('promo-position').value = styling.position || 'top';
+                        document.getElementById('promo-cta-color').value = ctaStyle.background || '#ffffff';
+
+                        // Show/hide countdown date field
+                        const countdownDate = document.getElementById('promo-countdown-date');
+                        if (countdownDate) {
+                            countdownDate.style.display = promoBar.countdown_enabled ? 'block' : 'none';
+                        }
+
+                        updatePreview(); // Update preview with loaded data
+                        
+                        console.log('Successfully loaded promo bar data:', promoBar);
+                    } else {
+                        alert('Error loading promo bar data: ' + (result.data || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading promo bar data:', error);
+                    alert('Error loading promo bar data. Please try again.');
+                });
+            } else {
+                console.error('Admin data not available for loading');
+                alert('Admin data not available for loading. Please refresh the page.');
+            }
+        }
+        
+        window.testLoadPromoBar = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const promoBarId = urlParams.get('id');
+            
+            console.log('Test: Current URL params:', window.location.search);
+            console.log('Test: Promo bar ID from URL:', promoBarId);
+            console.log('Test: Admin data available:', {
+                promobarxAdmin: window.promobarxAdmin,
+                ajaxurl: window.promobarxAdmin?.ajaxurl,
+                nonce: window.promobarxAdmin?.nonce
+            });
+            
+            if (promoBarId) {
+                console.log('Test: Attempting to load promo bar with ID:', promoBarId);
+                loadPromoBarData();
+            } else {
+                console.log('Test: No promo bar ID found in URL');
+                alert('No promo bar ID found in URL. Current URL: ' + window.location.href);
+            }
         }
         
         // For other components, we'll use simple HTML if needed

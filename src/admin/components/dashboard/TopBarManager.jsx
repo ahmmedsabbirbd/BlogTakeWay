@@ -9,6 +9,7 @@ const TopBarManager = () => {
     const [selectedPromoBar, setSelectedPromoBar] = useState(null);
     const [showEditor, setShowEditor] = useState(false);
     const [activeTab, setActiveTab] = useState('manage');
+    const [editingPromoBarId, setEditingPromoBarId] = useState(null);
 
     // Single useEffect for initialization
     useEffect(() => {
@@ -59,9 +60,39 @@ const TopBarManager = () => {
         setShowEditor(true);
     };
 
-    const handleEdit = (promoBar) => {
-        setSelectedPromoBar(promoBar);
-        setShowEditor(true);
+    const handleEdit = async (promoBar) => {
+        setEditingPromoBarId(promoBar.id);
+        try {
+            // Fetch the complete promo bar data from server
+            const response = await fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=promobarx_get_promo_bar&id=${promoBar.id}&nonce=${window.promobarxAdmin.nonce}`
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                console.log('Fetched promo bar data for editing:', data.data);
+                setSelectedPromoBar(data.data);
+                setShowEditor(true);
+            } else {
+                console.error('Failed to fetch promo bar data:', data.data);
+                console.log('Using fallback data from list:', promoBar);
+                // Fallback to using the data from the list
+                setSelectedPromoBar(promoBar);
+                setShowEditor(true);
+            }
+        } catch (error) {
+            console.error('Error fetching promo bar data:', error);
+            console.log('Using fallback data from list due to error:', promoBar);
+            // Fallback to using the data from the list
+            setSelectedPromoBar(promoBar);
+            setShowEditor(true);
+        } finally {
+            setEditingPromoBarId(null);
+        }
     };
 
     const handleDelete = async (id) => {
@@ -304,8 +335,13 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                                     onClick={() => onEdit(promoBar)}
                                                             className="text-blue-600 hover:text-blue-900"
                                                             title="Edit"
+                                                            disabled={editingPromoBarId === promoBar.id}
                                                         >
-                                                            <Edit className="w-4 h-4" />
+                                                            {editingPromoBarId === promoBar.id ? (
+                                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                                            ) : (
+                                                                <Edit className="w-4 h-4" />
+                                                            )}
                                                         </button>
                                                         <button
                                                     onClick={() => onDelete(promoBar.id)}

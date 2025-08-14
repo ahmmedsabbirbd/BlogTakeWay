@@ -46,14 +46,19 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
     const [showPreview, setShowPreview] = useState(true);
 
     useEffect(() => {
-        if (promoBar) {
-            console.log('PromoBar data received:', promoBar);
+        if (promoBar && typeof promoBar === 'object') {
+            console.log('PromoBar data received in editor:', promoBar);
             
             // Handle template styling data
             let templateStyling = {};
             if (promoBar.styling) {
                 if (typeof promoBar.styling === 'string') {
-                    templateStyling = JSON.parse(promoBar.styling);
+                    try {
+                        templateStyling = JSON.parse(promoBar.styling);
+                    } catch (error) {
+                        console.error('Error parsing styling JSON:', error);
+                        templateStyling = {};
+                    }
                 } else {
                     templateStyling = promoBar.styling;
                 }
@@ -61,22 +66,82 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
             
             // Map template styling to form styling
             const mappedStyling = {
-                background: templateStyling.background || templateStyling.backgroundColor,
-                color: templateStyling.color || templateStyling.text_color,
-                font_family: templateStyling.font_family || templateStyling.fontFamily,
-                font_size: templateStyling.font_size || templateStyling.fontSize,
-                padding: templateStyling.padding,
-                border_bottom: templateStyling.border_bottom || templateStyling.borderBottom
+                background: templateStyling.background || templateStyling.backgroundColor || '#ffffff',
+                color: templateStyling.color || templateStyling.text_color || '#333333',
+                font_family: templateStyling.font_family || templateStyling.fontFamily || 'Inter, sans-serif',
+                font_size: templateStyling.font_size || templateStyling.fontSize || '14px',
+                padding: templateStyling.padding || '12px 20px',
+                border_bottom: templateStyling.border_bottom || templateStyling.borderBottom || '1px solid #e5e7eb'
             };
             
-            setFormData({
+            // Handle CTA style
+            let ctaStyle = {};
+            if (promoBar.cta_style) {
+                if (typeof promoBar.cta_style === 'string') {
+                    try {
+                        ctaStyle = JSON.parse(promoBar.cta_style);
+                    } catch (error) {
+                        console.error('Error parsing CTA style JSON:', error);
+                        ctaStyle = {};
+                    }
+                } else {
+                    ctaStyle = promoBar.cta_style;
+                }
+            }
+            
+            // Handle countdown style
+            let countdownStyle = {};
+            if (promoBar.countdown_style) {
+                if (typeof promoBar.countdown_style === 'string') {
+                    try {
+                        countdownStyle = JSON.parse(promoBar.countdown_style);
+                    } catch (error) {
+                        console.error('Error parsing countdown style JSON:', error);
+                        countdownStyle = {};
+                    }
+                } else {
+                    countdownStyle = promoBar.countdown_style;
+                }
+            }
+            
+            // Handle close button style
+            let closeButtonStyle = {};
+            if (promoBar.close_button_style) {
+                if (typeof promoBar.close_button_style === 'string') {
+                    try {
+                        closeButtonStyle = JSON.parse(promoBar.close_button_style);
+                    } catch (error) {
+                        console.error('Error parsing close button style JSON:', error);
+                        closeButtonStyle = {};
+                    }
+                } else {
+                    closeButtonStyle = promoBar.close_button_style;
+                }
+            }
+            
+            const updatedFormData = {
                 ...formData,
-                ...promoBar,
+                name: promoBar.name || '',
+                title: promoBar.title || '',
+                subtitle: promoBar.subtitle || '',
+                cta_text: promoBar.cta_text || '',
+                cta_url: promoBar.cta_url || '',
+                countdown_enabled: Boolean(promoBar.countdown_enabled),
+                countdown_date: promoBar.countdown_date || '',
+                close_button_enabled: Boolean(promoBar.close_button_enabled),
+                status: promoBar.status || 'draft',
+                priority: parseInt(promoBar.priority) || 0,
+                template_id: parseInt(promoBar.template_id) || 0,
                 styling: { ...formData.styling, ...mappedStyling },
-                cta_style: { ...formData.cta_style, ...(promoBar.cta_style ? (typeof promoBar.cta_style === 'string' ? JSON.parse(promoBar.cta_style) : promoBar.cta_style) : {}) },
-                countdown_style: { ...formData.countdown_style, ...(promoBar.countdown_style ? (typeof promoBar.countdown_style === 'string' ? JSON.parse(promoBar.countdown_style) : promoBar.countdown_style) : {}) },
-                close_button_style: { ...formData.close_button_style, ...(promoBar.close_button_style ? (typeof promoBar.close_button_style === 'string' ? JSON.parse(promoBar.close_button_style) : promoBar.close_button_style) : {}) }
-            });
+                cta_style: { ...formData.cta_style, ...ctaStyle },
+                countdown_style: { ...formData.countdown_style, ...countdownStyle },
+                close_button_style: { ...formData.close_button_style, ...closeButtonStyle }
+            };
+            
+            console.log('Updated form data:', updatedFormData);
+            setFormData(updatedFormData);
+        } else {
+            console.log('No promo bar data provided or invalid data:', promoBar);
         }
     }, [promoBar]);
 

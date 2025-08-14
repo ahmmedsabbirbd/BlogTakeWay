@@ -7,16 +7,29 @@ const EditorPage = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        console.log('EditorPage: Component mounted');
         loadPromoBar();
     }, []);
 
     const loadPromoBar = async () => {
         try {
+            console.log('EditorPage: Loading promo bar data...');
+            
             // Check if we have a promo bar ID from the URL
             const urlParams = new URLSearchParams(window.location.search);
             const promoBarId = urlParams.get('id');
+            
+            console.log('EditorPage: URL params:', window.location.search);
+            console.log('EditorPage: Promo bar ID from URL:', promoBarId);
+            console.log('EditorPage: Admin data available:', {
+                promobarxAdmin: window.promobarxAdmin,
+                ajaxurl: window.promobarxAdmin?.ajaxurl,
+                nonce: window.promobarxAdmin?.nonce
+            });
 
             if (promoBarId && window.promobarxAdmin && window.promobarxAdmin.ajaxurl) {
+                console.log('EditorPage: Fetching promo bar with ID:', promoBarId);
+                
                 const response = await fetch(window.promobarxAdmin.ajaxurl, {
                     method: 'POST',
                     headers: {
@@ -25,19 +38,26 @@ const EditorPage = () => {
                     body: `action=promobarx_get_promo_bar&id=${promoBarId}&nonce=${window.promobarxAdmin.nonce}`
                 });
                 
+                console.log('EditorPage: Response status:', response.status);
+                
                 const data = await response.json();
+                console.log('EditorPage: Response data:', data);
+                
                 if (data.success) {
+                    console.log('EditorPage: Successfully loaded promo bar:', data.data);
                     setPromoBar(data.data);
                 } else {
-                    setError('Failed to load promo bar data');
+                    console.error('EditorPage: Failed to load promo bar data:', data.data);
+                    setError('Failed to load promo bar data: ' + (data.data || 'Unknown error'));
                 }
             } else {
+                console.log('EditorPage: No promo bar ID provided or admin data not available, creating new promo bar');
                 // Creating a new promo bar
                 setPromoBar(null);
             }
         } catch (error) {
-            console.error('Error loading promo bar:', error);
-            setError('Error loading promo bar data');
+            console.error('EditorPage: Error loading promo bar:', error);
+            setError('Error loading promo bar data: ' + error.message);
         } finally {
             setLoading(false);
         }
@@ -45,14 +65,16 @@ const EditorPage = () => {
 
     const handleSave = async (savedPromoBar) => {
         try {
+            console.log('EditorPage: Save completed, redirecting to manager');
             // Redirect back to the manager page after successful save
             window.location.href = 'admin.php?page=promo-bar-x-topbar-manager';
         } catch (error) {
-            console.error('Error after save:', error);
+            console.error('EditorPage: Error after save:', error);
         }
     };
 
     const handleClose = () => {
+        console.log('EditorPage: Close clicked, redirecting to manager');
         // Redirect back to the manager page
         window.location.href = 'admin.php?page=promo-bar-x-topbar-manager';
     };
@@ -89,6 +111,8 @@ const EditorPage = () => {
             </div>
         );
     }
+
+    console.log('EditorPage: Rendering TopBarEditor with promo bar:', promoBar);
 
     return (
         <div className="min-h-screen bg-gray-50">

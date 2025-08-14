@@ -638,11 +638,15 @@ class PromoBarX_Manager {
         }
         
         $id = intval($_POST['id']);
+        error_log('PromoBarX: Fetching promo bar with ID: ' . $id);
+        
         $promo_bar = $this->database->get_promo_bar($id);
         
         if ($promo_bar) {
+            error_log('PromoBarX: Found promo bar data: ' . print_r($promo_bar, true));
             wp_send_json_success($promo_bar);
         } else {
+            error_log('PromoBarX: Promo bar not found with ID: ' . $id);
             wp_send_json_error('Promo bar not found');
         }
     }
