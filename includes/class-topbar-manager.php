@@ -72,6 +72,10 @@ class PromoBarX_Manager {
         error_log('PromoBarX: Post ID: ' . $post_id);
         error_log('PromoBarX: Post Type: ' . $post_type);
         
+        // Get user context for advanced targeting
+        $user_context = $this->get_user_context();
+        error_log('PromoBarX: User context: ' . print_r($user_context, true));
+        
         // Get all active promo bars with their assignments
         $promo_bars = $this->database->get_promo_bars_with_assignments(['status' => 'active']);
         error_log('PromoBarX: Found ' . count($promo_bars) . ' active promo bars');
@@ -80,6 +84,13 @@ class PromoBarX_Manager {
         
         foreach ($promo_bars as $promo_bar) {
             error_log('PromoBarX: Checking promo bar ID: ' . $promo_bar->id . ', Name: ' . $promo_bar->name);
+            
+            // Check frequency capping first
+            if ($this->is_frequency_capped($promo_bar->id, $user_context)) {
+                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' is frequency capped');
+                continue;
+            }
+            
             $score = $this->calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type);
             error_log('PromoBarX: Score for promo bar ' . $promo_bar->id . ': ' . $score);
             if ($score > 0) {
@@ -107,6 +118,10 @@ class PromoBarX_Manager {
             // Check if promo bar is scheduled
             if ($this->is_promo_bar_scheduled($selected)) {
                 error_log('PromoBarX: Promo bar is scheduled to show');
+                
+                // Track impression for frequency capping
+                $this->track_impression($selected->id);
+                
                 return $selected;
             } else {
                 error_log('PromoBarX: Promo bar is not scheduled to show');
@@ -151,6 +166,7 @@ class PromoBarX_Manager {
         $assignment_type = $assignment['assignment_type'] ?? 'global';
         $target_id = $assignment['target_id'] ?? 0;
         $target_value = $assignment['target_value'] ?? '';
+        $priority = $assignment['priority'] ?? 0;
         
         error_log('PromoBarX: Assignment type: ' . $assignment_type . ', Target ID: ' . $target_id . ', Target Value: ' . $target_value);
         
@@ -196,6 +212,12 @@ class PromoBarX_Manager {
                 break;
         }
         
+        // Add priority bonus (0-10 additional points)
+        $priority_bonus = min($priority, 10);
+        $score += $priority_bonus;
+        
+        error_log('PromoBarX: Final assignment score: ' . $score . ' (base: ' . ($score - $priority_bonus) . ', priority bonus: ' . $priority_bonus . ')');
+        
         return $score;
     }
 
@@ -205,6 +227,179 @@ class PromoBarX_Manager {
     private function matches_custom_condition($condition, $current_url, $post_id) {
         // Simple URL matching for now
         return strpos($current_url, $condition) !== false;
+    }
+
+    /**
+     * Get user context for advanced targeting
+     */
+    private function get_user_context() {
+        $context = [
+            'user_id' => get_current_user_id(),
+            'user_roles' => $this->get_user_roles(),
+            'is_logged_in' => is_user_logged_in(),
+            'device_type' => $this->get_device_type(),
+            'referrer' => $this->get_referrer(),
+            'country' => $this->get_user_country(),
+            'ip_address' => $this->get_user_ip(),
+            'timezone' => $this->get_user_timezone(),
+            'session_id' => $this->get_session_id(),
+            'current_time' => current_time('mysql'),
+            'day_of_week' => date('N'), // 1 (Monday) to 7 (Sunday)
+            'hour' => date('G'), // 0-23
+        ];
+        
+        return $context;
+    }
+
+    /**
+     * Get user roles
+     */
+    private function get_user_roles() {
+        if (!is_user_logged_in()) {
+            return ['guest'];
+        }
+        
+        $user = wp_get_current_user();
+        return $user->roles ?: ['subscriber'];
+    }
+
+    /**
+     * Get device type
+     */
+    private function get_device_type() {
+        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        
+        if (preg_match('/(tablet|ipad|playbook)|(android(?!.*(mobi|opera mini)))/i', strtolower($user_agent))) {
+            return 'tablet';
+        }
+        
+        if (preg_match('/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|android|iemobile)/i', strtolower($user_agent))) {
+            return 'mobile';
+        }
+        
+        return 'desktop';
+    }
+
+    /**
+     * Get referrer
+     */
+    private function get_referrer() {
+        return $_SERVER['HTTP_REFERER'] ?? '';
+    }
+
+    /**
+     * Get user country (simplified)
+     */
+    private function get_user_country() {
+        // This is a simplified implementation
+        // In production, you might want to use a proper geolocation service
+        return 'unknown';
+    }
+
+    /**
+     * Get user IP address
+     */
+    private function get_user_ip() {
+        $ip_keys = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
+        
+        foreach ($ip_keys as $key) {
+            if (array_key_exists($key, $_SERVER) === true) {
+                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                    $ip = trim($ip);
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+                        return $ip;
+                    }
+                }
+            }
+        }
+        
+        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    }
+
+    /**
+     * Get user timezone
+     */
+    private function get_user_timezone() {
+        return wp_timezone_string();
+    }
+
+    /**
+     * Get session ID
+     */
+    private function get_session_id() {
+        if (!session_id()) {
+            session_start();
+        }
+        return session_id();
+    }
+
+    /**
+     * Check if promo bar is frequency capped
+     */
+    private function is_frequency_capped($promo_bar_id, $user_context) {
+        // Check session-based frequency capping
+        $session_key = 'promobarx_freq_' . $promo_bar_id;
+        if (isset($_SESSION[$session_key])) {
+            $last_impression = $_SESSION[$session_key];
+            $frequency_cap = 3600; // 1 hour default
+            
+            if ((time() - $last_impression) < $frequency_cap) {
+                return true;
+            }
+        }
+        
+        // Check cookie-based frequency capping
+        $cookie_name = 'promobarx_freq_' . $promo_bar_id;
+        if (isset($_COOKIE[$cookie_name])) {
+            $last_impression = intval($_COOKIE[$cookie_name]);
+            $frequency_cap = 3600; // 1 hour default
+            
+            if ((time() - $last_impression) < $frequency_cap) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Track impression for frequency capping
+     */
+    private function track_impression($promo_bar_id) {
+        // Track in session
+        $session_key = 'promobarx_freq_' . $promo_bar_id;
+        $_SESSION[$session_key] = time();
+        
+        // Track in cookie (24 hours)
+        $cookie_name = 'promobarx_freq_' . $promo_bar_id;
+        setcookie($cookie_name, time(), time() + 86400, '/');
+        
+        // Track in analytics table
+        $this->log_analytics_event($promo_bar_id, 'impression');
+    }
+
+    /**
+     * Log analytics event
+     */
+    private function log_analytics_event($promo_bar_id, $event_type) {
+        global $wpdb;
+        
+        $data = [
+            'promo_bar_id' => $promo_bar_id,
+            'event_type' => $event_type,
+            'page_url' => $_SERVER['REQUEST_URI'] ?? '',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            'ip_address' => $this->get_user_ip(),
+            'user_id' => get_current_user_id(),
+            'session_id' => $this->get_session_id(),
+            'created_at' => current_time('mysql')
+        ];
+        
+        $wpdb->insert(
+            $wpdb->prefix . 'promo_bar_analytics',
+            $data,
+            ['%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s']
+        );
     }
 
     /**
@@ -925,5 +1120,95 @@ class PromoBarX_Manager {
         } else {
             wp_send_json_error('Failed to recreate assignments table: ' . $this->database->wpdb->last_error);
         }
+    }
+
+    /**
+     * Get analytics data for a promo bar
+     */
+    public function get_analytics_data($promo_bar_id, $days = 30) {
+        global $wpdb;
+        
+        $start_date = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        
+        $sql = $wpdb->prepare(
+            "SELECT event_type, COUNT(*) as count, DATE(created_at) as date
+             FROM {$wpdb->prefix}promo_bar_analytics 
+             WHERE promo_bar_id = %d AND created_at >= %s
+             GROUP BY event_type, DATE(created_at)
+             ORDER BY date DESC, event_type",
+            $promo_bar_id,
+            $start_date
+        );
+        
+        return $wpdb->get_results($sql);
+    }
+
+    /**
+     * Get assignment statistics
+     */
+    public function get_assignment_stats() {
+        global $wpdb;
+        
+        $stats = [
+            'total_promo_bars' => 0,
+            'active_promo_bars' => 0,
+            'total_assignments' => 0,
+            'assignment_types' => [],
+            'most_used_assignments' => []
+        ];
+        
+        // Total promo bars
+        $stats['total_promo_bars'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bars");
+        
+        // Active promo bars
+        $stats['active_promo_bars'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bars WHERE status = 'active'");
+        
+        // Total assignments
+        $stats['total_assignments'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bar_assignments");
+        
+        // Assignment types breakdown
+        $assignment_types = $wpdb->get_results(
+            "SELECT assignment_type, COUNT(*) as count 
+             FROM {$wpdb->prefix}promo_bar_assignments 
+             GROUP BY assignment_type 
+             ORDER BY count DESC"
+        );
+        
+        foreach ($assignment_types as $type) {
+            $stats['assignment_types'][$type->assignment_type] = $type->count;
+        }
+        
+        // Most used assignments
+        $most_used = $wpdb->get_results(
+            "SELECT assignment_type, target_value, COUNT(*) as count 
+             FROM {$wpdb->prefix}promo_bar_assignments 
+             WHERE target_value != ''
+             GROUP BY assignment_type, target_value 
+             ORDER BY count DESC 
+             LIMIT 10"
+        );
+        
+        $stats['most_used_assignments'] = $most_used;
+        
+        return $stats;
+    }
+
+    /**
+     * Test conditional display system
+     */
+    public function test_conditional_display() {
+        $test_results = [
+            'database_connection' => $this->database->test_database_connection(),
+            'active_promo_bars' => count($this->database->get_promo_bars_with_assignments(['status' => 'active'])),
+            'current_page_context' => [
+                'url' => $_SERVER['REQUEST_URI'] ?? '',
+                'post_id' => get_queried_object_id(),
+                'post_type' => get_post_type(),
+                'user_context' => $this->get_user_context()
+            ],
+            'selected_promo_bar' => $this->get_active_promo_bar()
+        ];
+        
+        return $test_results;
     }
 }
