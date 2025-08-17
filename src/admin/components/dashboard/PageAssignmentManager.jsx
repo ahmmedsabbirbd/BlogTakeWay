@@ -151,7 +151,7 @@ const PageAssignmentManager = ({ promoBar, onClose, onSave }) => {
 
             const data = await response.json();
             if (data.success) {
-                onSave();
+                onSave(assignments); // Pass assignments back to parent
                 onClose();
             } else {
                 alert('Error saving assignments: ' + data.data);

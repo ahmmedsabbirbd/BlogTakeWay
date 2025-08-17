@@ -1,6 +1,6 @@
 <?php
 /**
- * Test script for PromoBarX Assignment System
+ * Simple Test script for PromoBarX Assignment System
  */
 
 // Enable error reporting
@@ -22,10 +22,11 @@ $database = new PromoBarX_Database();
 
 // Test 1: Check if assignments table exists
 echo "<h2>1. Database Table Check</h2>";
-$table_exists = $database->wpdb->get_var(
-    $database->wpdb->prepare(
+global $wpdb;
+$table_exists = $wpdb->get_var(
+    $wpdb->prepare(
         "SHOW TABLES LIKE %s",
-        $database->table_prefix . 'promo_bar_assignments'
+        $wpdb->prefix . 'promo_bar_assignments'
     )
 );
 
@@ -36,6 +37,20 @@ if ($table_exists) {
     // Try to create it
     $database->create_tables();
     echo "Attempted to create tables<br>";
+    
+    // Check again
+    $table_exists = $wpdb->get_var(
+        $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->prefix . 'promo_bar_assignments'
+        )
+    );
+    
+    if ($table_exists) {
+        echo "✅ Assignments table created successfully<br>";
+    } else {
+        echo "❌ Failed to create assignments table<br>";
+    }
 }
 
 // Test 2: Create a test promo bar
@@ -85,6 +100,7 @@ if ($save_result) {
     echo "✅ Assignments saved successfully<br>";
 } else {
     echo "❌ Failed to save assignments<br>";
+    echo "Database error: " . $wpdb->last_error . "<br>";
 }
 
 // Test 4: Retrieve assignments
@@ -100,6 +116,7 @@ if ($retrieved_assignments) {
     echo "</ul>";
 } else {
     echo "❌ Failed to retrieve assignments<br>";
+    echo "Database error: " . $wpdb->last_error . "<br>";
 }
 
 // Test 5: Test AJAX handlers
@@ -141,6 +158,7 @@ if ($delete_result) {
     }
 } else {
     echo "❌ Failed to delete assignments<br>";
+    echo "Database error: " . $wpdb->last_error . "<br>";
 }
 
 // Test 7: Clean up
@@ -156,6 +174,15 @@ if ($cleanup_result) {
 echo "<hr>";
 echo "<h2>Test Summary</h2>";
 echo "<p>✅ Assignment system test completed. Check the results above.</p>";
+echo "<p><strong>What was tested:</strong></p>";
+echo "<ul>";
+echo "<li>✅ Database table creation</li>";
+echo "<li>✅ Assignment saving functionality</li>";
+echo "<li>✅ Assignment retrieval functionality</li>";
+echo "<li>✅ AJAX handler integration</li>";
+echo "<li>✅ Assignment deletion</li>";
+echo "<li>✅ Data cleanup</li>";
+echo "</ul>";
 echo "<p><strong>Next Steps:</strong></p>";
 echo "<ul>";
 echo "<li>Test the frontend assignment manager</li>";

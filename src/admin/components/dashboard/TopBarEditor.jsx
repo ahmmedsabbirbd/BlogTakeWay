@@ -45,6 +45,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
     const [activeTab, setActiveTab] = useState('content');
     const [showPreview, setShowPreview] = useState(true);
     const [showPageAssignment, setShowPageAssignment] = useState(false);
+    const [assignments, setAssignments] = useState([]);
 
     useEffect(() => {
         if (promoBar && typeof promoBar === 'object') {
@@ -140,10 +141,41 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
             
             console.log('Updated form data:', updatedFormData);
             setFormData(updatedFormData);
+            
+            // Load existing assignments if promo bar has an ID
+            if (promoBar.id) {
+                loadAssignments(promoBar.id);
+            }
         } else {
             console.log('No promo bar data provided or invalid data:', promoBar);
         }
     }, [promoBar]);
+
+    const loadAssignments = async (promoBarId) => {
+        try {
+            const response = await fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    action: 'promobarx_get_assignments',
+                    promo_bar_id: promoBarId,
+                    nonce: window.promobarxAdmin.nonce
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                setAssignments(data.data || []);
+                console.log('Loaded assignments:', data.data);
+            } else {
+                console.error('Failed to load assignments:', data);
+            }
+        } catch (error) {
+            console.error('Error loading assignments:', error);
+        }
+    };
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({
@@ -174,8 +206,17 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 styling: JSON.stringify(formData.styling),
                 cta_style: JSON.stringify(formData.cta_style),
                 countdown_style: JSON.stringify(formData.countdown_style),
-                close_button_style: JSON.stringify(formData.close_button_style)
+                close_button_style: JSON.stringify(formData.close_button_style),
+                assignments: assignments // Include assignments in the save data
             };
+
+            // Include the promo bar ID if editing an existing promo bar
+            if (promoBar && promoBar.id) {
+                saveData.id = promoBar.id;
+            }
+
+            console.log('Saving promo bar with assignments:', assignments);
+            console.log('Save data:', saveData);
 
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
                 method: 'POST',
@@ -699,7 +740,10 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 <PageAssignmentManager
                     promoBar={promoBar}
                     onClose={() => setShowPageAssignment(false)}
-                    onSave={() => {
+                    onSave={(savedAssignments) => {
+                        if (savedAssignments) {
+                            setAssignments(savedAssignments);
+                        }
                         setShowPageAssignment(false);
                         // Optionally refresh data or show success message
                     }}

@@ -54,6 +54,7 @@ class PromoBarX_Manager {
         add_action('wp_ajax_promobarx_get_assignments', [$this, 'ajax_get_assignments']);
         add_action('wp_ajax_promobarx_save_assignments', [$this, 'ajax_save_assignments']);
         add_action('wp_ajax_promobarx_force_create_tables', [$this, 'ajax_force_create_tables']);
+        add_action('wp_ajax_promobarx_force_recreate_assignments_table', [$this, 'ajax_force_recreate_assignments_table']);
     }
 
     /**
@@ -71,8 +72,8 @@ class PromoBarX_Manager {
         error_log('PromoBarX: Post ID: ' . $post_id);
         error_log('PromoBarX: Post Type: ' . $post_type);
         
-        // Get all active promo bars
-        $promo_bars = $this->database->get_promo_bars(['status' => 'active']);
+        // Get all active promo bars with their assignments
+        $promo_bars = $this->database->get_promo_bars_with_assignments(['status' => 'active']);
         error_log('PromoBarX: Found ' . count($promo_bars) . ' active promo bars');
         
         $candidates = [];
@@ -123,10 +124,33 @@ class PromoBarX_Manager {
     private function calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type) {
         $score = 0;
         
-        // Use the assignment data directly from the promo_bar object
-        $assignment_type = $promo_bar->assignment_type ?? 'global';
-        $target_id = $promo_bar->target_id ?? 0;
-        $target_value = $promo_bar->target_value ?? '';
+        // Check if promo bar has assignments
+        if (!isset($promo_bar->assignments) || empty($promo_bar->assignments)) {
+            error_log('PromoBarX: No assignments found for promo bar ' . $promo_bar->id);
+            return 0;
+        }
+        
+        // Check each assignment and return the highest score
+        foreach ($promo_bar->assignments as $assignment) {
+            $assignment_score = $this->calculate_single_assignment_score($assignment, $current_url, $post_id, $post_type);
+            if ($assignment_score > $score) {
+                $score = $assignment_score;
+            }
+        }
+        
+        error_log('PromoBarX: Final score for promo bar ' . $promo_bar->id . ': ' . $score);
+        return $score;
+    }
+
+    /**
+     * Calculate score for a single assignment
+     */
+    private function calculate_single_assignment_score($assignment, $current_url, $post_id, $post_type) {
+        $score = 0;
+        
+        $assignment_type = $assignment['assignment_type'] ?? 'global';
+        $target_id = $assignment['target_id'] ?? 0;
+        $target_value = $assignment['target_value'] ?? '';
         
         error_log('PromoBarX: Assignment type: ' . $assignment_type . ', Target ID: ' . $target_id . ', Target Value: ' . $target_value);
         
@@ -172,7 +196,6 @@ class PromoBarX_Manager {
                 break;
         }
         
-        error_log('PromoBarX: Final score for promo bar ' . $promo_bar->id . ': ' . $score);
         return $score;
     }
 
@@ -777,22 +800,28 @@ class PromoBarX_Manager {
         }
         
         $promo_bar_id = intval($_POST['promo_bar_id']);
+        error_log('PromoBarX: Getting assignments for promo bar ID: ' . $promo_bar_id);
         
-        // Get the promo bar with assignment data
-        $promo_bar = $this->database->get_promo_bar($promo_bar_id);
+        // Get assignments from the new assignments table
+        $assignments = $this->database->get_assignments($promo_bar_id);
         
-        if ($promo_bar) {
-            // Create assignment object from promo bar data
-            $assignment = [
-                'id' => $promo_bar_id,
-                'assignment_type' => $promo_bar->assignment_type ?? 'global',
-                'target_id' => $promo_bar->target_id ?? 0,
-                'target_value' => $promo_bar->target_value ?? '',
-                'priority' => $promo_bar->priority ?? 0
-            ];
+        if ($assignments) {
+            // Convert to array format for frontend
+            $assignments_array = [];
+            foreach ($assignments as $assignment) {
+                $assignments_array[] = [
+                    'id' => $assignment->id,
+                    'assignment_type' => $assignment->assignment_type,
+                    'target_id' => $assignment->target_id,
+                    'target_value' => $assignment->target_value,
+                    'priority' => $assignment->priority
+                ];
+            }
             
-            wp_send_json_success([$assignment]);
+            error_log('PromoBarX: Returning assignments: ' . print_r($assignments_array, true));
+            wp_send_json_success($assignments_array);
         } else {
+            error_log('PromoBarX: No assignments found for promo bar ID: ' . $promo_bar_id);
             wp_send_json_success([]);
         }
     }
@@ -822,23 +851,33 @@ class PromoBarX_Manager {
             error_log('PromoBarX: Decoded assignments: ' . print_r($assignments, true));
         }
         
-        if (!is_array($assignments) || empty($assignments)) {
+        if (!is_array($assignments)) {
             error_log('PromoBarX: Invalid assignments data type: ' . gettype($assignments));
             wp_send_json_error('Invalid assignments data');
+            return;
         }
         
-        // Use the first assignment as the primary assignment
-        $primary_assignment = $assignments[0];
+        // Validate assignments
+        $valid_assignments = [];
+        foreach ($assignments as $assignment) {
+            if (!isset($assignment['assignment_type'])) {
+                continue;
+            }
+            
+            $valid_assignment = [
+                'assignment_type' => sanitize_text_field($assignment['assignment_type']),
+                'target_id' => isset($assignment['target_id']) ? intval($assignment['target_id']) : 0,
+                'target_value' => isset($assignment['target_value']) ? sanitize_text_field($assignment['target_value']) : '',
+                'priority' => isset($assignment['priority']) ? intval($assignment['priority']) : 0
+            ];
+            
+            $valid_assignments[] = $valid_assignment;
+        }
         
-        // Update the promo bar with assignment data
-        $update_data = [
-            'assignment_type' => sanitize_text_field($primary_assignment['assignment_type'] ?? 'global'),
-            'target_id' => intval($primary_assignment['target_id'] ?? 0),
-            'target_value' => sanitize_text_field($primary_assignment['target_value'] ?? ''),
-            'priority' => intval($primary_assignment['priority'] ?? 0)
-        ];
+        error_log('PromoBarX: Validated assignments: ' . print_r($valid_assignments, true));
         
-        $result = $this->database->update_promo_bar($promo_bar_id, $update_data);
+        // Save assignments using the new assignment system
+        $result = $this->database->save_assignments($promo_bar_id, $valid_assignments);
         
         error_log('PromoBarX: Save assignments result: ' . ($result ? 'true' : 'false'));
         
@@ -865,6 +904,25 @@ class PromoBarX_Manager {
             wp_send_json_error('Some tables could not be created: ' . print_r($results, true));
         } else {
             wp_send_json_success('All tables created successfully: ' . print_r($results, true));
+        }
+    }
+
+    /**
+     * AJAX force recreate assignments table
+     */
+    public function ajax_force_recreate_assignments_table() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $result = $this->database->force_recreate_assignments_table();
+        
+        if ($result) {
+            wp_send_json_success('Assignments table recreated successfully');
+        } else {
+            wp_send_json_error('Failed to recreate assignments table: ' . $this->database->wpdb->last_error);
         }
     }
 }
