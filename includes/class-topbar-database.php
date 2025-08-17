@@ -425,7 +425,7 @@ class PromoBarX_Database {
      * Create or update promo bar
      */
     public function save_promo_bar($data) {
-        error_log('PromoBarX Database: Save method called with data: ' . print_r($data, true));
+        error_log('PromoBarX Database: Save method called with data: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' . print_r($data, true));
         
         // Test database connection first
         if (!$this->test_database_connection()) {
@@ -435,9 +435,49 @@ class PromoBarX_Database {
         
         // Extract assignments data before sanitization
         $assignments_data = [];
-        if (isset($data['assignments']) && is_array($data['assignments'])) {
-            $assignments_data = $data['assignments'];
+        if (isset($data['assignments'])) {
+            error_log('PromoBarX Database: Assignments field type: ' . gettype($data['assignments']));
+            error_log('PromoBarX Database: Assignments field content: ' . print_r($data['assignments'], true));
+            
+            if (is_array($data['assignments'])) {
+                error_log('PromoBarX Database: Assignments is array, using directly');
+                $assignments_data = $data['assignments'];
+            } elseif (is_string($data['assignments'])) {
+                error_log('PromoBarX Database: Assignments is string, attempting JSON decode');
+                
+                // First attempt: direct JSON decode
+                $decoded = json_decode($data['assignments'], true);
+                error_log('PromoBarX Database: First JSON decode result: ' . print_r($decoded, true));
+                error_log('PromoBarX Database: First JSON last error: ' . json_last_error_msg());
+                
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    error_log('PromoBarX Database: First JSON decode successful, using decoded data');
+                    $assignments_data = $decoded;
+                } else {
+                    // Second attempt: try with stripslashes (in case of double encoding)
+                    error_log('PromoBarX Database: First decode failed, trying with stripslashes');
+                    $stripped = stripslashes($data['assignments']);
+                    error_log('PromoBarX Database: Stripped string: ' . $stripped);
+                    
+                    $decoded = json_decode($stripped, true);
+                    error_log('PromoBarX Database: Second JSON decode result: ' . print_r($decoded, true));
+                    error_log('PromoBarX Database: Second JSON last error: ' . json_last_error_msg());
+                    
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        error_log('PromoBarX Database: Second JSON decode successful, using decoded data');
+                        $assignments_data = $decoded;
+                    } else {
+                        error_log('PromoBarX Database: Both JSON decode attempts failed');
+                    }
+                }
+            } else {
+                error_log('PromoBarX Database: Assignments is neither array nor string, type: ' . gettype($data['assignments']));
+            }
+        } else {
+            error_log('PromoBarX Database: Assignments field not set in data');
         }
+
+        error_log('PromoBarX Database: Final assignments_data: ' . print_r($assignments_data, true));
         
         // Remove assignments from main data to avoid conflicts
         unset($data['assignments']);
@@ -506,7 +546,7 @@ class PromoBarX_Database {
                 return false;
             }
 
-            // error_log('PromoBarX Database: Assignments data:xxxxxxxxxxxxxxxxxxxxx ' . print_r($assignments_data, true));
+           
             
             // Update assignments if provided
             if (!empty($assignments_data)) {

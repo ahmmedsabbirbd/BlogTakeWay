@@ -559,6 +559,7 @@ class PromoBarX_Manager {
         error_log('PromoBarX: Data to save: ' . print_r($data, true));
         
         try {
+            error_log('PromoBarX: Data to save: cccccccccccccccccccccccccccccccccccccccccccc' . print_r($data, true));
             $result = $this->database->save_promo_bar($data);
             error_log('PromoBarX: Save result: ' . print_r($result, true));
             
