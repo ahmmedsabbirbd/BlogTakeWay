@@ -395,6 +395,28 @@ class PromoBarX_Database {
         error_log('PromoBarX Database: Query result: ' . print_r($result, true));
         error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
         
+        if ($result) {
+            // Get assignments for this promo bar
+            $assignments = $this->get_assignments($id);
+            
+            // Convert assignments to array format for frontend
+            $assignments_array = [];
+            foreach ($assignments as $assignment) {
+                $assignments_array[] = [
+                    'id' => $assignment->id,
+                    'assignment_type' => $assignment->assignment_type,
+                    'target_id' => $assignment->target_id,
+                    'target_value' => $assignment->target_value,
+                    'priority' => $assignment->priority
+                ];
+            }
+            
+            // Add assignments to the result
+            $result->assignments = $assignments_array;
+            
+            error_log('PromoBarX Database: Added assignments to result: ' . print_r($assignments_array, true));
+        }
+        
         return $result;
     }
 
@@ -865,7 +887,7 @@ class PromoBarX_Database {
         $assignments = $this->wpdb->get_results($sql);
         
         error_log('PromoBarX Database: Found ' . count($assignments) . ' assignments');
-        error_log('PromoBarX Database: Assignments: ' . print_r($assignments, true));
+        error_log('PromoBarX Database: Assignments: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' . print_r($assignments, true));
         
         return $assignments;
     }

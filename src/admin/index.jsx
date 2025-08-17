@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Show on Pages</label>
                                 <select id="promo-assignment-type" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="">Choose assignment type...</option>
                                     <option value="global">All Pages (Global)</option>
                                     <option value="specific">Specific Pages</option>
                                     <option value="post_type">All Posts/Pages</option>
@@ -296,6 +297,11 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryOption.style.display = 'none';
             customUrlOption.style.display = 'none';
             assignmentOptions.style.display = 'none';
+            
+            // Handle empty value (default option)
+            if (!assignmentType || assignmentType === '') {
+                return; // Do nothing, just hide all options
+            }
             
             if (assignmentType === 'global') {
                 // Add global assignment
