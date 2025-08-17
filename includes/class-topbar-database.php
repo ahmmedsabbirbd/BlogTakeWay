@@ -19,7 +19,11 @@ class PromoBarX_Database {
      * Initialize the database class
      */
     public function __construct() {
+        global $wpdb;
+        $this->wpdb = $wpdb;
+        $this->table_prefix = $this->wpdb->prefix;
         $this->create_tables();
+        $this->migrate_assignment_schema();
     }
 
     /**
@@ -66,9 +70,6 @@ class PromoBarX_Database {
      * Create required database tables
      */
     public function create_tables() {
-        global $wpdb;
-        $this->wpdb = $wpdb;
-        $this->table_prefix = $this->wpdb->prefix;
         $charset_collate = $this->wpdb->get_charset_collate();
         
         error_log('PromoBarX Database: Creating tables with prefix: ' . $this->table_prefix);
@@ -84,19 +85,24 @@ class PromoBarX_Database {
             countdown_enabled tinyint(1) DEFAULT 0,
             countdown_date datetime,
             countdown_style JSON,
+            assignment_type enum('global', 'page', 'post_type', 'category', 'tag', 'custom') DEFAULT 'global',
+            target_id bigint(20) DEFAULT 0,
+            target_value varchar(255) DEFAULT '',
+            priority int(11) DEFAULT 0,
             close_button_enabled tinyint(1) DEFAULT 1,
             close_button_style JSON,
             styling JSON,
             template_id bigint(20) DEFAULT 0,
             status enum('draft', 'active', 'paused', 'archived') DEFAULT 'draft',
-            priority int(11) DEFAULT 0,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             created_by bigint(20),
             PRIMARY KEY (id),
             KEY status (status),
             KEY priority (priority),
-            KEY template_id (template_id)
+            KEY template_id (template_id),
+            KEY assignment_type (assignment_type),
+            KEY target_id (target_id)
         ) $charset_collate;";
 
         error_log('PromoBarX Database: Creating promo_bars table');
@@ -139,23 +145,6 @@ class PromoBarX_Database {
             FOREIGN KEY (promo_bar_id) REFERENCES {$this->table_prefix}promo_bars(id) ON DELETE CASCADE
         ) $charset_collate;";
 
-        // Page assignments table
-        $sql_assignments = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bar_assignments (
-            id bigint(20) NOT NULL AUTO_INCREMENT,
-            promo_bar_id bigint(20) NOT NULL,
-            assignment_type enum('global', 'page', 'post_type', 'category', 'tag', 'custom') NOT NULL,
-            target_id bigint(20),
-            target_value varchar(255),
-            priority int(11) DEFAULT 0,
-            created_at datetime DEFAULT CURRENT_TIMESTAMP,
-            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            KEY promo_bar_id (promo_bar_id),
-            KEY assignment_type (assignment_type),
-            KEY target_id (target_id),
-            FOREIGN KEY (promo_bar_id) REFERENCES {$this->table_prefix}promo_bars(id) ON DELETE CASCADE
-        ) $charset_collate;";
-
         // Analytics table
         $sql_analytics = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bar_analytics (
             id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -176,11 +165,25 @@ class PromoBarX_Database {
         ) $charset_collate;";
 
         // Execute table creation
-        $this->wpdb->query($sql_promo_bars);
-        $this->wpdb->query($sql_templates);
-        $this->wpdb->query($sql_schedules);
-        $this->wpdb->query($sql_assignments);
-        $this->wpdb->query($sql_analytics);
+        error_log('PromoBarX Database: Executing table creation queries');
+        
+        $result1 = $this->wpdb->query($sql_promo_bars);
+        error_log('PromoBarX Database: promo_bars table creation result: ' . $result1);
+        
+        $result2 = $this->wpdb->query($sql_templates);
+        error_log('PromoBarX Database: templates table creation result: ' . $result2);
+        
+        $result3 = $this->wpdb->query($sql_schedules);
+        error_log('PromoBarX Database: schedules table creation result: ' . $result3);
+        
+        $result4 = $this->wpdb->query($sql_assignments);
+        error_log('PromoBarX Database: assignments table creation result: ' . $result4);
+        
+        $result5 = $this->wpdb->query($sql_analytics);
+        error_log('PromoBarX Database: analytics table creation result: ' . $result5);
+        
+        error_log('PromoBarX Database: All table creation results: ' . $result1 . ', ' . $result2 . ', ' . $result3 . ', ' . $result4 . ', ' . $result5);
+        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
 
         // Insert default templates
         $this->insert_default_templates();
@@ -284,6 +287,10 @@ class PromoBarX_Database {
                     'font_weight' => '600',
                     'font_family' => 'monospace'
                 ]),
+                'assignment_type' => 'global',
+                'target_id' => 0,
+                'target_value' => '',
+                'priority' => 10,
                 'close_button_enabled' => 1,
                 'close_button_style' => json_encode([
                     'color' => '#6b7280',
@@ -314,19 +321,7 @@ class PromoBarX_Database {
             if ($result) {
                 $promo_bar_id = $this->wpdb->insert_id;
                 
-                // Add global assignment for home page
-                $this->wpdb->insert(
-                    $this->table_prefix . 'promo_bar_assignments',
-                    [
-                        'promo_bar_id' => $promo_bar_id,
-                        'assignment_type' => 'global',
-                        'target_id' => 0,
-                        'target_value' => '',
-                        'priority' => 10,
-                        'created_at' => current_time('mysql'),
-                        'updated_at' => current_time('mysql')
-                    ]
-                );
+            
                 
                 error_log('PromoBarX: Default promo bar created with ID: ' . $promo_bar_id);
             } else {
@@ -388,6 +383,29 @@ class PromoBarX_Database {
     }
 
     /**
+     * Update promo bar
+     */
+    public function update_promo_bar($id, $data) {
+        error_log('PromoBarX Database: Updating promo bar with ID: ' . $id);
+        error_log('PromoBarX Database: Update data: ' . print_r($data, true));
+        
+        $data['updated_at'] = current_time('mysql');
+        
+        $result = $this->wpdb->update(
+            $this->table_prefix . 'promo_bars',
+            $data,
+            ['id' => $id],
+            null,
+            ['%d']
+        );
+        
+        error_log('PromoBarX Database: Update result: ' . print_r($result, true));
+        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        
+        return $result !== false;
+    }
+
+    /**
      * Create or update promo bar
      */
     public function save_promo_bar($data) {
@@ -415,12 +433,15 @@ class PromoBarX_Database {
             'countdown_enabled' => 0,
             'countdown_date' => null,
             'countdown_style' => json_encode([]),
+            'assignment_type' => 'global',
+            'target_id' => 0,
+            'target_value' => '',
+            'priority' => 0,
             'close_button_enabled' => 1,
             'close_button_style' => json_encode([]),
             'styling' => json_encode([]),
             'template_id' => 0,
             'status' => 'draft',
-            'priority' => 0,
             'created_by' => get_current_user_id()
         ];
 
@@ -497,7 +518,7 @@ class PromoBarX_Database {
         $sanitized = [];
         
         // Sanitize basic text fields
-        $text_fields = ['name', 'title', 'cta_text', 'cta_url'];
+        $text_fields = ['name', 'title', 'cta_text', 'cta_url', 'target_value'];
         foreach ($text_fields as $field) {
             if (isset($data[$field])) {
                 $sanitized[$field] = sanitize_text_field($data[$field]);
@@ -505,7 +526,7 @@ class PromoBarX_Database {
         }
         
         // Sanitize numeric fields
-        $numeric_fields = ['template_id', 'priority', 'created_by'];
+        $numeric_fields = ['template_id', 'priority', 'created_by', 'target_id'];
         foreach ($numeric_fields as $field) {
             if (isset($data[$field])) {
                 $sanitized[$field] = intval($data[$field]);
@@ -524,6 +545,12 @@ class PromoBarX_Database {
         if (isset($data['status'])) {
             $allowed_statuses = ['draft', 'active', 'paused', 'archived'];
             $sanitized['status'] = in_array($data['status'], $allowed_statuses) ? $data['status'] : 'draft';
+        }
+        
+        // Sanitize assignment_type field
+        if (isset($data['assignment_type'])) {
+            $allowed_assignment_types = ['global', 'page', 'post_type', 'category', 'tag', 'custom'];
+            $sanitized['assignment_type'] = in_array($data['assignment_type'], $allowed_assignment_types) ? $data['assignment_type'] : 'global';
         }
         
         // Sanitize date fields
@@ -635,32 +662,16 @@ class PromoBarX_Database {
     }
 
     /**
-     * Get assignments for a promo bar
-     */
-    public function get_assignments($promo_bar_id) {
-        $sql = $this->wpdb->prepare(
-            "SELECT * FROM {$this->table_prefix}promo_bar_assignments 
-            WHERE promo_bar_id = %d 
-            ORDER BY priority DESC, created_at ASC",
-            $promo_bar_id
-        );
-
-        return $this->wpdb->get_results($sql);
-    }
-
-    /**
      * Save assignments for a promo bar
      */
     public function save_assignments($promo_bar_id, $assignments) {
-        // First, delete existing assignments
-        $this->wpdb->delete(
-            $this->table_prefix . 'promo_bar_assignments',
-            ['promo_bar_id' => $promo_bar_id],
-            ['%d']
-        );
+        error_log('PromoBarX Database: Saving assignments for promo bar ID: ' . $promo_bar_id);
+        error_log('PromoBarX Database: Assignments data: ' . print_r($assignments, true));
+      
 
         // If no assignments provided, we're done
         if (empty($assignments)) {
+            error_log('PromoBarX Database: No assignments provided, returning true');
             return true;
         }
 
@@ -680,13 +691,47 @@ class PromoBarX_Database {
             $placeholders[] = "(%d, %s, %d, %s, %d, %s, %s)";
         }
 
-        $sql = "INSERT INTO {$this->table_prefix}promo_bar_assignments 
-                (promo_bar_id, assignment_type, target_id, target_value, priority, created_at, updated_at) 
-                VALUES " . implode(', ', $placeholders);
+
+
+        error_log('PromoBarX Database: Insert SQL: ' . $sql);
+        error_log('PromoBarX Database: Insert values: ' . print_r($values, true));
 
         $result = $this->wpdb->query($this->wpdb->prepare($sql, $values));
+        
+        error_log('PromoBarX Database: Insert result: ' . $result);
+        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
 
         return $result !== false;
+    }
+
+    /**
+     * Force create tables (useful for debugging)
+     */
+    public function force_create_tables() {
+        error_log('PromoBarX Database: Force creating tables');
+        $this->create_tables();
+        
+        // Verify tables were created
+        $tables = [
+            'promo_bars',
+            'promo_bar_templates', 
+            'promo_bar_schedules',
+            'promo_bar_analytics'
+        ];
+        
+        $results = [];
+        foreach ($tables as $table) {
+            $table_exists = $this->wpdb->get_var(
+                $this->wpdb->prepare(
+                    "SHOW TABLES LIKE %s",
+                    $this->table_prefix . $table
+                )
+            );
+            $results[$table] = $table_exists ? 'EXISTS' : 'MISSING';
+        }
+        
+        error_log('PromoBarX Database: Table creation verification: ' . print_r($results, true));
+        return $results;
     }
 
     /**
@@ -732,5 +777,134 @@ class PromoBarX_Database {
         }
 
         return $summary;
+    }
+
+    /**
+     * Migrate database schema to add new assignment columns and remove old assignments column
+     */
+    public function migrate_assignment_schema() {
+        error_log('PromoBarX Database: Starting assignment schema migration');
+        
+        // Check if migration is needed
+        $columns = $this->wpdb->get_results("DESCRIBE {$this->table_prefix}promo_bars");
+        $column_names = array_column($columns, 'Field');
+        
+        $migration_needed = false;
+        
+        // Check if new columns don't exist
+        if (!in_array('assignment_type', $column_names)) {
+            $migration_needed = true;
+        }
+        if (!in_array('target_id', $column_names)) {
+            $migration_needed = true;
+        }
+        if (!in_array('target_value', $column_names)) {
+            $migration_needed = true;
+        }
+        if (!in_array('priority', $column_names)) {
+            $migration_needed = true;
+        }
+        
+        // Check if old assignments column exists
+        if (in_array('assignments', $column_names)) {
+            $migration_needed = true;
+        }
+        
+        if (!$migration_needed) {
+            error_log('PromoBarX Database: Migration not needed - schema is up to date');
+            return true;
+        }
+        
+        error_log('PromoBarX Database: Migration needed - proceeding with schema update');
+        
+        // Start transaction
+        $this->wpdb->query('START TRANSACTION');
+        
+        try {
+            // Step 1: Add new columns
+            $alter_queries = [];
+            
+            if (!in_array('assignment_type', $column_names)) {
+                $alter_queries[] = "ADD COLUMN assignment_type enum('global', 'page', 'post_type', 'category', 'tag', 'custom') DEFAULT 'global'";
+            }
+            
+            if (!in_array('target_id', $column_names)) {
+                $alter_queries[] = "ADD COLUMN target_id bigint(20) DEFAULT 0";
+            }
+            
+            if (!in_array('target_value', $column_names)) {
+                $alter_queries[] = "ADD COLUMN target_value varchar(255) DEFAULT ''";
+            }
+            
+            if (!in_array('priority', $column_names)) {
+                $alter_queries[] = "ADD COLUMN priority int(11) DEFAULT 0";
+            }
+            
+            // Execute alter queries
+            if (!empty($alter_queries)) {
+                $alter_sql = "ALTER TABLE {$this->table_prefix}promo_bars " . implode(', ', $alter_queries);
+                error_log('PromoBarX Database: Executing alter query: ' . $alter_sql);
+                
+                $result = $this->wpdb->query($alter_sql);
+                if ($result === false) {
+                    throw new Exception('Failed to add new columns: ' . $this->wpdb->last_error);
+                }
+            }
+            
+            // Step 2: Migrate data from old assignments column to new columns
+            if (in_array('assignments', $column_names)) {
+                error_log('PromoBarX Database: Migrating data from assignments column');
+                
+                $promo_bars = $this->wpdb->get_results("SELECT id, assignments FROM {$this->table_prefix}promo_bars WHERE assignments IS NOT NULL AND assignments != 'null' AND assignments != '[]'");
+                
+                foreach ($promo_bars as $promo_bar) {
+                    $assignments = json_decode($promo_bar->assignments, true);
+                    
+                    if (is_array($assignments) && !empty($assignments)) {
+                        // Use the first assignment as the primary assignment
+                        $primary_assignment = $assignments[0];
+                        
+                        $update_data = [
+                            'assignment_type' => isset($primary_assignment['assignment_type']) ? $primary_assignment['assignment_type'] : 'global',
+                            'target_id' => isset($primary_assignment['target_id']) ? intval($primary_assignment['target_id']) : 0,
+                            'target_value' => isset($primary_assignment['target_value']) ? $primary_assignment['target_value'] : '',
+                            'priority' => isset($primary_assignment['priority']) ? intval($primary_assignment['priority']) : 0
+                        ];
+                        
+                        $result = $this->wpdb->update(
+                            $this->table_prefix . 'promo_bars',
+                            $update_data,
+                            ['id' => $promo_bar->id],
+                            ['%s', '%d', '%s', '%d'],
+                            ['%d']
+                        );
+                        
+                        if ($result === false) {
+                            error_log('PromoBarX Database: Failed to migrate data for promo bar ID: ' . $promo_bar->id);
+                        }
+                    }
+                }
+                
+                // Step 3: Remove old assignments column
+                error_log('PromoBarX Database: Removing assignments column');
+                $drop_result = $this->wpdb->query("ALTER TABLE {$this->table_prefix}promo_bars DROP COLUMN assignments");
+                
+                if ($drop_result === false) {
+                    throw new Exception('Failed to remove assignments column: ' . $this->wpdb->last_error);
+                }
+            }
+            
+            // Commit transaction
+            $this->wpdb->query('COMMIT');
+            
+            error_log('PromoBarX Database: Migration completed successfully');
+            return true;
+            
+        } catch (Exception $e) {
+            // Rollback transaction
+            $this->wpdb->query('ROLLBACK');
+            error_log('PromoBarX Database: Migration failed: ' . $e->getMessage());
+            return false;
+        }
     }
 }

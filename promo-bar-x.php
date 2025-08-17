@@ -388,6 +388,8 @@ class AISK_AI_Chatbot {
      * @return void
      */
     public function activate() {
+        error_log('PromoBarX: Plugin activation started');
+        
         // Initialize contact form if enabled
         $contact_form = AISK_Contact_Form_Handler::get_instance();
         if ( $contact_form->is_enabled() ) {
@@ -397,7 +399,10 @@ class AISK_AI_Chatbot {
         new AISK_Database();
         
         // Initialize PromoBarX database and create default promo bar
-        new PromoBarX_Database();
+        error_log('PromoBarX: Initializing PromoBarX database');
+        $promobarx_db = new PromoBarX_Database();
+        
+        error_log('PromoBarX: Plugin activation completed');
     }
 
     /**

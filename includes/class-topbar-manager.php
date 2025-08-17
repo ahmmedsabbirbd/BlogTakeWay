@@ -53,6 +53,7 @@ class PromoBarX_Manager {
         add_action('wp_ajax_promobarx_get_taxonomies', [$this, 'ajax_get_taxonomies']);
         add_action('wp_ajax_promobarx_get_assignments', [$this, 'ajax_get_assignments']);
         add_action('wp_ajax_promobarx_save_assignments', [$this, 'ajax_save_assignments']);
+        add_action('wp_ajax_promobarx_force_create_tables', [$this, 'ajax_force_create_tables']);
     }
 
     /**
@@ -120,59 +121,55 @@ class PromoBarX_Manager {
      * Calculate page match score for a promo bar
      */
     private function calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type) {
-        global $wpdb;
-        
         $score = 0;
-        $assignments = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}promo_bar_assignments WHERE promo_bar_id = %d ORDER BY priority DESC",
-            $promo_bar->id
-        ));
         
-        error_log('PromoBarX: Found ' . count($assignments) . ' assignments for promo bar ' . $promo_bar->id);
+        // Use the assignment data directly from the promo_bar object
+        $assignment_type = $promo_bar->assignment_type ?? 'global';
+        $target_id = $promo_bar->target_id ?? 0;
+        $target_value = $promo_bar->target_value ?? '';
         
-        foreach ($assignments as $assignment) {
-            error_log('PromoBarX: Assignment type: ' . $assignment->assignment_type . ', Target ID: ' . $assignment->target_id . ', Target Value: ' . $assignment->target_value);
-            switch ($assignment->assignment_type) {
-                case 'global':
-                    $score = 100;
-                    error_log('PromoBarX: Global assignment - score set to 100');
-                    break;
-                    
-                case 'page':
-                    if ($assignment->target_id == $post_id) {
-                        $score = 90;
-                        error_log('PromoBarX: Page match - score set to 90');
-                    }
-                    break;
-                    
-                case 'post_type':
-                    if ($assignment->target_value === $post_type) {
-                        $score = 80;
-                        error_log('PromoBarX: Post type match - score set to 80');
-                    }
-                    break;
-                    
-                case 'category':
-                    if (has_category($assignment->target_value, $post_id)) {
-                        $score = 70;
-                        error_log('PromoBarX: Category match - score set to 70');
-                    }
-                    break;
-                    
-                case 'tag':
-                    if (has_tag($assignment->target_value, $post_id)) {
-                        $score = 60;
-                        error_log('PromoBarX: Tag match - score set to 60');
-                    }
-                    break;
-                    
-                case 'custom':
-                    if ($this->matches_custom_condition($assignment->target_value, $current_url, $post_id)) {
-                        $score = 50;
-                        error_log('PromoBarX: Custom condition match - score set to 50');
-                    }
-                    break;
-            }
+        error_log('PromoBarX: Assignment type: ' . $assignment_type . ', Target ID: ' . $target_id . ', Target Value: ' . $target_value);
+        
+        switch ($assignment_type) {
+            case 'global':
+                $score = 100;
+                error_log('PromoBarX: Global assignment - score set to 100');
+                break;
+                
+            case 'page':
+                if ($target_id == $post_id) {
+                    $score = 90;
+                    error_log('PromoBarX: Page match - score set to 90');
+                }
+                break;
+                
+            case 'post_type':
+                if ($target_value === $post_type) {
+                    $score = 80;
+                    error_log('PromoBarX: Post type match - score set to 80');
+                }
+                break;
+                
+            case 'category':
+                if (has_category($target_value, $post_id)) {
+                    $score = 70;
+                    error_log('PromoBarX: Category match - score set to 70');
+                }
+                break;
+                
+            case 'tag':
+                if (has_tag($target_value, $post_id)) {
+                    $score = 60;
+                    error_log('PromoBarX: Tag match - score set to 60');
+                }
+                break;
+                
+            case 'custom':
+                if ($this->matches_custom_condition($target_value, $current_url, $post_id)) {
+                    $score = 50;
+                    error_log('PromoBarX: Custom condition match - score set to 50');
+                }
+                break;
         }
         
         error_log('PromoBarX: Final score for promo bar ' . $promo_bar->id . ': ' . $score);
@@ -780,14 +777,33 @@ class PromoBarX_Manager {
         }
         
         $promo_bar_id = intval($_POST['promo_bar_id']);
-        $assignments = $this->database->get_assignments($promo_bar_id);
-        wp_send_json_success($assignments);
+        
+        // Get the promo bar with assignment data
+        $promo_bar = $this->database->get_promo_bar($promo_bar_id);
+        
+        if ($promo_bar) {
+            // Create assignment object from promo bar data
+            $assignment = [
+                'id' => $promo_bar_id,
+                'assignment_type' => $promo_bar->assignment_type ?? 'global',
+                'target_id' => $promo_bar->target_id ?? 0,
+                'target_value' => $promo_bar->target_value ?? '',
+                'priority' => $promo_bar->priority ?? 0
+            ];
+            
+            wp_send_json_success([$assignment]);
+        } else {
+            wp_send_json_success([]);
+        }
     }
 
     /**
      * AJAX save assignments for a promo bar
      */
     public function ajax_save_assignments() {
+        error_log('PromoBarX: AJAX save assignments called');
+        error_log('PromoBarX: POST data: ' . print_r($_POST, true));
+        
         check_ajax_referer('promobarx_admin_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
@@ -797,16 +813,58 @@ class PromoBarX_Manager {
         $promo_bar_id = intval($_POST['promo_bar_id']);
         $assignments = isset($_POST['assignments']) ? $_POST['assignments'] : [];
         
-        if (!is_array($assignments)) {
+        error_log('PromoBarX: Promo bar ID: ' . $promo_bar_id);
+        error_log('PromoBarX: Raw assignments: ' . print_r($assignments, true));
+        
+        // If assignments is a JSON string, decode it
+        if (is_string($assignments)) {
+            $assignments = json_decode($assignments, true);
+            error_log('PromoBarX: Decoded assignments: ' . print_r($assignments, true));
+        }
+        
+        if (!is_array($assignments) || empty($assignments)) {
+            error_log('PromoBarX: Invalid assignments data type: ' . gettype($assignments));
             wp_send_json_error('Invalid assignments data');
         }
         
-        $result = $this->database->save_assignments($promo_bar_id, $assignments);
+        // Use the first assignment as the primary assignment
+        $primary_assignment = $assignments[0];
+        
+        // Update the promo bar with assignment data
+        $update_data = [
+            'assignment_type' => sanitize_text_field($primary_assignment['assignment_type'] ?? 'global'),
+            'target_id' => intval($primary_assignment['target_id'] ?? 0),
+            'target_value' => sanitize_text_field($primary_assignment['target_value'] ?? ''),
+            'priority' => intval($primary_assignment['priority'] ?? 0)
+        ];
+        
+        $result = $this->database->update_promo_bar($promo_bar_id, $update_data);
+        
+        error_log('PromoBarX: Save assignments result: ' . ($result ? 'true' : 'false'));
         
         if ($result) {
             wp_send_json_success('Assignments saved successfully');
         } else {
             wp_send_json_error('Failed to save assignments');
+        }
+    }
+
+    /**
+     * AJAX force create tables
+     */
+    public function ajax_force_create_tables() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $results = $this->database->force_create_tables();
+        
+        if (in_array('MISSING', $results)) {
+            wp_send_json_error('Some tables could not be created: ' . print_r($results, true));
+        } else {
+            wp_send_json_success('All tables created successfully: ' . print_r($results, true));
         }
     }
 }
