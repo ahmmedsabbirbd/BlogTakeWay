@@ -76,21 +76,21 @@ class PromoBarX_Manager {
         $user_context = $this->get_user_context();
         error_log('PromoBarX: User context: ' . print_r($user_context, true));
         
-        // Get all active promo bars with their assignments
+        // Get all promo bars with their assignments (we'll filter by status and countdown in the loop)
         $promo_bars = $this->database->get_promo_bars_with_assignments(['status' => 'active']);
-        error_log('PromoBarX: Found ' . count($promo_bars) . ' active promo bars');
+        error_log('PromoBarX: Found ' . count($promo_bars) . ' total promo bars');
         
         $candidates = [];
         
         foreach ($promo_bars as $promo_bar) {
             error_log('PromoBarX: Checking promo bar ID: ' . $promo_bar->id . ', Name: ' . $promo_bar->name);
             
-            // Check frequency capping first
-            if ($this->is_frequency_capped($promo_bar->id, $user_context)) {
-                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' is frequency capped');
+            // Check status and countdown date first
+            if ($this->is_countdown_blocked($promo_bar->id, $user_context)) {
+                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' blocked (inactive or countdown not reached)');
                 continue;
             }
-            
+            error_log('calculate_page_match_score_xxxxxxxxxxxxxxxxxxxxxxxcccccccccccccccccccccc');
             $score = $this->calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type);
             error_log('PromoBarX: Score for promo bar ' . $promo_bar->id . ': ' . $score);
             if ($score > 0) {
@@ -119,9 +119,6 @@ class PromoBarX_Manager {
             if ($this->is_promo_bar_scheduled($selected)) {
                 error_log('PromoBarX: Promo bar is scheduled to show');
                 
-                // Track impression for frequency capping
-                $this->track_impression($selected->id);
-                
                 return $selected;
             } else {
                 error_log('PromoBarX: Promo bar is not scheduled to show');
@@ -138,13 +135,13 @@ class PromoBarX_Manager {
      */
     private function calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type) {
         $score = 0;
+        error_log('calculate_page_match_scorex_xxxxxxxxxxxxxxxxxxxxxxxxx');
         
         // Check if promo bar has assignments
         if (!isset($promo_bar->assignments) || empty($promo_bar->assignments)) {
             error_log('PromoBarX: No assignments found for promo bar ' . $promo_bar->id);
             return 0;
         }
-        
         // Check each assignment and return the highest score
         foreach ($promo_bar->assignments as $assignment) {
             $assignment_score = $this->calculate_single_assignment_score($assignment, $current_url, $post_id, $post_type);
@@ -334,49 +331,42 @@ class PromoBarX_Manager {
     }
 
     /**
-     * Check if promo bar is frequency capped
+     * Check if promo bar should be shown based on status and countdown date
      */
-    private function is_frequency_capped($promo_bar_id, $user_context) {
-        // Check session-based frequency capping
-        $session_key = 'promobarx_freq_' . $promo_bar_id;
-        if (isset($_SESSION[$session_key])) {
-            $last_impression = $_SESSION[$session_key];
-            $frequency_cap = 3600; // 1 hour default
+    private function is_countdown_blocked($promo_bar_id, $user_context) {
+        global $wpdb;
+        
+        // Get the promo bar data to check status and countdown_date
+        $promo_bar = $wpdb->get_row($wpdb->prepare(
+            "SELECT status, countdown_date FROM {$wpdb->prefix}promo_bars WHERE id = %d",
+            $promo_bar_id
+        ));
+        
+        if (!$promo_bar) {
+            return true; // If promo bar doesn't exist, block it
+        }
+        
+        // First check: Status must be 'active'
+        if ($promo_bar->status !== 'active') {
+            error_log('PromoBarX: Promo bar ' . $promo_bar_id . ' is not active. Status: ' . $promo_bar->status);
+            return true; // Block non-active promo bars
+        }
+        
+        // Second check: If countdown_date is set, current time must be greater than countdown_date
+        if (!empty($promo_bar->countdown_date)) {
+            $current_time = current_time('mysql');
+            $countdown_date = $promo_bar->countdown_date;
             
-            if ((time() - $last_impression) < $frequency_cap) {
-                return true;
+            if ($current_time <= $countdown_date) {
+                error_log('PromoBarX: Promo bar ' . $promo_bar_id . ' countdown date not reached yet. Current: ' . $current_time . ', Countdown: ' . $countdown_date);
+                return true; // Return true to skip this promo bar (countdown not reached)
             }
         }
         
-        // Check cookie-based frequency capping
-        $cookie_name = 'promobarx_freq_' . $promo_bar_id;
-        if (isset($_COOKIE[$cookie_name])) {
-            $last_impression = intval($_COOKIE[$cookie_name]);
-            $frequency_cap = 3600; // 1 hour default
-            
-            if ((time() - $last_impression) < $frequency_cap) {
-                return true;
-            }
-        }
-        
-        return false;
+        return false; // Show the promo bar (active status and countdown date has passed or no countdown)
     }
 
-    /**
-     * Track impression for frequency capping
-     */
-    private function track_impression($promo_bar_id) {
-        // Track in session
-        $session_key = 'promobarx_freq_' . $promo_bar_id;
-        $_SESSION[$session_key] = time();
-        
-        // Track in cookie (24 hours)
-        $cookie_name = 'promobarx_freq_' . $promo_bar_id;
-        setcookie($cookie_name, time(), time() + 86400, '/');
-        
-        // Track in analytics table
-        $this->log_analytics_event($promo_bar_id, 'impression');
-    }
+
 
     /**
      * Log analytics event

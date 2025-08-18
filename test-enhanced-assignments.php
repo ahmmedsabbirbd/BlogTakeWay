@@ -183,7 +183,7 @@ foreach ($test_contexts as $context_name => $context_data) {
 echo "<h2>Test 4: Testing Frequency Capping</h2>\n";
 
 $user_context = $manager->get_user_context();
-$is_capped = $manager->is_frequency_capped($promo_bar_id, $user_context);
+$is_capped = $manager->is_countdown_blocked($promo_bar_id, $user_context);
 
 echo "<p>Frequency capped for promo bar {$promo_bar_id}: " . ($is_capped ? 'Yes' : 'No') . "</p>\n";
 

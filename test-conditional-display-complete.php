@@ -183,7 +183,7 @@ echo "<h2>8. Frequency Capping Test</h2>\n";
 
 // Test frequency capping
 $user_context = $manager->get_user_context();
-$is_capped = $manager->is_frequency_capped($promo_bar_id, $user_context);
+$is_capped = $manager->is_countdown_blocked($promo_bar_id, $user_context);
 echo "<p><strong>Frequency Capped:</strong> " . ($is_capped ? "✅ YES" : "❌ NO") . "</p>\n";
 
 echo "<h2>9. System Summary</h2>\n";
