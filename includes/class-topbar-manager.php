@@ -80,7 +80,7 @@ class PromoBarX_Manager {
         $promo_bars = $this->database->get_promo_bars_with_assignments(['status' => 'active']);
         error_log('PromoBarX: Found ' . count($promo_bars) . ' total promo bars');
         
-        $candidates = [];
+        $matching_promo_bars = [];
         
         foreach ($promo_bars as $promo_bar) {
             error_log('PromoBarX: Checking promo bar ID: ' . $promo_bar->id . ', Name: ' . $promo_bar->name);
@@ -90,132 +90,118 @@ class PromoBarX_Manager {
                 error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' blocked (inactive or countdown not reached)');
                 continue;
             }
-            error_log('calculate_page_match_score_xxxxxxxxxxxxxxxxxxxxxxxcccccccccccccccccccccc');
-            $score = $this->calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type);
-            error_log('PromoBarX: Score for promo bar ' . $promo_bar->id . ': ' . $score);
-            if ($score > 0) {
-                $candidates[] = [
-                    'promo_bar' => $promo_bar,
-                    'score' => $score
-                ];
+            
+            // Check if promo bar has matching assignments (no scoring, just match/no match)
+            if ($this->has_matching_assignments($promo_bar, $current_url, $post_id, $post_type)) {
+                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' has matching assignments');
+                $matching_promo_bars[] = $promo_bar;
+            } else {
+                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' has no matching assignments');
             }
         }
         
-        error_log('PromoBarX: Found ' . count($candidates) . ' candidates');
+        error_log('PromoBarX: Found ' . count($matching_promo_bars) . ' matching promo bars');
         
-        // Sort by score and priority
-        usort($candidates, function($a, $b) {
-            if ($a['score'] !== $b['score']) {
-                return $b['score'] - $a['score'];
-            }
-            return $b['promo_bar']->priority - $a['promo_bar']->priority;
-        });
-        
-        if (!empty($candidates)) {
-            $selected = $candidates[0]['promo_bar'];
-            error_log('PromoBarX: Selected promo bar ID: ' . $selected->id . ', Name: ' . $selected->name);
+        if (!empty($matching_promo_bars)) {
+            // Sort by priority (highest priority first)
+            usort($matching_promo_bars, function($a, $b) {
+                return $b->priority - $a->priority;
+            });
+            
+            $selected = $matching_promo_bars[0];
+            error_log('PromoBarX: Selected promo bar ID: ' . $selected->id . ', Name: ' . $selected->name . ', Priority: ' . $selected->priority);
             
             // Check if promo bar is scheduled
             if ($this->is_promo_bar_scheduled($selected)) {
                 error_log('PromoBarX: Promo bar is scheduled to show');
-                
                 return $selected;
             } else {
                 error_log('PromoBarX: Promo bar is not scheduled to show');
             }
         } else {
-            error_log('PromoBarX: No candidates found');
+            error_log('PromoBarX: No matching promo bars found');
         }
         
         return null;
     }
 
     /**
-     * Calculate page match score for a promo bar
+     * Check if promo bar has matching assignments
      */
-    private function calculate_page_match_score($promo_bar, $current_url, $post_id, $post_type) {
-        $score = 0;
-        error_log('calculate_page_match_scorex_xxxxxxxxxxxxxxxxxxxxxxxxx');
+    private function has_matching_assignments($promo_bar, $current_url, $post_id, $post_type) {
+        error_log('PromoBarX: Checking assignments for promo bar ' . $promo_bar->id);
         
         // Check if promo bar has assignments
         if (!isset($promo_bar->assignments) || empty($promo_bar->assignments)) {
             error_log('PromoBarX: No assignments found for promo bar ' . $promo_bar->id);
-            return 0;
+            return false;
         }
-        // Check each assignment and return the highest score
+        
+        // Check each assignment - if any match, return true
         foreach ($promo_bar->assignments as $assignment) {
-            $assignment_score = $this->calculate_single_assignment_score($assignment, $current_url, $post_id, $post_type);
-            if ($assignment_score > $score) {
-                $score = $assignment_score;
+            if ($this->assignment_matches($assignment, $current_url, $post_id, $post_type)) {
+                error_log('PromoBarX: Assignment matches for promo bar ' . $promo_bar->id);
+                return true;
             }
         }
         
-        error_log('PromoBarX: Final score for promo bar ' . $promo_bar->id . ': ' . $score);
-        return $score;
+        error_log('PromoBarX: No assignments match for promo bar ' . $promo_bar->id);
+        return false;
     }
 
     /**
-     * Calculate score for a single assignment
+     * Check if a single assignment matches the current page
      */
-    private function calculate_single_assignment_score($assignment, $current_url, $post_id, $post_type) {
-        $score = 0;
-        
+    private function assignment_matches($assignment, $current_url, $post_id, $post_type) {
         $assignment_type = $assignment['assignment_type'] ?? 'global';
         $target_id = $assignment['target_id'] ?? 0;
         $target_value = $assignment['target_value'] ?? '';
-        $priority = $assignment['priority'] ?? 0;
         
-        error_log('PromoBarX: Assignment type: ' . $assignment_type . ', Target ID: ' . $target_id . ', Target Value: ' . $target_value);
+        error_log('PromoBarX: Checking assignment type: ' . $assignment_type . ', Target ID: ' . $target_id . ', Target Value: ' . $target_value);
         
         switch ($assignment_type) {
             case 'global':
-                $score = 100;
-                error_log('PromoBarX: Global assignment - score set to 100');
-                break;
+                error_log('PromoBarX: Global assignment - matches all pages');
+                return true;
                 
             case 'page':
                 if ($target_id == $post_id) {
-                    $score = 90;
-                    error_log('PromoBarX: Page match - score set to 90');
+                    error_log('PromoBarX: Page match - target ID matches current post ID');
+                    return true;
                 }
                 break;
                 
             case 'post_type':
                 if ($target_value === $post_type) {
-                    $score = 80;
-                    error_log('PromoBarX: Post type match - score set to 80');
+                    error_log('PromoBarX: Post type match - target value matches current post type');
+                    return true;
                 }
                 break;
                 
             case 'category':
                 if (has_category($target_value, $post_id)) {
-                    $score = 70;
-                    error_log('PromoBarX: Category match - score set to 70');
+                    error_log('PromoBarX: Category match - post has the specified category');
+                    return true;
                 }
                 break;
                 
             case 'tag':
                 if (has_tag($target_value, $post_id)) {
-                    $score = 60;
-                    error_log('PromoBarX: Tag match - score set to 60');
+                    error_log('PromoBarX: Tag match - post has the specified tag');
+                    return true;
                 }
                 break;
                 
             case 'custom':
                 if ($this->matches_custom_condition($target_value, $current_url, $post_id)) {
-                    $score = 50;
-                    error_log('PromoBarX: Custom condition match - score set to 50');
+                    error_log('PromoBarX: Custom condition match - URL contains the specified condition');
+                    return true;
                 }
                 break;
         }
         
-        // Add priority bonus (0-10 additional points)
-        $priority_bonus = min($priority, 10);
-        $score += $priority_bonus;
-        
-        error_log('PromoBarX: Final assignment score: ' . $score . ' (base: ' . ($score - $priority_bonus) . ', priority bonus: ' . $priority_bonus . ')');
-        
-        return $score;
+        error_log('PromoBarX: Assignment does not match');
+        return false;
     }
 
     /**
