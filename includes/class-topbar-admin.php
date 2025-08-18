@@ -22,7 +22,7 @@ if ( ! defined('ABSPATH') ) {
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
  * @link     https://aisk.com
  */
-class AISK_Admin {
+class TOP_Admin {
 
 
     private $plugin_slug = 'promo-bar-x';
@@ -33,7 +33,7 @@ class AISK_Admin {
      *
      * @since 1.0.0
      *
-     * @return AISK_Admin Instance of the class
+     * @return TOP_Admin Instance of the class
      */
     public static function get_instance() {
         if ( null === self::$instance ) {
@@ -142,7 +142,7 @@ class AISK_Admin {
         }
 
         // First load the common chat widget assets
-        AISK_Scripts::load_chat_widget_assets();
+        // AISK_Scripts::load_chat_widget_assets();
 
         // Then load admin-specific assets
         wp_enqueue_media();
@@ -414,4 +414,4 @@ class AISK_Admin {
     }
 }
 
-AISK_Admin::get_instance();
+TOP_Admin::get_instance();
