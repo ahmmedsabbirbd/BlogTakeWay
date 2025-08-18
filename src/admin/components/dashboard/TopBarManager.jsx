@@ -165,6 +165,13 @@ const TopBarManager = () => {
         return new Date(dateString).toLocaleDateString();
     };
 
+    const getMaxPriority = (assignments) => {
+        if (!assignments || assignments.length === 0) {
+            return 0;
+        }
+        return Math.max(...assignments.map(a => parseInt(a.priority) || 0));
+    };
+
     // Loading state
     if (loading) {
         return (
@@ -288,7 +295,9 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Assignments
                                             </th>
-
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Priority
+                                            </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Created
                                             </th>
@@ -314,9 +323,17 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                                     {getStatusBadge(promoBar.status)}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <AssignmentSummary promoBarId={promoBar.id} />
+                                                    <AssignmentSummary assignments={promoBar.assignments} />
                                                 </td>
-
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        getMaxPriority(promoBar.assignments) > 0 
+                                                            ? 'bg-blue-100 text-blue-800' 
+                                                            : 'bg-gray-100 text-gray-800'
+                                                    }`}>
+                                                        {getMaxPriority(promoBar.assignments)}
+                                                    </span>
+                                                </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {formatDate(promoBar.created_at)}
                                                 </td>
@@ -451,49 +468,8 @@ const QuickTemplatesTab = ({ onTemplateSelect }) => {
 };
 
 // Assignment Summary Component
-const AssignmentSummary = ({ promoBarId }) => {
-    const [assignments, setAssignments] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        loadAssignments();
-    }, [promoBarId]);
-
-    const loadAssignments = async () => {
-        console.log('AssignmentSummary: Loading assignments for promo bar:', promoBarId);
-        
-        try {
-            const body = `action=promobarx_get_assignments&promo_bar_id=${promoBarId}&nonce=${window.promobarxAdmin.nonce}`;
-            console.log('AssignmentSummary: Request body:', body);
-            
-            const response = await fetch(window.promobarxAdmin.ajaxurl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: body
-            });
-            
-            const data = await response.json();
-            console.log('AssignmentSummary: Response:', data);
-            
-            if (data.success) {
-                setAssignments(data.data || []);
-            } else {
-                console.error('AssignmentSummary: Failed to load assignments:', data);
-            }
-        } catch (error) {
-            console.error('AssignmentSummary: Error loading assignments:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return <span className="text-gray-400">Loading...</span>;
-    }
-
-    if (assignments.length === 0) {
+const AssignmentSummary = ({ assignments }) => {
+    if (!assignments || assignments.length === 0) {
         return <span className="text-gray-400">No assignments</span>;
     }
 
@@ -502,7 +478,14 @@ const AssignmentSummary = ({ promoBarId }) => {
             case 'global':
                 return 'All Pages';
             case 'page':
-                return `Page: ${assignment.target_value || 'Unknown'}`;
+                // Try to get the actual page title
+                if (assignment.target_value && assignment.target_value !== '') {
+                    return `Page: ${assignment.target_value}`;
+                } else if (assignment.target_id && assignment.target_id !== '0') {
+                    return `Page ID: ${assignment.target_id}`;
+                } else {
+                    return 'Page: Unknown';
+                }
             case 'post_type':
                 return `All ${assignment.target_value || 'Posts'}`;
             case 'category':

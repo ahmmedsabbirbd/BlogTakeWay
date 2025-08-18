@@ -111,6 +111,70 @@ const VanillaTopBarManager = ({ containerId }) => {
         return new Date(dateString).toLocaleDateString();
     };
 
+    const formatAssignmentType = (assignmentType) => {
+        const types = {
+            'global': 'Global',
+            'page': 'Specific Page',
+            'post_type': 'Post Type',
+            'category': 'Category',
+            'tag': 'Tag',
+            'custom': 'Custom URL'
+        };
+        return types[assignmentType] || assignmentType;
+    };
+
+    const formatAssignmentValue = (assignment) => {
+        if (assignment.assignment_type === 'global') {
+            return 'All Pages';
+        } else if (assignment.assignment_type === 'page') {
+            // Try to get the actual page title
+            if (assignment.target_value && assignment.target_value !== '') {
+                return assignment.target_value;
+            } else if (assignment.target_id && assignment.target_id !== '0') {
+                return `Page ID: ${assignment.target_id}`;
+            } else {
+                return 'Unknown Page';
+            }
+        } else if (assignment.assignment_type === 'post_type') {
+            return assignment.target_value || 'All Posts';
+        } else if (assignment.assignment_type === 'category') {
+            return assignment.target_value || `Category ID: ${assignment.target_id}`;
+        } else if (assignment.assignment_type === 'tag') {
+            return assignment.target_value || `Tag ID: ${assignment.target_id}`;
+        } else if (assignment.assignment_type === 'custom') {
+            return assignment.target_value || 'Custom Pattern';
+        }
+        return assignment.target_value || 'Unknown';
+    };
+
+    const getAssignmentDisplay = (assignments) => {
+        if (!assignments || assignments.length === 0) {
+            return <span className="text-gray-400 italic">No assignments</span>;
+        }
+
+        return (
+            <div className="space-y-1">
+                {assignments.map((assignment, index) => (
+                    <div key={index} className="text-xs">
+                        <span className="font-medium text-gray-700">
+                            {formatAssignmentType(assignment.assignment_type)}:
+                        </span>
+                        <span className="text-gray-600 ml-1">
+                            {formatAssignmentValue(assignment)}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    const getMaxPriority = (assignments) => {
+        if (!assignments || assignments.length === 0) {
+            return 0;
+        }
+        return Math.max(...assignments.map(a => parseInt(a.priority) || 0));
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -185,6 +249,7 @@ const VanillaTopBarManager = ({ containerId }) => {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignments</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -200,7 +265,18 @@ const VanillaTopBarManager = ({ containerId }) => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(promoBar.status)}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{promoBar.priority}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {getAssignmentDisplay(promoBar.assignments)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                    getMaxPriority(promoBar.assignments) > 0 
+                                                        ? 'bg-blue-100 text-blue-800' 
+                                                        : 'bg-gray-100 text-gray-800'
+                                                }`}>
+                                                    {getMaxPriority(promoBar.assignments)}
+                                                </span>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(promoBar.created_at)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                 <div className="flex items-center justify-end space-x-2">

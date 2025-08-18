@@ -285,9 +285,14 @@ class PromoBarX_Database {
         $where_clause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
         $limit_clause = $args['limit'] > 0 ? 'LIMIT ' . intval($args['limit']) : '';
 
-        // Use LEFT JOIN to get priority from assignments table
+        // Use LEFT JOIN to get priority and assignment data from assignments table
         $sql = "SELECT pb.*, 
-                       COALESCE(MAX(pa.priority), 0) as max_priority
+                       COALESCE(MAX(pa.priority), 0) as max_priority,
+                       GROUP_CONCAT(
+                           CONCAT(pa.assignment_type, ':', pa.target_id, ':', pa.target_value, ':', pa.priority)
+                           ORDER BY pa.priority DESC, pa.id ASC
+                           SEPARATOR '|'
+                       ) as assignments_data
                 FROM {$this->table_prefix}promo_bars pb
                 LEFT JOIN {$this->table_prefix}promo_bar_assignments pa ON pb.id = pa.promo_bar_id
                 {$where_clause}
@@ -298,7 +303,36 @@ class PromoBarX_Database {
             $sql = $this->wpdb->prepare($sql, $values);
         }
 
-        return $this->wpdb->get_results($sql);
+        $results = $this->wpdb->get_results($sql);
+        
+        // Process assignments data for each promo bar
+        foreach ($results as $promo_bar) {
+            if (!empty($promo_bar->assignments_data)) {
+                $assignments_array = [];
+                $assignments_parts = explode('|', $promo_bar->assignments_data);
+                
+                foreach ($assignments_parts as $part) {
+                    $assignment_parts = explode(':', $part);
+                    if (count($assignment_parts) >= 4) {
+                        $assignments_array[] = [
+                            'assignment_type' => $assignment_parts[0],
+                            'target_id' => $assignment_parts[1],
+                            'target_value' => $assignment_parts[2],
+                            'priority' => $assignment_parts[3]
+                        ];
+                    }
+                }
+                
+                $promo_bar->assignments = $assignments_array;
+            } else {
+                $promo_bar->assignments = [];
+            }
+            
+            // Remove the raw assignments_data field
+            unset($promo_bar->assignments_data);
+        }
+
+        return $results;
     }
 
     /**
@@ -727,10 +761,37 @@ class PromoBarX_Database {
         $placeholders = [];
 
         foreach ($assignments as $assignment) {
+            $target_value = isset($assignment['target_value']) ? sanitize_text_field($assignment['target_value']) : '';
+            $target_id = isset($assignment['target_id']) ? intval($assignment['target_id']) : 0;
+            
+            // For page assignments, ensure we have the page title
+            if ($assignment['assignment_type'] === 'page' && $target_id > 0 && empty($target_value)) {
+                $post = get_post($target_id);
+                if ($post) {
+                    $target_value = $post->post_title;
+                }
+            }
+            
+            // For category assignments, ensure we have the category name
+            if ($assignment['assignment_type'] === 'category' && $target_id > 0 && empty($target_value)) {
+                $term = get_term($target_id, 'category');
+                if ($term && !is_wp_error($term)) {
+                    $target_value = $term->name;
+                }
+            }
+            
+            // For tag assignments, ensure we have the tag name
+            if ($assignment['assignment_type'] === 'tag' && $target_id > 0 && empty($target_value)) {
+                $term = get_term($target_id, 'post_tag');
+                if ($term && !is_wp_error($term)) {
+                    $target_value = $term->name;
+                }
+            }
+            
             $values[] = $promo_bar_id;
             $values[] = sanitize_text_field($assignment['assignment_type']);
-            $values[] = isset($assignment['target_id']) ? intval($assignment['target_id']) : 0;
-            $values[] = isset($assignment['target_value']) ? sanitize_text_field($assignment['target_value']) : '';
+            $values[] = $target_id;
+            $values[] = $target_value;
             $values[] = isset($assignment['priority']) ? intval($assignment['priority']) : 0;
             $values[] = current_time('mysql');
             $values[] = current_time('mysql');
@@ -758,11 +819,38 @@ class PromoBarX_Database {
             // Try individual inserts as fallback
             $success_count = 0;
             foreach ($assignments as $assignment) {
+                $target_value = isset($assignment['target_value']) ? sanitize_text_field($assignment['target_value']) : '';
+                $target_id = isset($assignment['target_id']) ? intval($assignment['target_id']) : 0;
+                
+                // For page assignments, ensure we have the page title
+                if ($assignment['assignment_type'] === 'page' && $target_id > 0 && empty($target_value)) {
+                    $post = get_post($target_id);
+                    if ($post) {
+                        $target_value = $post->post_title;
+                    }
+                }
+                
+                // For category assignments, ensure we have the category name
+                if ($assignment['assignment_type'] === 'category' && $target_id > 0 && empty($target_value)) {
+                    $term = get_term($target_id, 'category');
+                    if ($term && !is_wp_error($term)) {
+                        $target_value = $term->name;
+                    }
+                }
+                
+                // For tag assignments, ensure we have the tag name
+                if ($assignment['assignment_type'] === 'tag' && $target_id > 0 && empty($target_value)) {
+                    $term = get_term($target_id, 'post_tag');
+                    if ($term && !is_wp_error($term)) {
+                        $target_value = $term->name;
+                    }
+                }
+                
                 $insert_data = [
                     'promo_bar_id' => $promo_bar_id,
                     'assignment_type' => sanitize_text_field($assignment['assignment_type']),
-                    'target_id' => isset($assignment['target_id']) ? intval($assignment['target_id']) : 0,
-                    'target_value' => isset($assignment['target_value']) ? sanitize_text_field($assignment['target_value']) : '',
+                    'target_id' => $target_id,
+                    'target_value' => $target_value,
                     'priority' => isset($assignment['priority']) ? intval($assignment['priority']) : 0,
                     'created_at' => current_time('mysql'),
                     'updated_at' => current_time('mysql')
