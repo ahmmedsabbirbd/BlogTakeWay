@@ -280,7 +280,7 @@ class AISK_AI_Chatbot {
     public function render_chat_widget() {
         // Check if we're on the contact form page
         if ( ! is_page('promo-bar-x-p') ) {
-            // Chat widget will be rendered by AISK_Scripts::load_chat_widget_assets()
+            // AISK_Scripts::load_chat_widget_assets();
         }
     }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Eye, Palette, Type, MousePointer, Clock, Link, Settings, MapPin } from 'lucide-react';
-import ColorPicker from '../ui/ColorPicker';
+import ColorPicker from '../../../components/ui/ColorPicker';
 import PageAssignmentManager from './PageAssignmentManager';
 
 const TopBarEditor = ({ promoBar, onClose, onSave }) => {
@@ -325,7 +325,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <div>
                         <h2 className="text-xl font-semibold text-gray-900">
-                            {promoBar ? 'Edit Promo Bar' : 'Create New Promo Bar'}
+                            {promoBar ? 'Edit Promo Bar x' : 'Create New Promo Bar'}
                         </h2>
                         <p className="text-sm text-gray-600">Design your promotional top bar</p>
                     </div>

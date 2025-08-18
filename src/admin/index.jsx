@@ -1,33 +1,32 @@
-// Simple TopBar Manager - No React Dependencies
-import './components/dashboard/SimpleTopBarManager.js';
+// React-based TopBar Manager
+import React from 'react';
+import ReactDOM from 'react-dom';
+import SimpleTopBarManager from './components/dashboard/SimpleTopBarManager.jsx';
+// Styles: Tailwind utilities and admin overrides
+import './styles/main.scss';
+import './styles/admin.scss';
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // Mount top bar manager using simple vanilla JavaScript
+        // Mount top bar manager using React
         const topBarManagerContainer = document.getElementById('promo-bar-x-topbar-manager');
         if (topBarManagerContainer) {
-            // Initialize the simple manager
-            window.simpleTopBarManager.init('promo-bar-x-topbar-manager');
+            // Initialize the React-based manager
+            ReactDOM.render(React.createElement(SimpleTopBarManager, { containerId: 'promo-bar-x-topbar-manager' }), topBarManagerContainer);
         }
         
         // Mount editor page if container exists
         const editorContainer = document.getElementById('promo-bar-x-editor');
         if (editorContainer) {
             // Initialize the full React-based editor
-            if (window.React && window.ReactDOM) {
-                // Import and render the EditorPage component
-                import('./components/dashboard/EditorPage.jsx').then(module => {
-                    const EditorPage = module.default;
-                    window.ReactDOM.render(window.React.createElement(EditorPage), editorContainer);
-                }).catch(error => {
-                    console.error('Error loading editor:', error);
-                    // Fallback to simple editor
-                    renderSimpleEditor(editorContainer);
-                });
-            } else {
-                // Fallback to simple editor if React is not available
+            import('./components/dashboard/TopBarEditor.jsx').then(module => {
+                const TopBarEditor = module.default;
+                ReactDOM.render(React.createElement(TopBarEditor), editorContainer);
+            }).catch(error => {
+                console.error('Error loading editor:', error);
+                // Fallback to simple editor
                 renderSimpleEditor(editorContainer);
-            }
+            });
         }
         
         function renderSimpleEditor(container) {
