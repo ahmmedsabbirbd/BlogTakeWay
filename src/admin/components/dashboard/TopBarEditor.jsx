@@ -13,7 +13,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
         countdown_date: '',
         close_button_enabled: true,
         status: 'draft',
-        priority: 0,
         template_id: 0,
         styling: {
             background: '#ffffff',
@@ -131,7 +130,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 countdown_date: promoBar.countdown_date || '',
                 close_button_enabled: Boolean(promoBar.close_button_enabled),
                 status: promoBar.status || 'draft',
-                priority: parseInt(promoBar.priority) || 0,
                 template_id: parseInt(promoBar.template_id) || 0,
                 styling: { ...formData.styling, ...mappedStyling },
                 cta_style: { ...formData.cta_style, ...ctaStyle },
@@ -663,20 +661,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                                         </select>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Priority
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={formData.priority}
-                                            onChange={(e) => handleInputChange('priority', parseInt(e.target.value))}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            min="0"
-                                            max="100"
-                                        />
-                                        <p className="text-sm text-gray-500 mt-1">Higher priority promo bars will be shown first</p>
-                                    </div>
+
                                 </div>
                             )}
                         </div>

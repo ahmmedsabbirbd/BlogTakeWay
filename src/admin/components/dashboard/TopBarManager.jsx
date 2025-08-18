@@ -288,9 +288,7 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Assignments
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Priority
-                                            </th>
+
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Created
                                             </th>
@@ -318,9 +316,7 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     <AssignmentSummary promoBarId={promoBar.id} />
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {promoBar.priority}
-                                                </td>
+
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {formatDate(promoBar.created_at)}
                                                 </td>

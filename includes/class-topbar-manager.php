@@ -103,13 +103,16 @@ class PromoBarX_Manager {
         error_log('PromoBarX: Found ' . count($matching_promo_bars) . ' matching promo bars');
         
         if (!empty($matching_promo_bars)) {
-            // Sort by priority (highest priority first)
+            // Sort by max priority from assignments (highest priority first)
             usort($matching_promo_bars, function($a, $b) {
-                return $b->priority - $a->priority;
+                $a_priority = isset($a->max_priority) ? $a->max_priority : 0;
+                $b_priority = isset($b->max_priority) ? $b->max_priority : 0;
+                return $b_priority - $a_priority;
             });
             
             $selected = $matching_promo_bars[0];
-            error_log('PromoBarX: Selected promo bar ID: ' . $selected->id . ', Name: ' . $selected->name . ', Priority: ' . $selected->priority);
+            $selected_priority = isset($selected->max_priority) ? $selected->max_priority : 0;
+            error_log('PromoBarX: Selected promo bar ID: ' . $selected->id . ', Name: ' . $selected->name . ', Priority: ' . $selected_priority);
             
             // Check if promo bar is scheduled
             if ($this->is_promo_bar_scheduled($selected)) {

@@ -85,10 +85,6 @@ class PromoBarX_Database {
             countdown_enabled tinyint(1) DEFAULT 0,
             countdown_date datetime,
             countdown_style JSON,
-            assignment_type enum('global', 'page', 'post_type', 'category', 'tag', 'custom') DEFAULT 'global',
-            target_id bigint(20) DEFAULT 0,
-            target_value varchar(255) DEFAULT '',
-            priority int(11) DEFAULT 0,
             close_button_enabled tinyint(1) DEFAULT 1,
             close_button_style JSON,
             styling JSON,
@@ -99,10 +95,7 @@ class PromoBarX_Database {
             created_by bigint(20),
             PRIMARY KEY (id),
             KEY status (status),
-            KEY priority (priority),
-            KEY template_id (template_id),
-            KEY assignment_type (assignment_type),
-            KEY target_id (target_id)
+            KEY template_id (template_id)
         ) $charset_collate;";
 
         error_log('PromoBarX Database: Creating promo_bars table');
@@ -303,10 +296,6 @@ class PromoBarX_Database {
                     'font_weight' => '600',
                     'font_family' => 'monospace'
                 ]),
-                'assignment_type' => 'global',
-                'target_id' => 0,
-                'target_value' => '',
-                'priority' => 10,
                 'close_button_enabled' => 1,
                 'close_button_style' => json_encode([
                     'color' => '#6b7280',
@@ -323,7 +312,6 @@ class PromoBarX_Database {
                 ]),
                 'template_id' => 0,
                 'status' => 'active',
-                'priority' => 10,
                 'created_by' => get_current_user_id(),
                 'created_at' => current_time('mysql'),
                 'updated_at' => current_time('mysql')
@@ -353,7 +341,7 @@ class PromoBarX_Database {
         $defaults = [
             'status' => 'active',
             'limit' => -1,
-            'orderby' => 'priority DESC, created_at DESC'
+            'orderby' => 'created_at DESC'
         ];
 
         $args = wp_parse_args($args, $defaults);
@@ -361,14 +349,21 @@ class PromoBarX_Database {
         $values = [];
 
         if ($args['status'] !== 'all') {
-            $where[] = 'status = %s';
+            $where[] = 'pb.status = %s';
             $values[] = $args['status'];
         }
 
         $where_clause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
         $limit_clause = $args['limit'] > 0 ? 'LIMIT ' . intval($args['limit']) : '';
 
-        $sql = "SELECT * FROM {$this->table_prefix}promo_bars {$where_clause} ORDER BY {$args['orderby']} {$limit_clause}";
+        // Use LEFT JOIN to get priority from assignments table
+        $sql = "SELECT pb.*, 
+                       COALESCE(MAX(pa.priority), 0) as max_priority
+                FROM {$this->table_prefix}promo_bars pb
+                LEFT JOIN {$this->table_prefix}promo_bar_assignments pa ON pb.id = pa.promo_bar_id
+                {$where_clause}
+                GROUP BY pb.id
+                ORDER BY max_priority DESC, pb.created_at DESC {$limit_clause}";
 
         if (!empty($values)) {
             $sql = $this->wpdb->prepare($sql, $values);
@@ -520,7 +515,6 @@ class PromoBarX_Database {
             'countdown_enabled' => 0,
             'countdown_date' => null,
             'countdown_style' => json_encode([]),
-            'priority' => 0,
             'close_button_enabled' => 1,
             'close_button_style' => json_encode([]),
             'styling' => json_encode([]),
@@ -645,7 +639,7 @@ class PromoBarX_Database {
         $sanitized = [];
         
         // Sanitize basic text fields
-        $text_fields = ['name', 'title', 'cta_text', 'cta_url', 'target_value'];
+        $text_fields = ['name', 'title', 'cta_text', 'cta_url'];
         foreach ($text_fields as $field) {
             if (isset($data[$field])) {
                 $sanitized[$field] = sanitize_text_field($data[$field]);
@@ -653,7 +647,7 @@ class PromoBarX_Database {
         }
         
         // Sanitize numeric fields
-        $numeric_fields = ['template_id', 'priority', 'created_by', 'target_id'];
+        $numeric_fields = ['template_id', 'created_by'];
         foreach ($numeric_fields as $field) {
             if (isset($data[$field])) {
                 $sanitized[$field] = intval($data[$field]);
@@ -672,12 +666,6 @@ class PromoBarX_Database {
         if (isset($data['status'])) {
             $allowed_statuses = ['draft', 'active', 'paused', 'archived'];
             $sanitized['status'] = in_array($data['status'], $allowed_statuses) ? $data['status'] : 'draft';
-        }
-        
-        // Sanitize assignment_type field
-        if (isset($data['assignment_type'])) {
-            $allowed_assignment_types = ['global', 'page', 'post_type', 'category', 'tag', 'custom'];
-            $sanitized['assignment_type'] = in_array($data['assignment_type'], $allowed_assignment_types) ? $data['assignment_type'] : 'global';
         }
         
         // Sanitize date fields
@@ -917,7 +905,7 @@ class PromoBarX_Database {
         $defaults = [
             'status' => 'active',
             'limit' => -1,
-            'orderby' => 'priority DESC, created_at DESC'
+            'orderby' => 'created_at DESC'
         ];
 
         $args = wp_parse_args($args, $defaults);
@@ -937,12 +925,13 @@ class PromoBarX_Database {
                            CONCAT(pa.assignment_type, ':', pa.target_id, ':', pa.target_value, ':', pa.priority)
                            ORDER BY pa.priority DESC, pa.id ASC
                            SEPARATOR '|'
-                       ) as assignments_data
+                       ) as assignments_data,
+                       COALESCE(MAX(pa.priority), 0) as max_priority
                 FROM {$this->table_prefix}promo_bars pb
                 LEFT JOIN {$this->table_prefix}promo_bar_assignments pa ON pb.id = pa.promo_bar_id
                 {$where_clause}
                 GROUP BY pb.id
-                ORDER BY {$args['orderby']} {$limit_clause}";
+                ORDER BY max_priority DESC, pb.created_at DESC {$limit_clause}";
 
         if (!empty($values)) {
             $sql = $this->wpdb->prepare($sql, $values);
