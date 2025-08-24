@@ -621,7 +621,15 @@ class PromoBarX_Database {
         $boolean_fields = ['countdown_enabled', 'close_button_enabled'];
         foreach ($boolean_fields as $field) {
             if (isset($data[$field])) {
-                $sanitized[$field] = $data[$field] ? 1 : 0;
+                // Handle both boolean and string values
+                $value = $data[$field];
+                if (is_string($value)) {
+                    // Convert string values to boolean
+                    $sanitized[$field] = in_array(strtolower($value), ['true', '1', 'yes', 'on']) ? 1 : 0;
+                } else {
+                    // Handle boolean and numeric values
+                    $sanitized[$field] = $value ? 1 : 0;
+                }
             }
         }
         

@@ -172,6 +172,46 @@ const TopBarManager = () => {
         return Math.max(...assignments.map(a => parseInt(a.priority) || 0));
     };
 
+    const formatCountdownDisplay = (promoBar) => {
+        if (!promoBar.countdown_enabled) {
+            return <span className="text-gray-400 italic">Disabled</span>;
+        }
+        
+        if (!promoBar.countdown_date) {
+            return <span className="text-yellow-600">Enabled (No date set)</span>;
+        }
+        
+        const countdownDate = new Date(promoBar.countdown_date);
+        const now = new Date();
+        
+        if (countdownDate <= now) {
+            return <span className="text-red-600">Expired</span>;
+        }
+        
+        // Calculate time remaining
+        const timeDiff = countdownDate - now;
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        let timeDisplay = '';
+        if (days > 0) {
+            timeDisplay = `${days}d ${hours}h`;
+        } else if (hours > 0) {
+            timeDisplay = `${hours}h ${minutes}m`;
+        } else {
+            timeDisplay = `${minutes}m`;
+        }
+        
+        return (
+            <div>
+                <div className="text-sm font-medium text-green-600">Active</div>
+                <div className="text-xs text-gray-500">{timeDisplay} remaining</div>
+                <div className="text-xs text-gray-400">{formatDate(promoBar.countdown_date)}</div>
+            </div>
+        );
+    };
+
     // Loading state
     if (loading) {
         return (
@@ -293,6 +333,9 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                                 Status
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Countdown
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Assignments
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -321,6 +364,9 @@ const ManageTab = ({ promoBars, onEdit, onDelete, onToggleStatus, onCreateNew, g
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     {getStatusBadge(promoBar.status)}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {formatCountdownDisplay(promoBar)}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     <AssignmentSummary assignments={promoBar.assignments} />

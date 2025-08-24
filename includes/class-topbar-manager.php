@@ -341,14 +341,14 @@ class PromoBarX_Manager {
             return true; // Block non-active promo bars
         }
         
-        // Second check: If countdown_date is set, current time must be greater than countdown_date
+        // Second check: If countdown_date is set, current time must be LESS than countdown_date (show before expiry)
         if (!empty($promo_bar->countdown_date)) {
             $current_time = current_time('mysql');
             $countdown_date = $promo_bar->countdown_date;
             
-            if ($current_time <= $countdown_date) {
-                error_log('PromoBarX: Promo bar ' . $promo_bar_id . ' countdown date not reached yet. Current: ' . $current_time . ', Countdown: ' . $countdown_date);
-                return true; // Return true to skip this promo bar (countdown not reached)
+            if ($current_time >= $countdown_date) {
+                error_log('PromoBarX: Promo bar ' . $promo_bar_id . ' countdown has expired. Current: ' . $current_time . ', Countdown: ' . $countdown_date);
+                return true; // Return true to skip this promo bar (countdown has expired)
             }
         }
         
@@ -451,6 +451,9 @@ class PromoBarX_Manager {
         
         error_log('PromoBarX: Rendering promo bar HTML');
         $this->render_topbar_html($promo_bar);
+        
+        // Also pass data to React component
+        $this->render_react_data($promo_bar);
     }
 
     /**
@@ -489,8 +492,8 @@ class PromoBarX_Manager {
                     <div class="promobarx-title"><?php echo esc_html($promo_bar->title); ?></div>
                 <?php endif; ?>
                 
-                <?php if ($promo_bar->countdown_enabled && !empty($promo_bar->countdown_end_date)): ?>
-                    <div class="promobarx-countdown" style="<?php echo esc_attr($countdown_styles); ?>" data-end="<?php echo esc_attr($promo_bar->countdown_end_date); ?>">
+                <?php if ($promo_bar->countdown_enabled && !empty($promo_bar->countdown_date)): ?>
+                    <div class="promobarx-countdown" style="<?php echo esc_attr($countdown_styles); ?>" data-end="<?php echo esc_attr($promo_bar->countdown_date); ?>">
                         <span class="countdown-days">00</span>d 
                         <span class="countdown-hours">00</span>h 
                         <span class="countdown-minutes">00</span>m 
@@ -596,6 +599,21 @@ class PromoBarX_Manager {
             }
         }
         </style>
+        <?php
+    }
+
+    /**
+     * Render React data for the promo bar
+     */
+    private function render_react_data($promo_bar) {
+        ?>
+        <script>
+        window.promobarxData = {
+            promoBar: <?php echo json_encode($promo_bar); ?>,
+            nonce: '<?php echo wp_create_nonce('promobarx_track'); ?>',
+            ajaxurl: '<?php echo admin_url('admin-ajax.php'); ?>'
+        };
+        </script>
         <?php
     }
 

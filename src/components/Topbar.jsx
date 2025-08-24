@@ -1,6 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Topbar.scss';
 
+// Countdown Timer Component
+const CountdownTimer = ({ endDate, style }) => {
+    const [timeLeft, setTimeLeft] = useState({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0
+    });
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const end = new Date(endDate).getTime();
+            const distance = end - now;
+
+            if (distance < 0) {
+                setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+                return;
+            }
+
+            setTimeLeft({
+                days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                seconds: Math.floor((distance % (1000 * 60)) / 1000)
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [endDate]);
+
+    return (
+        <div className="promobarx-countdown" style={style}>
+            <span className="countdown-days">{timeLeft.days.toString().padStart(2, '0')}</span>d 
+            <span className="countdown-hours">{timeLeft.hours.toString().padStart(2, '0')}</span>h 
+            <span className="countdown-minutes">{timeLeft.minutes.toString().padStart(2, '0')}</span>m 
+            <span className="countdown-seconds">{timeLeft.seconds.toString().padStart(2, '0')}</span>s
+        </div>
+    );
+};
+
 const Topbar = React.forwardRef((props, ref) => {
     const [promoBar, setPromoBar] = useState(null);
     const [isVisible, setIsVisible] = useState(true);
@@ -84,16 +125,10 @@ const Topbar = React.forwardRef((props, ref) => {
                 )}
                 
                 {promoBar.countdown_enabled && promoBar.countdown_date && (
-                    <div 
-                        className="promobarx-countdown"
-                        data-end={promoBar.countdown_date}
+                    <CountdownTimer 
+                        endDate={promoBar.countdown_date}
                         style={generateStyles(countdownStyle)}
-                    >
-                        <span className="countdown-days">00</span>d 
-                        <span className="countdown-hours">00</span>h 
-                        <span className="countdown-minutes">00</span>m 
-                        <span className="countdown-seconds">00</span>s
-                    </div>
+                    />
                 )}
                 
                 {promoBar.cta_text && promoBar.cta_url && (

@@ -157,6 +157,46 @@ const SimpleTopBarManager = ({ containerId }) => {
         return assignment.target_value || 'Unknown';
     };
 
+    const formatCountdownDisplay = (promoBar) => {
+        if (!promoBar.countdown_enabled) {
+            return <span className="text-gray-400 italic">Disabled</span>;
+        }
+        
+        if (!promoBar.countdown_date) {
+            return <span className="text-yellow-600">Enabled (No date set)</span>;
+        }
+        
+        const countdownDate = new Date(promoBar.countdown_date);
+        const now = new Date();
+        
+        if (countdownDate <= now) {
+            return <span className="text-red-600">Expired</span>;
+        }
+        
+        // Calculate time remaining
+        const timeDiff = countdownDate - now;
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        let timeDisplay = '';
+        if (days > 0) {
+            timeDisplay = `${days}d ${hours}h`;
+        } else if (hours > 0) {
+            timeDisplay = `${hours}h ${minutes}m`;
+        } else {
+            timeDisplay = `${minutes}m`;
+        }
+        
+        return (
+            <div>
+                <div className="text-sm font-medium text-green-600">Active</div>
+                <div className="text-xs text-gray-500">{timeDisplay} remaining</div>
+                <div className="text-xs text-gray-400">{formatDate(promoBar.countdown_date)}</div>
+            </div>
+        );
+    };
+
     const getAssignmentDisplay = (assignments) => {
         if (!assignments || assignments.length === 0) {
             return <span className="text-gray-400 italic">No assignments</span>;
@@ -265,6 +305,7 @@ const SimpleTopBarManager = ({ containerId }) => {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th> 
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Countdown</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignments</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
@@ -281,6 +322,9 @@ const SimpleTopBarManager = ({ containerId }) => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(promoBar.status)}</td> 
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {formatCountdownDisplay(promoBar)}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {getAssignmentDisplay(promoBar.assignments)}
                                             </td>
