@@ -155,7 +155,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <option value="14px" selected>Medium (14px)</option>
                                     <option value="16px">Large (16px)</option>
                                     <option value="18px">Extra Large (18px)</option>
+                                    <option value="custom">Custom</option>
                                 </select>
+                                <div id="custom-font-size-container" style="display: none; margin-top: 10px;">
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="number" id="custom-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                        <select id="custom-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                            <option value="px">px</option>
+                                            <option value="em">em</option>
+                                            <option value="rem">rem</option>
+                                            <option value="%">%</option>
+                                        </select>
+                                    </div>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Enter a value between 8 and 72</p>
+                                </div>
                             </div>
                             
                             <div style="margin-bottom: 20px;">
@@ -280,6 +293,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.addEventListener('change', updatePreview);
                 }
             });
+            
+            // Custom font size handling
+            const fontSizeSelect = document.getElementById('promo-font-size');
+            const customFontSizeContainer = document.getElementById('custom-font-size-container');
+            const customFontSizeValue = document.getElementById('custom-font-size-value');
+            const customFontSizeUnit = document.getElementById('custom-font-size-unit');
+            
+            if (fontSizeSelect) {
+                fontSizeSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customFontSizeContainer.style.display = 'block';
+                    } else {
+                        customFontSizeContainer.style.display = 'none';
+                    }
+                    updatePreview();
+                });
+            }
+            
+            if (customFontSizeValue) {
+                customFontSizeValue.addEventListener('input', updatePreview);
+            }
+            
+            if (customFontSizeUnit) {
+                customFontSizeUnit.addEventListener('change', updatePreview);
+            }
             
             // Page assignment events
             const assignmentType = document.getElementById('promo-assignment-type');
@@ -622,7 +660,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const bgColor = document.getElementById('promo-bg-color')?.value || '#3b82f6';
             const textColor = document.getElementById('promo-text-color')?.value || '#ffffff';
             const ctaColor = document.getElementById('promo-cta-color')?.value || '#ffffff';
-            const fontSize = document.getElementById('promo-font-size')?.value || '14px';
+            
+            // Handle font size (including custom)
+            let fontSize = document.getElementById('promo-font-size')?.value || '14px';
+            if (fontSize === 'custom') {
+                const customValue = document.getElementById('custom-font-size-value')?.value || '14';
+                const customUnit = document.getElementById('custom-font-size-unit')?.value || 'px';
+                fontSize = customValue + customUnit;
+            }
+            
             const position = document.getElementById('promo-position')?.value || 'top';
             
             // Calculate countdown if enabled and date is set
@@ -716,7 +762,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 styling: JSON.stringify({
                     background: document.getElementById('promo-bg-color')?.value || '#3b82f6',
                     color: document.getElementById('promo-text-color')?.value || '#ffffff',
-                    font_size: document.getElementById('promo-font-size')?.value || '14px',
+                    font_size: (() => {
+                        const fontSize = document.getElementById('promo-font-size')?.value || '14px';
+                        if (fontSize === 'custom') {
+                            const customValue = document.getElementById('custom-font-size-value')?.value || '14';
+                            const customUnit = document.getElementById('custom-font-size-unit')?.value || 'px';
+                            return customValue + customUnit;
+                        }
+                        return fontSize;
+                    })(),
                     position: document.getElementById('promo-position')?.value || 'top'
                 }),
                 cta_style: JSON.stringify({
@@ -923,7 +977,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Fill styling fields
                         document.getElementById('promo-bg-color').value = styling.background || '#3b82f6';
                         document.getElementById('promo-text-color').value = styling.color || '#ffffff';
-                        document.getElementById('promo-font-size').value = styling.font_size || '14px';
+                        
+                        // Handle font size (including custom)
+                        const savedFontSize = styling.font_size || '14px';
+                        const fontSizeSelect = document.getElementById('promo-font-size');
+                        const customFontSizeContainer = document.getElementById('custom-font-size-container');
+                        const customFontSizeValue = document.getElementById('custom-font-size-value');
+                        const customFontSizeUnit = document.getElementById('custom-font-size-unit');
+                        
+                        // Check if the saved font size is one of the predefined options
+                        const predefinedSizes = ['12px', '14px', '16px', '18px'];
+                        if (predefinedSizes.includes(savedFontSize)) {
+                            fontSizeSelect.value = savedFontSize;
+                            customFontSizeContainer.style.display = 'none';
+                        } else {
+                            // It's a custom font size, parse it
+                            fontSizeSelect.value = 'custom';
+                            customFontSizeContainer.style.display = 'block';
+                            
+                            // Extract value and unit from the font size string
+                            const match = savedFontSize.match(/^(\d+(?:\.\d+)?)(px|em|rem|%)$/);
+                            if (match) {
+                                customFontSizeValue.value = match[1];
+                                customFontSizeUnit.value = match[2];
+                            } else {
+                                // Fallback to default values
+                                customFontSizeValue.value = '14';
+                                customFontSizeUnit.value = 'px';
+                            }
+                        }
+                        
                         document.getElementById('promo-position').value = styling.position || 'top';
                         document.getElementById('promo-cta-color').value = ctaStyle.background || '#ffffff';
 
