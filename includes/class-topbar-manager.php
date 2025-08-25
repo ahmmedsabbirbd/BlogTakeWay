@@ -535,6 +535,11 @@ class PromoBarX_Manager {
             color: white;
         }
         
+        /* Add padding to body when promo bar is visible */
+        body.promobarx-active {
+            padding-top: var(--promobarx-height, 60px) !important;
+        }
+        
         .promobarx-content {
             flex: 1;
             display: flex;
@@ -640,6 +645,35 @@ class PromoBarX_Manager {
         
         ?>
         <script>
+        // Add body padding when promo bar is visible
+        document.addEventListener('DOMContentLoaded', function() {
+            const promoBar = document.querySelector('.promobarx-topbar');
+            if (promoBar) {
+                // Calculate the actual height of the promo bar
+                const promoBarHeight = promoBar.offsetHeight;
+                
+                // Set the CSS custom property with the actual height
+                document.documentElement.style.setProperty('--promobarx-height', promoBarHeight + 'px');
+                
+                // Add the active class to body
+                document.body.classList.add('promobarx-active');
+            }
+        });
+        
+        // Function to update promo bar height on window resize
+        function updatePromoBarHeight() {
+            const promoBar = document.querySelector('.promobarx-topbar');
+            if (promoBar && document.body.classList.contains('promobarx-active')) {
+                const promoBarHeight = promoBar.offsetHeight;
+ 
+                document.documentElement.style.setProperty('--promobarx-height', promoBarHeight + 'px');
+            }
+        }
+        
+        // Listen for window resize events
+        window.addEventListener('resize', updatePromoBarHeight);
+        window.addEventListener('load', updatePromoBarHeight);
+        
         function promobarxTrackEvent(promoId, eventType) {
             fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
                 method: 'POST',
@@ -656,6 +690,10 @@ class PromoBarX_Manager {
                 bar.style.transform = 'translateY(-100%)';
                 setTimeout(() => {
                     bar.style.display = 'none';
+                    // Remove body padding when promo bar is hidden
+                    document.body.classList.remove('promobarx-active');
+                    // Remove the CSS custom property
+                    document.documentElement.style.removeProperty('--promobarx-height');
                 }, 300);
             }
             

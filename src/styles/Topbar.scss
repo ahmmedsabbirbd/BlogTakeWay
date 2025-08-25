@@ -1,3 +1,93 @@
+// Promo Bar Styles
+.promobarx-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: #2563eb;
+  color: white;
+}
+
+.promobarx-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.promobarx-title {
+  font-weight: 600;
+}
+
+.promobarx-countdown {
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.promobarx-cta {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  
+  &:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.promobarx-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  color: white;
+  
+  &:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Body padding when promo bar is active
+body.promobarx-active {
+  padding-top: var(--promobarx-height, 60px) !important;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .promobarx-content {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .promobarx-topbar {
+    padding: 10px 15px;
+    font-size: 13px;
+  }
+}
+
 .support-buddy-header-actions {
   display: flex;
   gap: 8px;

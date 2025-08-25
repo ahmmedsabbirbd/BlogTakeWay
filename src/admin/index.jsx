@@ -245,9 +245,23 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (countdownCheckbox) {
                 countdownCheckbox.addEventListener('change', function() {
+                    // Show/hide countdown date field based on checkbox state
                     countdownDate.style.display = this.checked ? 'block' : 'none';
+                    
+                    // Set default date if empty and checkbox is checked
+                    if (this.checked && !countdownDate.value) {
+                        const now = new Date();
+                        const futureDate = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 24 hours from now
+                        countdownDate.value = futureDate.toISOString().slice(0, 16);
+                    }
+                    
                     updatePreview();
-                });
+                }); 
+            }
+            
+            // Countdown date change handler
+            if (countdownDate) {
+                countdownDate.addEventListener('change', updatePreview);
             }
             
             // Real-time preview updates
@@ -279,6 +293,24 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Initial preview
             updatePreview();
+            
+            // Start live countdown update if countdown is enabled
+            startLiveCountdown();
+        }
+        
+        // Live countdown update function
+        function startLiveCountdown() {
+            const countdownCheckbox = document.getElementById('promo-countdown-enabled');
+            const countdownDate = document.getElementById('promo-countdown-date');
+            
+            if (countdownCheckbox && countdownDate) {
+                // Update countdown every second if enabled and date is set
+                setInterval(() => {
+                    if (countdownCheckbox.checked && countdownDate.value) {
+                        updatePreview();
+                    }
+                }, 1000);
+            }
         }
         
         // Page assignment functions
@@ -584,6 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const title = document.getElementById('promo-title')?.value || 'Sample Title';
             const ctaText = document.getElementById('promo-cta-text')?.value || 'Shop Now';
             const countdownEnabled = document.getElementById('promo-countdown-enabled')?.checked || false;
+            const countdownDate = document.getElementById('promo-countdown-date')?.value || '';
             const closeEnabled = document.getElementById('promo-close-enabled')?.checked || false;
             
             // Get styling values
@@ -593,19 +626,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const fontSize = document.getElementById('promo-font-size')?.value || '14px';
             const position = document.getElementById('promo-position')?.value || 'top';
             
+            // Calculate countdown if enabled and date is set
+            let countdownDisplay = '';
+            if (countdownEnabled && countdownDate) {
+                const targetDate = new Date(countdownDate);
+                const now = new Date();
+                const timeDiff = targetDate.getTime() - now.getTime();
+                
+                if (timeDiff > 0) {
+                    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+                    
+                    // Simple format: 108d 19h 43m 08s
+                    const timeString = `${days}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+                    
+                    countdownDisplay = `<div style="font-weight: 600; font-family: monospace; font-size: 0.9em; color: ${textColor};">
+                        ${timeString}
+                    </div>`;
+                } else {
+                    countdownDisplay = '<div style="font-weight: 600; font-family: monospace; font-size: 0.9em; color: #ff4444;">EXPIRED</div>';
+                }
+            }
+            
             preview.innerHTML = `
                 <div style="background: ${bgColor}; color: ${textColor}; padding: 12px 20px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: ${fontSize};">
-                    <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1;">
                         <div>
                             <div style="font-weight: 600;">${title}</div>
                         </div>
-                        ${countdownEnabled ? '<div style="font-weight: 600; font-family: monospace; font-size: 0.85em;">23:59:59</div>' : ''}
+                        ${countdownDisplay}
                         <a href="#" style="background: ${ctaColor}; color: ${bgColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 0.85em;">${ctaText}</a>
                     </div>
                     ${closeEnabled ? '<button style="background: none; border: none; color: ' + textColor + '; font-size: 18px; cursor: pointer; opacity: 0.7;">×</button>' : ''}
                 </div>
                 <div style="margin-top: 10px; font-size: 12px; color: #6b7280; text-align: center;">
                     Position: ${position === 'top' ? 'Top of Page' : 'Bottom of Page'}
+                    ${countdownEnabled && countdownDate ? `<br>Countdown Target: ${new Date(countdownDate).toLocaleDateString()} ${new Date(countdownDate).toLocaleTimeString()}` : ''}
                 </div>
             `;
         }
@@ -632,13 +690,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
+            // Handle countdown date format conversion for saving
+            let countdownDate = '';
+            const countdownDateInput = document.getElementById('promo-countdown-date')?.value || '';
+            if (countdownDateInput) {
+                try {
+                    const localDate = new Date(countdownDateInput);
+                    if (!isNaN(localDate.getTime())) {
+                        // Convert to ISO string format for database storage
+                        countdownDate = localDate.toISOString().slice(0, 19).replace('T', ' ');
+                    }
+                } catch (e) {
+                    console.error('Error converting countdown date:', e);
+                }
+            }
+            
             const data = {
                 name: name,
                 title: title,
                 cta_text: document.getElementById('promo-cta-text')?.value || '',
                 cta_url: document.getElementById('promo-cta-url')?.value || '',
                 countdown_enabled: document.getElementById('promo-countdown-enabled')?.checked || false,
-                countdown_date: document.getElementById('promo-countdown-date')?.value || '',
+                countdown_date: countdownDate,
                 close_button_enabled: document.getElementById('promo-close-enabled')?.checked || false,
                 status: document.getElementById('promo-status')?.value || 'draft',
                 styling: JSON.stringify({
@@ -825,7 +898,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('promo-cta-text').value = promoBar.cta_text || '';
                         document.getElementById('promo-cta-url').value = promoBar.cta_url || '';
                         document.getElementById('promo-countdown-enabled').checked = Boolean(promoBar.countdown_enabled);
-                        document.getElementById('promo-countdown-date').value = promoBar.countdown_date || '';
+                        
+                        // Handle countdown date format conversion
+                        if (promoBar.countdown_date) {
+                            try {
+                                const date = new Date(promoBar.countdown_date);
+                                if (!isNaN(date.getTime())) {
+                                    // Convert to datetime-local format (YYYY-MM-DDTHH:MM)
+                                    const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                                    document.getElementById('promo-countdown-date').value = localDate.toISOString().slice(0, 16);
+                                } else {
+                                    document.getElementById('promo-countdown-date').value = '';
+                                }
+                            } catch (e) {
+                                console.error('Error parsing countdown date:', e);
+                                document.getElementById('promo-countdown-date').value = '';
+                            }
+                        } else {
+                            document.getElementById('promo-countdown-date').value = '';
+                        }
+                        
                         document.getElementById('promo-close-enabled').checked = Boolean(promoBar.close_button_enabled);
                         document.getElementById('promo-status').value = promoBar.status || 'draft';
                         

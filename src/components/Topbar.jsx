@@ -53,8 +53,39 @@ const Topbar = React.forwardRef((props, ref) => {
         }
     }, []);
 
+    // Add body padding when promo bar is visible
+    useEffect(() => {
+        if (promoBar && isVisible) {
+            // Wait for the DOM to be updated with the promo bar
+            setTimeout(() => {
+                const promoBarElement = document.querySelector('.promobarx-topbar');
+                if (promoBarElement) {
+                    // Calculate the actual height of the promo bar
+                    const promoBarHeight = promoBarElement.offsetHeight;
+                    
+                    // Set the CSS custom property with the actual height
+                    document.documentElement.style.setProperty('--promobarx-height', promoBarHeight + 'px');
+                    
+                    // Add the active class to body
+                    document.body.classList.add('promobarx-active');
+                }
+            }, 0);
+        }
+        
+        // Cleanup function to remove body padding when component unmounts
+        return () => {
+            document.body.classList.remove('promobarx-active');
+            document.documentElement.style.removeProperty('--promobarx-height');
+        };
+    }, [promoBar, isVisible]);
+
     const handleClose = () => {
         setIsVisible(false);
+        
+        // Remove body padding when promo bar is hidden
+        document.body.classList.remove('promobarx-active');
+        // Remove the CSS custom property
+        document.documentElement.style.removeProperty('--promobarx-height');
         
         // Set cookie to remember user closed this promo bar
         if (promoBar) {

@@ -644,18 +644,35 @@ class PromoBarX_Database {
             $sanitized['countdown_date'] = sanitize_text_field($data['countdown_date']);
         }
         
+        error_log('PromoBarX Database: Sanitizing JSON fields');
+        error_log(print_r($data['styling'], true));
         // Sanitize JSON fields
         $json_fields = ['cta_style', 'countdown_style', 'close_button_style', 'styling'];
         foreach ($json_fields as $field) {
             if (isset($data[$field])) {
                 if (is_string($data[$field])) {
+                    // Clean the string first - remove any potential encoding issues
+                    $clean_value = trim($data[$field]);
+                    
                     // If it's already a JSON string, validate it
-                    $decoded = json_decode($data[$field], true);
+                    $decoded = json_decode($clean_value, true);
                     if (json_last_error() === JSON_ERROR_NONE) {
-                        $sanitized[$field] = $data[$field];
+                        $sanitized[$field] = $clean_value;
                     } else {
                         error_log('PromoBarX Database: Invalid JSON in field ' . $field . ': ' . json_last_error_msg());
-                        $sanitized[$field] = json_encode([]);
+                        error_log('PromoBarX Database: Raw value for ' . $field . ': ' . $data[$field]);
+                        error_log('PromoBarX Database: Cleaned value for ' . $field . ': ' . $clean_value);
+                        
+                        // Try to fix common JSON issues
+                        $fixed_value = $this->fix_json_string($clean_value);
+                        $decoded = json_decode($fixed_value, true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $sanitized[$field] = $fixed_value;
+                            error_log('PromoBarX Database: Fixed JSON for ' . $field);
+                        } else {
+                            $sanitized[$field] = json_encode([]);
+                            error_log('PromoBarX Database: Could not fix JSON for ' . $field . ', using empty array');
+                        }
                     }
                 } elseif (is_array($data[$field])) {
                     // If it's an array, encode it
@@ -665,6 +682,10 @@ class PromoBarX_Database {
                 }
             }
         }
+
+        error_log('PromoBarX Database: Sanitizing JSON fields after');
+        error_log(print_r($sanitized, true));
+        error_log(print_r($sanitized['styling'], true));
         
         // Handle ID field for updates
         if (isset($data['id'])) {
@@ -672,6 +693,25 @@ class PromoBarX_Database {
         }
         
         return $sanitized;
+    }
+
+    /**
+     * Fix common JSON string issues
+     */
+    private function fix_json_string($json_string) {
+        // Remove any BOM or hidden characters
+        $json_string = preg_replace('/[\x00-\x1F\x7F]/', '', $json_string);
+        
+        // Remove any HTML entities that might have been encoded
+        $json_string = html_entity_decode($json_string, ENT_QUOTES, 'UTF-8');
+        
+        // Try to fix common encoding issues
+        $json_string = str_replace(['\\"', '\\\'', '\\\\'], ['"', "'", '\\'], $json_string);
+        
+        // Remove any trailing commas before closing braces/brackets
+        $json_string = preg_replace('/,(\s*[}\]])/', '$1', $json_string);
+        
+        return $json_string;
     }
 
     /**
