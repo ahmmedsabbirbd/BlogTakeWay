@@ -465,6 +465,14 @@ class PromoBarX_Manager {
         $countdown_style = json_decode($promo_bar->countdown_style, true) ?: [];
         $close_style = json_decode($promo_bar->close_button_style, true) ?: [];
         
+        // Extract individual element styling from the main styling object
+        $title_color = $styling['title_color'] ?? $styling['color'] ?? '#ffffff';
+        $title_font_size = $styling['title_font_size'] ?? 'inherit';
+        $countdown_color = $styling['countdown_color'] ?? $styling['color'] ?? '#ffffff';
+        $countdown_font_size = $styling['countdown_font_size'] ?? 'inherit';
+        $cta_text_color = $styling['cta_text_color'] ?? $styling['background'] ?? '#3b82f6';
+        $cta_font_size = $styling['cta_font_size'] ?? 'inherit';
+        
         // Get template config if applicable
         $template_config = [];
         if ($promo_bar->template_id > 0) {
@@ -489,11 +497,30 @@ class PromoBarX_Manager {
         <div id="promobarx-topbar-<?php echo esc_attr($promo_bar->id); ?>" class="promobarx-topbar" style="<?php echo esc_attr($topbar_styles); ?>">
             <div class="promobarx-content">
                 <?php if (!empty($promo_bar->title)): ?>
-                    <div class="promobarx-title"><?php echo esc_html($promo_bar->title); ?></div>
+                    <?php 
+                    $title_style = '';
+                    if ($title_color) {
+                        $title_style .= 'color: ' . esc_attr($title_color) . ';';
+                    }
+                    if ($title_font_size && $title_font_size !== 'inherit') {
+                        $title_style .= 'font-size: ' . esc_attr($title_font_size) . ';';
+                    }
+                    ?>
+                    <div class="promobarx-title" style="<?php echo esc_attr($title_style); ?>"><?php echo esc_html($promo_bar->title); ?></div>
                 <?php endif; ?>
                 
                 <?php if ($promo_bar->countdown_enabled && !empty($promo_bar->countdown_date)): ?>
-                    <div class="promobarx-countdown" style="<?php echo esc_attr($countdown_styles); ?>" data-end="<?php echo esc_attr($promo_bar->countdown_date); ?>">
+                    <?php 
+                    $countdown_individual_style = '';
+                    if ($countdown_color) {
+                        $countdown_individual_style .= 'color: ' . esc_attr($countdown_color) . ';';
+                    }
+                    if ($countdown_font_size && $countdown_font_size !== 'inherit') {
+                        $countdown_individual_style .= 'font-size: ' . esc_attr($countdown_font_size) . ';';
+                    }
+                    $final_countdown_style = $countdown_individual_style . $countdown_styles;
+                    ?>
+                    <div class="promobarx-countdown" style="<?php echo esc_attr($final_countdown_style); ?>" data-end="<?php echo esc_attr($promo_bar->countdown_date); ?>">
                         <span class="countdown-days">00</span>d 
                         <span class="countdown-hours">00</span>h 
                         <span class="countdown-minutes">00</span>m 
@@ -502,7 +529,17 @@ class PromoBarX_Manager {
                 <?php endif; ?>
                 
                 <?php if (!empty($promo_bar->cta_text) && !empty($promo_bar->cta_url)): ?>
-                    <a href="<?php echo esc_url($promo_bar->cta_url); ?>" class="promobarx-cta" style="<?php echo esc_attr($cta_styles); ?>" onclick="promobarxTrackEvent(<?php echo esc_js($promo_bar->id); ?>, 'click')">
+                    <?php 
+                    $cta_individual_style = '';
+                    if ($cta_text_color) {
+                        $cta_individual_style .= 'color: ' . esc_attr($cta_text_color) . ';';
+                    }
+                    if ($cta_font_size && $cta_font_size !== 'inherit') {
+                        $cta_individual_style .= 'font-size: ' . esc_attr($cta_font_size) . ';';
+                    }
+                    $final_cta_style = $cta_styles . $cta_individual_style;
+                    ?>
+                    <a href="<?php echo esc_url($promo_bar->cta_url); ?>" class="promobarx-cta" style="<?php echo esc_attr($final_cta_style); ?>" onclick="promobarxTrackEvent(<?php echo esc_js($promo_bar->id); ?>, 'click')">
                         <?php echo esc_html($promo_bar->cta_text); ?>
                     </a>
                 <?php endif; ?>
@@ -567,7 +604,6 @@ class PromoBarX_Manager {
             transition: all 0.2s ease;
             white-space: nowrap;
             background: rgba(255,255,255,0.2);
-            color: white;
         }
         
         .promobarx-cta:hover {

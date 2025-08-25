@@ -491,16 +491,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Text Color
-                                        </label>
-                                        <ColorPicker
-                                            color={formData.styling.color}
-                                            onChange={(color) => handleStyleChange('styling', 'color', color)}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Font Family
                                         </label>
                                         <select
@@ -553,16 +543,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                                         <ColorPicker
                                             color={formData.cta_style.background}
                                             onChange={(color) => handleStyleChange('cta_style', 'background', color)}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Button Text Color
-                                        </label>
-                                        <ColorPicker
-                                            color={formData.cta_style.color}
-                                            onChange={(color) => handleStyleChange('cta_style', 'color', color)}
                                         />
                                     </div>
 

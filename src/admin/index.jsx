@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input type="color" id="promo-bg-color" value="#3b82f6" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
                             </div>
                             
-                            <div style="margin-bottom: 20px;">
+                            <div style="margin-bottom: 20px; display: none;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Text Color</label>
                                 <input type="color" id="promo-text-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
                             </div>
@@ -148,34 +148,119 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <input type="color" id="promo-cta-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
                             </div>
                             
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Font Size</label>
-                                <select id="promo-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                    <option value="12px">Small (12px)</option>
-                                    <option value="14px" selected>Medium (14px)</option>
-                                    <option value="16px">Large (16px)</option>
-                                    <option value="18px">Extra Large (18px)</option>
-                                    <option value="custom">Custom</option>
-                                </select>
-                                <div id="custom-font-size-container" style="display: none; margin-top: 10px;">
-                                    <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="number" id="custom-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                        <select id="custom-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                            <option value="px">px</option>
-                                            <option value="em">em</option>
-                                            <option value="rem">rem</option>
-                                            <option value="%">%</option>
-                                        </select>
-                                    </div>
-                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Enter a value between 8 and 72</p>
-                                </div>
-                            </div>
+
                             
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Position</label>
                                 <select id="promo-position" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                                     <option value="top">Top of Page</option>
                                 </select>
+                            </div>
+                            
+                            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+                            
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Individual Element Styling</h3>
+                            
+                            <!-- Title Styling -->
+                            <div style="margin-bottom: 25px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #111827;">Title Styling</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Title Color</label>
+                                        <input type="color" id="title-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Title Font Size</label>
+                                        <select id="title-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                            <option value="inherit">Inherit (Default)</option>
+                                            <option value="12px">Small (12px)</option>
+                                            <option value="14px">Medium (14px)</option>
+                                            <option value="16px">Large (16px)</option>
+                                            <option value="18px">Extra Large (18px)</option>
+                                            <option value="20px">XXL (20px)</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                        <div id="custom-title-font-size-container" style="display: none; margin-top: 10px;">
+                                            <div style="display: flex; gap: 10px; align-items: center;">
+                                                <input type="number" id="custom-title-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                                <select id="custom-title-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                                    <option value="px">px</option>
+                                                    <option value="em">em</option>
+                                                    <option value="rem">rem</option>
+                                                    <option value="%">%</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Countdown Styling -->
+                            <div style="margin-bottom: 25px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #111827;">Countdown Styling</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Countdown Color</label>
+                                        <input type="color" id="countdown-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Countdown Font Size</label>
+                                        <select id="countdown-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                            <option value="inherit">Inherit (Default)</option>
+                                            <option value="12px">Small (12px)</option>
+                                            <option value="14px">Medium (14px)</option>
+                                            <option value="16px">Large (16px)</option>
+                                            <option value="18px">Extra Large (18px)</option>
+                                            <option value="20px">XXL (20px)</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                        <div id="custom-countdown-font-size-container" style="display: none; margin-top: 10px;">
+                                            <div style="display: flex; gap: 10px; align-items: center;">
+                                                <input type="number" id="custom-countdown-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                                <select id="custom-countdown-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                                    <option value="px">px</option>
+                                                    <option value="em">em</option>
+                                                    <option value="rem">rem</option>
+                                                    <option value="%">%</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- CTA Button Styling -->
+                            <div style="margin-bottom: 25px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #111827;">CTA Button Styling</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Text Color</label>
+                                        <input type="color" id="cta-text-color" value="#3b82f6" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Font Size</label>
+                                        <select id="cta-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                            <option value="inherit">Inherit (Default)</option>
+                                            <option value="12px">Small (12px)</option>
+                                            <option value="14px">Medium (14px)</option>
+                                            <option value="16px">Large (16px)</option>
+                                            <option value="18px">Extra Large (18px)</option>
+                                            <option value="20px">XXL (20px)</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                        <div id="custom-cta-font-size-container" style="display: none; margin-top: 10px;">
+                                            <div style="display: flex; gap: 10px; align-items: center;">
+                                                <input type="number" id="custom-cta-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                                <select id="custom-cta-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                                    <option value="px">px</option>
+                                                    <option value="em">em</option>
+                                                    <option value="rem">rem</option>
+                                                    <option value="%">%</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             
                             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
@@ -286,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             // Styling options
-            const stylingInputs = ['promo-bg-color', 'promo-text-color', 'promo-cta-color', 'promo-font-size', 'promo-position'];
+            const stylingInputs = ['promo-bg-color', 'promo-text-color', 'promo-cta-color', 'promo-position'];
             stylingInputs.forEach(id => {
                 const input = document.getElementById(id);
                 if (input) {
@@ -294,29 +379,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
-            // Custom font size handling
-            const fontSizeSelect = document.getElementById('promo-font-size');
-            const customFontSizeContainer = document.getElementById('custom-font-size-container');
-            const customFontSizeValue = document.getElementById('custom-font-size-value');
-            const customFontSizeUnit = document.getElementById('custom-font-size-unit');
+
             
-            if (fontSizeSelect) {
-                fontSizeSelect.addEventListener('change', function() {
+            // Individual element styling event listeners
+            const individualStylingInputs = [
+                'title-color', 'title-font-size', 'custom-title-font-size-value', 'custom-title-font-size-unit',
+                'countdown-color', 'countdown-font-size', 'custom-countdown-font-size-value', 'custom-countdown-font-size-unit',
+                'cta-text-color', 'cta-font-size', 'custom-cta-font-size-value', 'custom-cta-font-size-unit'
+            ];
+            
+            individualStylingInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('change', updatePreview);
+                    if (input.type === 'number') {
+                        input.addEventListener('input', updatePreview);
+                    }
+                }
+            });
+            
+            // Custom font size handling for individual elements
+            const titleFontSizeSelect = document.getElementById('title-font-size');
+            const customTitleFontSizeContainer = document.getElementById('custom-title-font-size-container');
+            
+            if (titleFontSizeSelect) {
+                titleFontSizeSelect.addEventListener('change', function() {
                     if (this.value === 'custom') {
-                        customFontSizeContainer.style.display = 'block';
+                        customTitleFontSizeContainer.style.display = 'block';
                     } else {
-                        customFontSizeContainer.style.display = 'none';
+                        customTitleFontSizeContainer.style.display = 'none';
                     }
                     updatePreview();
                 });
             }
             
-            if (customFontSizeValue) {
-                customFontSizeValue.addEventListener('input', updatePreview);
+            const countdownFontSizeSelect = document.getElementById('countdown-font-size');
+            const customCountdownFontSizeContainer = document.getElementById('custom-countdown-font-size-container');
+            
+            if (countdownFontSizeSelect) {
+                countdownFontSizeSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customCountdownFontSizeContainer.style.display = 'block';
+                    } else {
+                        customCountdownFontSizeContainer.style.display = 'none';
+                    }
+                    updatePreview();
+                });
             }
             
-            if (customFontSizeUnit) {
-                customFontSizeUnit.addEventListener('change', updatePreview);
+            const ctaFontSizeSelect = document.getElementById('cta-font-size');
+            const customCtaFontSizeContainer = document.getElementById('custom-cta-font-size-container');
+            
+            if (ctaFontSizeSelect) {
+                ctaFontSizeSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customCtaFontSizeContainer.style.display = 'block';
+                    } else {
+                        customCtaFontSizeContainer.style.display = 'none';
+                    }
+                    updatePreview();
+                });
             }
             
             // Page assignment events
@@ -656,20 +778,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const countdownDate = document.getElementById('promo-countdown-date')?.value || '';
             const closeEnabled = document.getElementById('promo-close-enabled')?.checked || false;
             
-            // Get styling values
+            // Get base styling values
             const bgColor = document.getElementById('promo-bg-color')?.value || '#3b82f6';
             const textColor = document.getElementById('promo-text-color')?.value || '#ffffff';
             const ctaColor = document.getElementById('promo-cta-color')?.value || '#ffffff';
             
-            // Handle font size (including custom)
-            let fontSize = document.getElementById('promo-font-size')?.value || '14px';
-            if (fontSize === 'custom') {
-                const customValue = document.getElementById('custom-font-size-value')?.value || '14';
-                const customUnit = document.getElementById('custom-font-size-unit')?.value || 'px';
-                fontSize = customValue + customUnit;
-            }
+            // Use default font size since individual elements have their own font sizes
+            const fontSize = '14px';
             
             const position = document.getElementById('promo-position')?.value || 'top';
+            
+            // Get individual element styling
+            const titleColor = document.getElementById('title-color')?.value || textColor;
+            const countdownColor = document.getElementById('countdown-color')?.value || textColor;
+            const ctaTextColor = document.getElementById('cta-text-color')?.value || bgColor;
+            
+            // Handle title font size
+            let titleFontSize = document.getElementById('title-font-size')?.value || 'inherit';
+            if (titleFontSize === 'custom') {
+                const customValue = document.getElementById('custom-title-font-size-value')?.value || '14';
+                const customUnit = document.getElementById('custom-title-font-size-unit')?.value || 'px';
+                titleFontSize = customValue + customUnit;
+            }
+            
+            // Handle countdown font size
+            let countdownFontSize = document.getElementById('countdown-font-size')?.value || 'inherit';
+            if (countdownFontSize === 'custom') {
+                const customValue = document.getElementById('custom-countdown-font-size-value')?.value || '14';
+                const customUnit = document.getElementById('custom-countdown-font-size-unit')?.value || 'px';
+                countdownFontSize = customValue + customUnit;
+            }
+            
+            // Handle CTA font size
+            let ctaFontSize = document.getElementById('cta-font-size')?.value || 'inherit';
+            if (ctaFontSize === 'custom') {
+                const customValue = document.getElementById('custom-cta-font-size-value')?.value || '14';
+                const customUnit = document.getElementById('custom-cta-font-size-unit')?.value || 'px';
+                ctaFontSize = customValue + customUnit;
+            }
             
             // Calculate countdown if enabled and date is set
             let countdownDisplay = '';
@@ -687,22 +833,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Simple format: 108d 19h 43m 08s
                     const timeString = `${days}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
                     
-                    countdownDisplay = `<div style="font-weight: 600; font-family: monospace; font-size: 0.9em; color: ${textColor};">
+                    const countdownFontSizeStyle = countdownFontSize !== 'inherit' ? `font-size: ${countdownFontSize};` : '';
+                    countdownDisplay = `<div style="font-weight: 600; font-family: monospace; ${countdownFontSizeStyle} color: ${countdownColor};">
                         ${timeString}
                     </div>`;
                 } else {
-                    countdownDisplay = '<div style="font-weight: 600; font-family: monospace; font-size: 0.9em; color: #ff4444;">EXPIRED</div>';
+                    const countdownFontSizeStyle = countdownFontSize !== 'inherit' ? `font-size: ${countdownFontSize};` : '';
+                    countdownDisplay = `<div style="font-weight: 600; font-family: monospace; ${countdownFontSizeStyle} color: #ff4444;">EXPIRED</div>`;
                 }
             }
+            
+            // Apply individual styling
+            const titleFontSizeStyle = titleFontSize !== 'inherit' ? `font-size: ${titleFontSize};` : '';
+            const ctaFontSizeStyle = ctaFontSize !== 'inherit' ? `font-size: ${ctaFontSize};` : '';
             
             preview.innerHTML = `
                 <div style="background: ${bgColor}; color: ${textColor}; padding: 12px 20px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: ${fontSize};">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1;">
                         <div>
-                            <div style="font-weight: 600;">${title}</div>
+                            <div style="font-weight: 600; color: ${titleColor}; ${titleFontSizeStyle}">${title}</div>
                         </div>
                         ${countdownDisplay}
-                        <a href="#" style="background: ${ctaColor}; color: ${bgColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; font-size: 0.85em;">${ctaText}</a>
+                        <a href="#" style="background: ${ctaColor}; color: ${ctaTextColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; ${ctaFontSizeStyle}">${ctaText}</a>
                     </div>
                     ${closeEnabled ? '<button style="background: none; border: none; color: ' + textColor + '; font-size: 18px; cursor: pointer; opacity: 0.7;">×</button>' : ''}
                 </div>
@@ -762,16 +914,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 styling: JSON.stringify({
                     background: document.getElementById('promo-bg-color')?.value || '#3b82f6',
                     color: document.getElementById('promo-text-color')?.value || '#ffffff',
-                    font_size: (() => {
-                        const fontSize = document.getElementById('promo-font-size')?.value || '14px';
+                    position: document.getElementById('promo-position')?.value || 'top',
+                    // Individual element styling
+                    title_color: document.getElementById('title-color')?.value || document.getElementById('promo-text-color')?.value || '#ffffff',
+                    title_font_size: (() => {
+                        const fontSize = document.getElementById('title-font-size')?.value || 'inherit';
                         if (fontSize === 'custom') {
-                            const customValue = document.getElementById('custom-font-size-value')?.value || '14';
-                            const customUnit = document.getElementById('custom-font-size-unit')?.value || 'px';
+                            const customValue = document.getElementById('custom-title-font-size-value')?.value || '14';
+                            const customUnit = document.getElementById('custom-title-font-size-unit')?.value || 'px';
                             return customValue + customUnit;
                         }
                         return fontSize;
                     })(),
-                    position: document.getElementById('promo-position')?.value || 'top'
+                    countdown_color: document.getElementById('countdown-color')?.value || document.getElementById('promo-text-color')?.value || '#ffffff',
+                    countdown_font_size: (() => {
+                        const fontSize = document.getElementById('countdown-font-size')?.value || 'inherit';
+                        if (fontSize === 'custom') {
+                            const customValue = document.getElementById('custom-countdown-font-size-value')?.value || '14';
+                            const customUnit = document.getElementById('custom-countdown-font-size-unit')?.value || 'px';
+                            return customValue + customUnit;
+                        }
+                        return fontSize;
+                    })(),
+                    cta_text_color: document.getElementById('cta-text-color')?.value || document.getElementById('promo-bg-color')?.value || '#3b82f6',
+                    cta_font_size: (() => {
+                        const fontSize = document.getElementById('cta-font-size')?.value || 'inherit';
+                        if (fontSize === 'custom') {
+                            const customValue = document.getElementById('custom-cta-font-size-value')?.value || '14';
+                            const customUnit = document.getElementById('custom-cta-font-size-unit')?.value || 'px';
+                            return customValue + customUnit;
+                        }
+                        return fontSize;
+                    })()
                 }),
                 cta_style: JSON.stringify({
                     background: document.getElementById('promo-cta-color')?.value || '#ffffff',
@@ -978,37 +1152,90 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('promo-bg-color').value = styling.background || '#3b82f6';
                         document.getElementById('promo-text-color').value = styling.color || '#ffffff';
                         
-                        // Handle font size (including custom)
-                        const savedFontSize = styling.font_size || '14px';
-                        const fontSizeSelect = document.getElementById('promo-font-size');
-                        const customFontSizeContainer = document.getElementById('custom-font-size-container');
-                        const customFontSizeValue = document.getElementById('custom-font-size-value');
-                        const customFontSizeUnit = document.getElementById('custom-font-size-unit');
-                        
-                        // Check if the saved font size is one of the predefined options
-                        const predefinedSizes = ['12px', '14px', '16px', '18px'];
-                        if (predefinedSizes.includes(savedFontSize)) {
-                            fontSizeSelect.value = savedFontSize;
-                            customFontSizeContainer.style.display = 'none';
-                        } else {
-                            // It's a custom font size, parse it
-                            fontSizeSelect.value = 'custom';
-                            customFontSizeContainer.style.display = 'block';
-                            
-                            // Extract value and unit from the font size string
-                            const match = savedFontSize.match(/^(\d+(?:\.\d+)?)(px|em|rem|%)$/);
-                            if (match) {
-                                customFontSizeValue.value = match[1];
-                                customFontSizeUnit.value = match[2];
-                            } else {
-                                // Fallback to default values
-                                customFontSizeValue.value = '14';
-                                customFontSizeUnit.value = 'px';
-                            }
-                        }
+
                         
                         document.getElementById('promo-position').value = styling.position || 'top';
                         document.getElementById('promo-cta-color').value = ctaStyle.background || '#ffffff';
+                        
+                        // Load individual element styling
+                        // Title styling
+                        document.getElementById('title-color').value = styling.title_color || styling.color || '#ffffff';
+                        
+                        const savedTitleFontSize = styling.title_font_size || 'inherit';
+                        const titleFontSizeSelect = document.getElementById('title-font-size');
+                        const customTitleFontSizeContainer = document.getElementById('custom-title-font-size-container');
+                        const customTitleFontSizeValue = document.getElementById('custom-title-font-size-value');
+                        const customTitleFontSizeUnit = document.getElementById('custom-title-font-size-unit');
+                        
+                        const predefinedTitleSizes = ['inherit', '12px', '14px', '16px', '18px', '20px'];
+                        if (predefinedTitleSizes.includes(savedTitleFontSize)) {
+                            titleFontSizeSelect.value = savedTitleFontSize;
+                            customTitleFontSizeContainer.style.display = 'none';
+                        } else {
+                            titleFontSizeSelect.value = 'custom';
+                            customTitleFontSizeContainer.style.display = 'block';
+                            
+                            const match = savedTitleFontSize.match(/^(\d+(?:\.\d+)?)(px|em|rem|%)$/);
+                            if (match) {
+                                customTitleFontSizeValue.value = match[1];
+                                customTitleFontSizeUnit.value = match[2];
+                            } else {
+                                customTitleFontSizeValue.value = '14';
+                                customTitleFontSizeUnit.value = 'px';
+                            }
+                        }
+                        
+                        // Countdown styling
+                        document.getElementById('countdown-color').value = styling.countdown_color || styling.color || '#ffffff';
+                        
+                        const savedCountdownFontSize = styling.countdown_font_size || 'inherit';
+                        const countdownFontSizeSelect = document.getElementById('countdown-font-size');
+                        const customCountdownFontSizeContainer = document.getElementById('custom-countdown-font-size-container');
+                        const customCountdownFontSizeValue = document.getElementById('custom-countdown-font-size-value');
+                        const customCountdownFontSizeUnit = document.getElementById('custom-countdown-font-size-unit');
+                        
+                        if (predefinedTitleSizes.includes(savedCountdownFontSize)) {
+                            countdownFontSizeSelect.value = savedCountdownFontSize;
+                            customCountdownFontSizeContainer.style.display = 'none';
+                        } else {
+                            countdownFontSizeSelect.value = 'custom';
+                            customCountdownFontSizeContainer.style.display = 'block';
+                            
+                            const match = savedCountdownFontSize.match(/^(\d+(?:\.\d+)?)(px|em|rem|%)$/);
+                            if (match) {
+                                customCountdownFontSizeValue.value = match[1];
+                                customCountdownFontSizeUnit.value = match[2];
+                            } else {
+                                customCountdownFontSizeValue.value = '14';
+                                customCountdownFontSizeUnit.value = 'px';
+                            }
+                        }
+                        
+                        // CTA styling
+                        document.getElementById('cta-text-color').value = styling.cta_text_color || styling.background || '#3b82f6';
+                        
+                        const savedCtaFontSize = styling.cta_font_size || 'inherit';
+                        const ctaFontSizeSelect = document.getElementById('cta-font-size');
+                        const customCtaFontSizeContainer = document.getElementById('custom-cta-font-size-container');
+                        const customCtaFontSizeValue = document.getElementById('custom-cta-font-size-value');
+                        const customCtaFontSizeUnit = document.getElementById('custom-cta-font-size-unit');
+                        
+                        if (predefinedTitleSizes.includes(savedCtaFontSize)) {
+                            ctaFontSizeSelect.value = savedCtaFontSize;
+                            customCtaFontSizeContainer.style.display = 'none';
+                        } else {
+                            ctaFontSizeSelect.value = 'custom';
+                            customCtaFontSizeContainer.style.display = 'block';
+                            
+                            const match = savedCtaFontSize.match(/^(\d+(?:\.\d+)?)(px|em|rem|%)$/);
+                            if (match) {
+                                customCtaFontSizeValue.value = match[1];
+                                customCtaFontSizeUnit.value = match[2];
+                            } else {
+                                customCtaFontSizeValue.value = '14';
+                                customCtaFontSizeUnit.value = 'px';
+                            }
+                        }
 
                         // Show/hide countdown date field
                         const countdownDate = document.getElementById('promo-countdown-date');

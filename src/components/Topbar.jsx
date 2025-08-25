@@ -135,12 +135,24 @@ const Topbar = React.forwardRef((props, ref) => {
     const ctaStyle = promoBar.cta_style ? JSON.parse(promoBar.cta_style) : {};
     const countdownStyle = promoBar.countdown_style ? JSON.parse(promoBar.countdown_style) : {};
     const closeStyle = promoBar.close_button_style ? JSON.parse(promoBar.close_button_style) : {};
+    
+    // Extract individual element styling
+    const titleColor = styling.title_color || styling.color || '#ffffff';
+    const titleFontSize = styling.title_font_size || 'inherit';
+    const countdownColor = styling.countdown_color || styling.color || '#ffffff';
+    const countdownFontSize = styling.countdown_font_size || 'inherit';
+    const ctaTextColor = styling.cta_text_color || styling.background || '#3b82f6';
+    const ctaFontSize = styling.cta_font_size || 'inherit';
 
     const generateStyles = (styleObj) => {
-        return Object.entries(styleObj)
-            .filter(([_, value]) => value)
-            .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
-            .join('; ');
+        const styles = {};
+        Object.entries(styleObj).forEach(([key, value]) => {
+            if (value) {
+                const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                styles[cssKey] = value;
+            }
+        });
+        return styles;
     };
 
     return (
@@ -152,13 +164,25 @@ const Topbar = React.forwardRef((props, ref) => {
         >
             <div className="promobarx-content">
                 {promoBar.title && (
-                    <div className="promobarx-title">{promoBar.title}</div>
+                    <div 
+                        className="promobarx-title"
+                        style={{
+                            color: titleColor,
+                            fontSize: titleFontSize !== 'inherit' ? titleFontSize : undefined
+                        }}
+                    >
+                        {promoBar.title}
+                    </div>
                 )}
                 
                 {promoBar.countdown_enabled && promoBar.countdown_date && (
                     <CountdownTimer 
                         endDate={promoBar.countdown_date}
-                        style={generateStyles(countdownStyle)}
+                        style={{
+                            ...generateStyles(countdownStyle),
+                            color: countdownColor,
+                            fontSize: countdownFontSize !== 'inherit' ? countdownFontSize : undefined
+                        }}
                     />
                 )}
                 
@@ -166,7 +190,11 @@ const Topbar = React.forwardRef((props, ref) => {
                     <a 
                         href={promoBar.cta_url}
                         className="promobarx-cta"
-                        style={generateStyles(ctaStyle)}
+                        style={{
+                            ...generateStyles(ctaStyle),
+                            color: ctaTextColor,
+                            fontSize: ctaFontSize !== 'inherit' ? ctaFontSize : undefined
+                        }}
                         onClick={handleCTAClick}
                     >
                         {promoBar.cta_text}
