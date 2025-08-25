@@ -162,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Position</label>
                                 <select id="promo-position" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                                     <option value="top">Top of Page</option>
-                                    <option value="bottom">Bottom of Page</option>
                                 </select>
                             </div>
                             
@@ -662,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${closeEnabled ? '<button style="background: none; border: none; color: ' + textColor + '; font-size: 18px; cursor: pointer; opacity: 0.7;">×</button>' : ''}
                 </div>
                 <div style="margin-top: 10px; font-size: 12px; color: #6b7280; text-align: center;">
-                    Position: ${position === 'top' ? 'Top of Page' : 'Bottom of Page'}
+                    Position: Top of Page
                     ${countdownEnabled && countdownDate ? `<br>Countdown Target: ${new Date(countdownDate).toLocaleDateString()} ${new Date(countdownDate).toLocaleTimeString()}` : ''}
                 </div>
             `;
