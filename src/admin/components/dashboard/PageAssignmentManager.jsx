@@ -113,7 +113,7 @@ const PageAssignmentManager = ({ promoBar, onClose, onSave }) => {
 
     const addAssignment = (type, data = {}) => {
         const newAssignment = {
-            id: Date.now(), // Temporary ID for frontend
+            id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Unique temporary ID for frontend
             assignment_type: type,
             target_id: data.id || 0,
             target_value: data.value || data.name || '',
@@ -123,8 +123,8 @@ const PageAssignmentManager = ({ promoBar, onClose, onSave }) => {
         setAssignments([...assignments, newAssignment]);
     };
 
-    const removeAssignment = (index) => {
-        const newAssignments = assignments.filter((_, i) => i !== index);
+    const removeAssignment = (assignmentId) => {
+        const newAssignments = assignments.filter(assignment => assignment.id !== assignmentId);
         setAssignments(newAssignments);
     };
 
@@ -330,7 +330,7 @@ const PageAssignmentManager = ({ promoBar, onClose, onSave }) => {
                                         <div key={assignment.id || index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                                             <span className="text-sm text-gray-700">{getAssignmentLabel(assignment)}</span>
                                             <button
-                                                onClick={() => removeAssignment(index)}
+                                                onClick={() => removeAssignment(assignment.id)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 className="w-4 h-4" />

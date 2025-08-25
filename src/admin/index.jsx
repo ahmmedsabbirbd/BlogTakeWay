@@ -315,9 +315,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             
                             <div id="current-assignments" style="margin-top: 20px;">
-                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #111827;">Current Assignments</h4>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="font-size: 14px; font-weight: 600; color: #111827; margin: 0;">Current Assignments</h4>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button onclick="normalizePriorities()" style="background: #6b7280; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;" title="Normalize priorities (make them sequential)">Normalize</button>
+                                        <button onclick="clearAllAssignments()" style="background: #dc2626; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">Clear All</button>
+                                    </div>
+                                </div>
                                 <div id="assignments-list" style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; min-height: 50px;">
                                     <div style="text-align: center; color: #6b7280; font-size: 14px;">No assignments yet</div>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 11px; color: #6b7280; text-align: center;">
+                                    💡 Lower priority numbers = higher priority (displayed first)
                                 </div>
                             </div>
                         </div>
@@ -513,8 +522,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         function addAssignment(type, data) {
+            // Check if this assignment type already exists
+            const existingAssignment = currentAssignments.find(a => 
+                a.assignment_type === type && 
+                a.target_id === (data.id || 0) && 
+                a.target_value === (data.value || data.name || '')
+            );
+            
+            if (existingAssignment) {
+                console.log('Assignment already exists:', existingAssignment);
+                return; // Don't add duplicate
+            }
+            
             const assignment = {
-                id: Date.now(),
+                id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Unique temporary ID for frontend
                 assignment_type: type,
                 target_id: data.id || 0,
                 target_value: data.value || data.name || '',
@@ -523,28 +544,104 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentAssignments.push(assignment);
             updateAssignmentsList();
+            console.log('Added new assignment:', assignment);
+        }
+        
+        function removeDuplicateAssignments() {
+            const seen = new Set();
+            const uniqueAssignments = [];
+            
+            currentAssignments.forEach(assignment => {
+                const key = `${assignment.assignment_type}_${assignment.target_id}_${assignment.target_value}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueAssignments.push(assignment);
+                } else {
+                    console.log('Removing duplicate assignment:', assignment);
+                }
+            });
+            
+            if (uniqueAssignments.length !== currentAssignments.length) {
+                console.log(`Removed ${currentAssignments.length - uniqueAssignments.length} duplicate assignments`);
+                currentAssignments = uniqueAssignments;
+                updateAssignmentsList();
+            }
         }
         
         function removeAssignment(id) {
-            currentAssignments = currentAssignments.filter(a => a.id !== id);
+            console.log('Removing assignment with ID:', id, 'Type:', typeof id);
+            console.log('Current assignments before removal:', currentAssignments);
+            console.log('Assignment IDs:', currentAssignments.map(a => ({ id: a.id, type: typeof a.id })));
+            
+            const beforeCount = currentAssignments.length;
+            currentAssignments = currentAssignments.filter(a => {
+                const matches = a.id !== id;
+                console.log(`Comparing ${a.id} (${typeof a.id}) with ${id} (${typeof id}): ${matches}`);
+                return matches;
+            });
+            const afterCount = currentAssignments.length;
+            
+            console.log(`Removed ${beforeCount - afterCount} assignments`);
+            console.log('Current assignments after removal:', currentAssignments);
+            
+            // Update the display after removal (don't normalize priorities automatically)
             updateAssignmentsList();
         }
         
         function updateAssignmentsList() {
+            // Remove any duplicates before updating the display
+            removeDuplicateAssignments();
+            
             const assignmentsList = document.getElementById('assignments-list');
             if (!assignmentsList) return;
+            
+            console.log('Updating assignments list with:', currentAssignments);
             
             if (currentAssignments.length === 0) {
                 assignmentsList.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 14px;">No assignments yet</div>';
                 return;
             }
             
-            assignmentsList.innerHTML = currentAssignments.map(assignment => {
+            // Sort assignments by priority
+            const sortedAssignments = [...currentAssignments].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+            
+            assignmentsList.innerHTML = sortedAssignments.map((assignment, index) => {
                 const label = getAssignmentLabel(assignment);
+                console.log('Creating assignment element for:', assignment, 'with ID:', assignment.id);
                 return `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 8px;">
-                        <span style="font-size: 14px; color: #374151;">${label}</span>
-                        <button onclick="removeAssignment(${assignment.id})" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px;">×</button>
+                        <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                            <span style="font-size: 12px; color: #6b7280; min-width: 20px;">${assignment.priority || index + 1}</span>
+                            <span style="font-size: 14px; color: #374151; flex: 1;">${label}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <input 
+                                type="number" 
+                                value="${assignment.priority || index + 1}" 
+                                min="1" 
+                                max="999"
+                                style="width: 60px; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;"
+                                onchange="updateAssignmentPriority('${assignment.id}', this.value)"
+                                title="Priority (lower number = higher priority)"
+                            />
+                            <button 
+                                onclick="moveAssignmentUp('${assignment.id}')" 
+                                style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 14px; padding: 2px;"
+                                title="Move up"
+                                ${index === 0 ? 'disabled' : ''}
+                            >↑</button>
+                            <button 
+                                onclick="moveAssignmentDown('${assignment.id}')" 
+                                style="background: none; border: none; color: #6b7280; cursor: pointer; font-size: 14px; padding: 2px;"
+                                title="Move down"
+                                ${index === sortedAssignments.length - 1 ? 'disabled' : ''}
+                            >↓</button>
+                            <button 
+                                onclick="console.log('Button clicked for ID: ${assignment.id}'); removeAssignment('${assignment.id}')" 
+                                style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px;"
+                                title="Remove assignment"
+                            >×</button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -568,6 +665,97 @@ document.addEventListener('DOMContentLoaded', () => {
                     return 'Unknown Assignment';
             }
         }
+        
+        // Priority management functions
+        window.updateAssignmentPriority = function(assignmentId, newPriority) {
+            console.log('Updating priority for assignment:', assignmentId, 'to:', newPriority);
+            
+            const assignment = currentAssignments.find(a => a.id === assignmentId);
+            if (!assignment) {
+                console.error('Assignment not found:', assignmentId);
+                return;
+            }
+            
+            const priority = parseInt(newPriority) || 1;
+            assignment.priority = Math.max(1, Math.min(999, priority));
+            
+            console.log('Updated assignment priority:', assignment);
+            updateAssignmentsList();
+        };
+        
+        window.moveAssignmentUp = function(assignmentId) {
+            console.log('Moving assignment up:', assignmentId);
+            
+            const assignment = currentAssignments.find(a => a.id === assignmentId);
+            if (!assignment) {
+                console.error('Assignment not found:', assignmentId);
+                return;
+            }
+            
+            // Sort assignments by priority
+            const sortedAssignments = [...currentAssignments].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+            const currentIndex = sortedAssignments.findIndex(a => a.id === assignmentId);
+            
+            if (currentIndex <= 0) {
+                console.log('Assignment is already at the top');
+                return;
+            }
+            
+            const previousAssignment = sortedAssignments[currentIndex - 1];
+            
+            // Swap priorities
+            const tempPriority = assignment.priority;
+            assignment.priority = previousAssignment.priority;
+            previousAssignment.priority = tempPriority;
+            
+            console.log('Swapped priorities:', assignment.priority, previousAssignment.priority);
+            updateAssignmentsList();
+        };
+        
+        window.moveAssignmentDown = function(assignmentId) {
+            console.log('Moving assignment down:', assignmentId);
+            
+            const assignment = currentAssignments.find(a => a.id === assignmentId);
+            if (!assignment) {
+                console.error('Assignment not found:', assignmentId);
+                return;
+            }
+            
+            // Sort assignments by priority
+            const sortedAssignments = [...currentAssignments].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+            const currentIndex = sortedAssignments.findIndex(a => a.id === assignmentId);
+            
+            if (currentIndex >= sortedAssignments.length - 1) {
+                console.log('Assignment is already at the bottom');
+                return;
+            }
+            
+            const nextAssignment = sortedAssignments[currentIndex + 1];
+            
+            // Swap priorities
+            const tempPriority = assignment.priority;
+            assignment.priority = nextAssignment.priority;
+            nextAssignment.priority = tempPriority;
+            
+            console.log('Swapped priorities:', assignment.priority, nextAssignment.priority);
+            updateAssignmentsList();
+        };
+        
+        // Function to normalize priorities (ensure they are sequential)
+        window.normalizePriorities = function() {
+            console.log('Normalizing priorities...');
+            
+            // Sort assignments by current priority
+            const sortedAssignments = [...currentAssignments].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+            
+            // Reassign sequential priorities
+            sortedAssignments.forEach((assignment, index) => {
+                assignment.priority = index + 1;
+            });
+            
+            console.log('Normalized priorities:', sortedAssignments.map(a => ({ id: a.id, priority: a.priority })));
+            updateAssignmentsList();
+        };
         
 
         
@@ -701,6 +889,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Make functions globally accessible
         window.addAssignment = addAssignment;
         window.removeAssignment = removeAssignment;
+        
+        // Debug function to test assignment removal
+        window.testRemoveAssignment = function(id) {
+            console.log('Testing removal of assignment with ID:', id);
+            removeAssignment(id);
+        };
+        
+        // Function to clear all assignments
+        window.clearAllAssignments = function() {
+            currentAssignments = [];
+            updateAssignmentsList();
+            console.log('Cleared all assignments');
+        };
+        
+        // Function to remove duplicates
+        window.removeDuplicateAssignments = removeDuplicateAssignments;
         
         // Add custom URL pattern handler
         window.addCustomUrlPattern = function() {
@@ -953,6 +1157,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }),
                 assignments: JSON.stringify(currentAssignments)
             };
+            
+            // Save assignments with their current priority values (don't normalize automatically)
+            if (currentAssignments.length > 0) {
+                console.log('Saving assignments with current priorities:', currentAssignments.map(a => ({ id: a.id, priority: a.priority })));
+                data.assignments = JSON.stringify(currentAssignments);
+            }
             
             // Add ID if editing existing promo bar
             if (promoBarId) {
@@ -1249,7 +1459,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (promoBar.assignments) {
                             try {
                                 const assignments = typeof promoBar.assignments === 'string' ? JSON.parse(promoBar.assignments) : promoBar.assignments;
-                                currentAssignments = assignments;
+                                // Ensure all assignments have proper IDs and priority values
+                                currentAssignments = assignments.map((assignment, index) => ({
+                                    ...assignment,
+                                    id: assignment.id || `db_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                                    priority: assignment.priority || (index + 1) // Ensure priority exists
+                                }));
                                 updateAssignmentsList();
                             } catch (e) {
                                 console.error('Error parsing assignments:', e);
