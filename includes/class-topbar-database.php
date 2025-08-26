@@ -117,7 +117,8 @@ class PromoBarX_Database {
             KEY promo_bar_id (promo_bar_id),
             KEY assignment_type (assignment_type),
             KEY target_id (target_id),
-            KEY priority (priority)
+            KEY priority (priority),
+            FOREIGN KEY (promo_bar_id) REFERENCES {$this->table_prefix}promo_bars(id) ON DELETE CASCADE
         ) $charset_collate;";
 
         error_log('PromoBarX Database: Creating promo_bar_assignments table');
@@ -718,11 +719,17 @@ class PromoBarX_Database {
      * Delete promo bar
      */
     public function delete_promo_bar($id) {
-        return $this->wpdb->delete(
+        // First, delete existing assignments for this promo bar
+        $delete_result = $this->delete_assignments($id);
+        
+        // Then delete the promo bar
+        $result = $this->wpdb->delete(
             $this->table_prefix . 'promo_bars',
             ['id' => $id],
             ['%d']
         );
+        
+        return $result !== false;
     }
 
     /**

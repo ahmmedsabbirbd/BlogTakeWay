@@ -55,6 +55,7 @@ class PromoBarX_Manager {
         add_action('wp_ajax_promobarx_save_assignments', [$this, 'ajax_save_assignments']);
         add_action('wp_ajax_promobarx_force_create_tables', [$this, 'ajax_force_create_tables']);
         add_action('wp_ajax_promobarx_force_recreate_assignments_table', [$this, 'ajax_force_recreate_assignments_table']);
+        add_action('wp_ajax_promobarx_get_analytics', [$this, 'ajax_get_analytics']);
     }
 
     /**
@@ -495,7 +496,7 @@ class PromoBarX_Manager {
         // Render the actual promo bar HTML
         ?>
         <div id="promobarx-topbar-<?php echo esc_attr($promo_bar->id); ?>" class="promobarx-topbar" style="<?php echo esc_attr($topbar_styles); ?>">
-            <div class="promobarx-content">
+            <div class="promobarx-content" onclick="promobarxTrackEvent(<?php echo esc_js($promo_bar->id); ?>, 'click')">
                 <?php if (!empty($promo_bar->title)): ?>
                     <?php 
                     $title_style = '';
@@ -539,7 +540,7 @@ class PromoBarX_Manager {
                     }
                     $final_cta_style = $cta_styles . $cta_individual_style;
                     ?>
-                    <a href="<?php echo esc_url($promo_bar->cta_url); ?>" class="promobarx-cta" style="<?php echo esc_attr($final_cta_style); ?>" onclick="promobarxTrackEvent(<?php echo esc_js($promo_bar->id); ?>, 'click')">
+                    <a href="<?php echo esc_url($promo_bar->cta_url); ?>" class="promobarx-cta" style="<?php echo esc_attr($final_cta_style); ?>" onclick="event.stopPropagation(); promobarxTrackEvent(<?php echo esc_js($promo_bar->id); ?>, 'cta_click')">
                         <?php echo esc_html($promo_bar->cta_text); ?>
                     </a>
                 <?php endif; ?>
@@ -1281,5 +1282,46 @@ class PromoBarX_Manager {
         ];
         
         return $test_results;
+    }
+
+    /**
+     * AJAX get analytics data for promo bars
+     */
+    public function ajax_get_analytics() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        global $wpdb;
+        
+        // Get analytics data for all promo bars
+        $sql = "SELECT 
+                    pba.promo_bar_id,
+                    pba.event_type,
+                    COUNT(*) as count
+                FROM {$wpdb->prefix}promo_bar_analytics pba
+                INNER JOIN {$wpdb->prefix}promo_bars pb ON pba.promo_bar_id = pb.id
+                GROUP BY pba.promo_bar_id, pba.event_type
+                ORDER BY pba.promo_bar_id, pba.event_type";
+        
+        $analytics_results = $wpdb->get_results($sql);
+        
+        // Organize data by promo bar ID
+        $analytics_by_promo_bar = [];
+        foreach ($analytics_results as $result) {
+            if (!isset($analytics_by_promo_bar[$result->promo_bar_id])) {
+                $analytics_by_promo_bar[$result->promo_bar_id] = [
+                    'impression' => 0,
+                    'click' => 0,
+                    'close' => 0,
+                    'cta_click' => 0
+                ];
+            }
+            $analytics_by_promo_bar[$result->promo_bar_id][$result->event_type] = intval($result->count);
+        }
+        
+        wp_send_json_success($analytics_by_promo_bar);
     }
 }

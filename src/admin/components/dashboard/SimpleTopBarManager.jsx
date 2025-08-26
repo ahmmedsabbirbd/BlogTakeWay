@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const SimpleTopBarManager = ({ containerId }) => {
     const [promoBars, setPromoBars] = useState([]);
+    const [analyticsData, setAnalyticsData] = useState({});
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('manage');
 
@@ -12,6 +13,7 @@ const SimpleTopBarManager = ({ containerId }) => {
         if (window.promobarxAdmin && window.promobarxAdmin.ajaxurl && window.promobarxAdmin.nonce) {
             console.log('SimpleTopBarManager: Admin data available, loading promo bars');
             loadPromoBars();
+            loadAnalyticsData();
         } else {
             console.error('SimpleTopBarManager: Admin data not available');
             console.error('SimpleTopBarManager: promobarxAdmin:', window.promobarxAdmin);
@@ -46,6 +48,32 @@ const SimpleTopBarManager = ({ containerId }) => {
             console.error('Error loading promo bars:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadAnalyticsData = async () => {
+        try {
+            console.log('Loading analytics data...');
+            
+            const response = await fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=promobarx_get_analytics&nonce=' + window.promobarxAdmin.nonce
+            });
+            
+            const data = await response.json();
+            console.log('Analytics response:', data);
+            
+            if (data.success) {
+                setAnalyticsData(data.data);
+                console.log('Analytics data loaded:', data.data);
+            } else {
+                console.error('Failed to load analytics data:', data);
+            }
+        } catch (error) {
+            console.error('Error loading analytics data:', error);
         }
     };
 
@@ -225,6 +253,36 @@ const SimpleTopBarManager = ({ containerId }) => {
         return Math.max(...assignments.map(a => parseInt(a.priority) || 0));
     };
 
+    const getAnalyticsDisplay = (promoBarId) => {
+        const analytics = analyticsData[promoBarId] || {
+            impression: 0,
+            click: 0,
+            close: 0,
+            cta_click: 0
+        };
+
+        return (
+            <div className="space-y-1">
+                <div className="text-xs">
+                    <span className="font-medium text-blue-600">👁️ {analytics.impression}</span>
+                    <span className="text-gray-500 ml-2">impressions</span>
+                </div>
+                <div className="text-xs">
+                    <span className="font-medium text-green-600">🖱️ {analytics.click}</span>
+                    <span className="text-gray-500 ml-2">clicks</span>
+                </div>
+                <div className="text-xs">
+                    <span className="font-medium text-red-600">❌ {analytics.close}</span>
+                    <span className="text-gray-500 ml-2">closes</span>
+                </div>
+                <div className="text-xs">
+                    <span className="font-medium text-purple-600">🎯 {analytics.cta_click}</span>
+                    <span className="text-gray-500 ml-2">CTA clicks</span>
+                </div>
+            </div>
+        );
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -307,6 +365,7 @@ const SimpleTopBarManager = ({ containerId }) => {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th> 
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Countdown</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignments</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Analytics</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -327,6 +386,9 @@ const SimpleTopBarManager = ({ containerId }) => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {getAssignmentDisplay(promoBar.assignments)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {getAnalyticsDisplay(promoBar.id)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

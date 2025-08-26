@@ -31,7 +31,7 @@ if (currentAssignments.length > 0) {
 ```
 
 **After:**
-```javascript
+```javascript 
 // Save assignments with their current priority values (don't normalize automatically)
 if (currentAssignments.length > 0) {
     console.log('Saving assignments with current priorities:', currentAssignments.map(a => ({ id: a.id, priority: a.priority })));
