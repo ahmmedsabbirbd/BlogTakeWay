@@ -4,7 +4,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     exit;
 }
 
-class AISK_Uninstaller {
+class PromoBarX_Uninstaller {
 
     /**
      * Array of table names
@@ -25,18 +25,18 @@ class AISK_Uninstaller {
      */
     public function __construct() {
         $this->tables = [
-            'aisk_conversations',
-            'aisk_messages',
-            'aisk_user_states',
-            'aisk_inquiries',
-            'aisk_inquiry_notes',
-            'aisk_embeddings',
-            'aisk_pdf_queue',
+            'promo_conversations',
+            'promo_messages',
+            'promo_user_states',
+            'promo_inquiries',
+            'promo_inquiry_notes',
+            'promo_embeddings',
+            'promo_pdf_queue',
         ];
 
         $this->options = [
-            'aisk_settings',
-            'aisk_last_pdf_processing',
+            'promo_settings',
+            'promo_last_pdf_processing',
         ];
     }
 
@@ -84,5 +84,5 @@ class AISK_Uninstaller {
 }
 
 // Execute the uninstallation
-$uninstaller = new AISK_Uninstaller();
+$uninstaller = new PromoBarX_Uninstaller();
 $uninstaller->uninstall();

@@ -748,7 +748,6 @@ class Insights {
      * @return array
      */
     private function get_uninstall_reasons() {
-        error_log('aisk_ai_chat____get_uninstall_reasons');
         $reasons = [
             [
                 'id'          => 'could-not-understand',
@@ -839,14 +838,11 @@ class Insights {
      * @return void
      */
     public function deactivate_scripts() {
-        error_log('aisk_ai_chat________deactivate_scripts_1');
         global $pagenow;
 
         if ( 'plugins.php' !== $pagenow ) {
             return;
         }
-
-        error_log('aisk_ai_chat________deactivate_scripts_2');
 
         $this->deactivation_modal_styles();
         $reasons        = $this->get_uninstall_reasons();

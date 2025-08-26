@@ -1,12 +1,12 @@
 <?php
 /**
- * AISK Admin Class
+ * PROMO Admin Class
  *
  * @category WordPress
- * @package  AISK
- * @author   Aisk Team <support@aisk.chat>
+ * @package  PROMO
+ * @author   Aisk Team <support@promo.chat>
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
- * @link     https://aisk.com
+ * @link     https://promo.com
  */
 
 if ( ! defined('ABSPATH') ) {
@@ -14,13 +14,13 @@ if ( ! defined('ABSPATH') ) {
 }
 
 /**
- * AISK Admin Class handles all admin-related functionality
+ * PROMO Admin Class handles all admin-related functionality
  *
  * @category Class
- * @package  AISK
- * @author   Aisk Team <support@aisk.chat>
+ * @package  PROMO
+ * @author   Aisk Team <support@promo.chat>
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
- * @link     https://aisk.com
+ * @link     https://promo.com
  */
 class TOP_Admin {
 
@@ -50,7 +50,7 @@ class TOP_Admin {
         add_action('admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ]);
         add_action('admin_enqueue_scripts', [ $this, 'enqueue_admin_styles' ]);
 
-        add_action('rest_api_init', [ $this, 'aisk_register_settings_endpoints' ]);
+        add_action('rest_api_init', [ $this, 'promo_register_settings_endpoints' ]);
     }
     
     /**
@@ -139,7 +139,7 @@ class TOP_Admin {
         }
 
         // First load the common chat widget assets
-        // AISK_Scripts::load_chat_widget_assets();
+        // PROMO_Scripts::load_chat_widget_assets();
 
         // Then load admin-specific assets
         wp_enqueue_media();
@@ -169,7 +169,7 @@ class TOP_Admin {
             'promo-bar-x-admin',
             'AiskSettings',
             [
-                'apiUrl' => rest_url('aisk/v1'),
+                'apiUrl' => rest_url('promo/v1'),
                 'nonce' => wp_create_nonce('wp_rest'),
                 'pluginUrl' => PromoBarX_PLUGIN_URL,
                 'isWooCommerceActive' => class_exists('WooCommerce'),
@@ -204,26 +204,26 @@ class TOP_Admin {
      *
      * @return void
      */
-    public function aisk_register_settings_endpoints() {
+    public function promo_register_settings_endpoints() {
         register_rest_route(
-            'aisk/v1', '/settings', [
+            'promo/v1', '/settings', [
 				[
 					'methods' => 'GET',
-					'callback' => [ $this, 'aisk_get_settings' ],
+					'callback' => [ $this, 'promo_get_settings' ],
 					'permission_callback' => function () {
 						return current_user_can('manage_options');
 					},
 				],
 				[
 					'methods' => 'POST',
-					'callback' => [ $this, 'aisk_update_settings' ],
+					'callback' => [ $this, 'promo_update_settings' ],
 					'permission_callback' => function () {
 						return current_user_can('manage_options');
 					},
 				],
             ]
         );
-        register_rest_route('aisk/v1', '/install-woocommerce', array(
+        register_rest_route('promo/v1', '/install-woocommerce', array(
             'methods' => 'POST',
             'callback' => array( $this, 'install_woocommerce' ),
             'permission_callback' => function () {
@@ -368,8 +368,8 @@ class TOP_Admin {
      *
      * @return WP_REST_Response
      */
-    public function aisk_get_settings() {
-        $settings = get_option('aisk_settings', []);
+    public function promo_get_settings() {
+        $settings = get_option('promo_settings', []);
         return rest_ensure_response($settings);
     }
 
@@ -382,9 +382,9 @@ class TOP_Admin {
      *
      * @return WP_REST_Response
      */
-    public function aisk_update_settings( $request ) {
+    public function promo_update_settings( $request ) {
         $settings = $request->get_json_params();
-        update_option('aisk_settings', $settings);
+        update_option('promo_settings', $settings);
         return rest_ensure_response([ 'success' => true ]);
     }
 

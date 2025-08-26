@@ -1,12 +1,12 @@
 {
-    "name": "aisk/promo-bar-x",
+    "name": "promo/promo-bar-x",
     "description": "AI chatbot for WordPress with messaging platform integration",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Aisk Team",
-            "email": "support@aisk.chat"
+            "name": "WPPOOL Team",
+            "email": "support@wppool.com"
         }
     ],
     "require": {

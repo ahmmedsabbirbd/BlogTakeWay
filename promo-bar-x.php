@@ -47,21 +47,20 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 } else {
     // Log error but don't stop plugin execution
     if ( defined('WP_DEBUG') && WP_DEBUG ) {
-        // error_log('Aisk AI Chat: Composer autoloader not found. Some features may not work properly.');
+        // error_log('Promo Bar X: Composer autoloader not found. Some features may not work properly.');
     }
 }
 
 /**
- * Main plugin class for AISK AI Chatbot
+ * Main plugin class for Promo Bar X
  *
  * Handles initialization, dependencies loading, and core functionality
- * of the AISK chatbot plugin for WordPress and WooCommerce.
+ * of the Promo Bar X plugin for WordPress.
  *
  * @category WordPress
- * @package  AISK
- * @author   Aisk Team <support@aisk.chat>
+ * @package  PromoBarX
+ * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
- * @link     https://aisk.chat
  */
 class PROMO_BAR_X {
 
@@ -90,7 +89,7 @@ class PROMO_BAR_X {
         define('PromoBarX_PLUGIN_DIR', plugin_dir_path(__FILE__));
         define('PromoBarX_PLUGIN_URL', plugin_dir_url(__FILE__));
         define('PromoBarX_TEXT_DOMAIN', 'promo-bar-x');
-        define('PromoBarX_CHAT_SESSION_COOKIE', 'aisk_chat_session');
+        define('PromoBarX_CHAT_SESSION_COOKIE', 'promo_chat_session');
         define('PromoBarX_GREAP_KEY', 'zcP5AsW6bwGApWF5NdyF4TvyKZs6w7KP');
 
         // Initialize components
@@ -98,7 +97,7 @@ class PROMO_BAR_X {
         register_activation_hook(__FILE__, [ $this, 'activate' ]);
         
         // $this->include_appsero_client();
-        // $this->appsero_init_tracker_aisk_ai_chat();
+        // $this->appsero_init_tracker_promo_bar_x();
 
         // Load required files
         $this->load_dependencies(); 
@@ -121,7 +120,7 @@ class PROMO_BAR_X {
                     email: "%s",
                     name: "%s",
                     role: "%s",
-                    plugin_name: "AISK AI Chat",
+                    plugin_name: "Promo Bar X",
                     version: "%s",
                     site_url: "%s",
                     is_multisite: "%s",
@@ -158,8 +157,8 @@ class PROMO_BAR_X {
         
         // Check if we're on stock notifier pages
         if (
-            (!$screen || strpos($screen->base, 'aisk') === false) && 
-            $current_page !== 'aisk-inquiries' && $current_page !== 'aisk-history' && $current_page !== 'aisk-settings'
+            (!$screen || strpos($screen->base, 'promo') === false) && 
+            $current_page !== 'promo-inquiries' && $current_page !== 'promo-history' && $current_page !== 'promo-settings'
         ) {
             return;
         }
@@ -167,9 +166,9 @@ class PROMO_BAR_X {
         $user = wp_get_current_user();
         $user_role = ( !empty($user->roles) && isset($user->roles[0]) ) ? $user->roles[0] : '';
 
-        wp_register_script( 'aisk-gleap-dummy', false );
-        wp_enqueue_script( 'aisk-gleap-dummy' );
-        wp_add_inline_script( 'aisk-gleap-dummy', $this->get_gleap_inline_script( $user, $user_role ) );
+        wp_register_script( 'promo-gleap-dummy', false );
+        wp_enqueue_script( 'promo-gleap-dummy' );
+        wp_add_inline_script( 'promo-gleap-dummy', $this->get_gleap_inline_script( $user, $user_role ) );
     }
 
     /**
@@ -177,7 +176,7 @@ class PROMO_BAR_X {
      *
      * @return void
      */
-    public function appsero_init_tracker_aisk_ai_chat() {
+    public function appsero_init_tracker_promo_bar_x() {
         $client = new Aisk_Ai_Chat\Appsero\Client( 'e46991ff-ae9b-42f3-bf87-1ec87ab8bb77', 'Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA', PromoBarX_PLUGIN_FILE );
 
         // Active insights.
@@ -188,7 +187,7 @@ class PROMO_BAR_X {
      * Includes the Appsero client by creating a class alias if necessary.
      *
      * If the 'Appsero\Client' class is not defined, it will create an alias to
-     * 'AISK_AI_CHAT\Appsero\Client'.
+     * 'PROMO_BAR_X\Appsero\Client'.
      *
      * @version 1.0.0
      * @return void
@@ -268,7 +267,7 @@ class PROMO_BAR_X {
      */
     public function enqueue_scripts() {
         if ( ! is_page('promo-bar-x-p') ) {
-            // AISK_Scripts::load_chat_widget_assets();
+            // PROMO_Scripts::load_chat_widget_assets();
         }
     }
 
@@ -280,7 +279,7 @@ class PROMO_BAR_X {
     public function render_chat_widget() {
         // Check if we're on the contact form page
         if ( ! is_page('promo-bar-x-p') ) {
-            // AISK_Scripts::load_chat_widget_assets();
+            // PROMO_Scripts::load_chat_widget_assets();
         }
     }
 
