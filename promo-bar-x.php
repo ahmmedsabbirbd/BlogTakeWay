@@ -63,7 +63,7 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
  * @link     https://aisk.chat
  */
-class AISK_AI_Chatbot {
+class PROMO_BAR_X {
 
     private static $instance = null;
     private $pdf_queue_handler = null;
@@ -71,7 +71,7 @@ class AISK_AI_Chatbot {
     /**
      * Get singleton instance of this class
      *
-     * @return AISK_AI_Chatbot Instance of this class
+     * @return PROMO_BAR_X Instance of this class
      */
     public static function get_instance() {
         if ( null === self::$instance ) {
@@ -251,14 +251,14 @@ class AISK_AI_Chatbot {
      * @return void
      */
     public function activate() {
-        error_log('PromoBarX: Plugin activation started');
+
         
         
         // Initialize PromoBarX database and create default promo bar
-        error_log('PromoBarX: Initializing PromoBarX database');
+
         $promobarx_db = new PromoBarX_Database();
         
-        error_log('PromoBarX: Plugin activation completed');
+
     }
 
     /**
@@ -287,4 +287,4 @@ class AISK_AI_Chatbot {
 }
 
 // Initialize the plugin
-AISK_AI_Chatbot::get_instance();
+PROMO_BAR_X::get_instance();

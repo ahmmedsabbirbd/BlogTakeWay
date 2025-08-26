@@ -30,12 +30,12 @@ class PromoBarX_Database {
      * Test database connectivity and table existence
      */
     public function test_database_connection() {
-        error_log('PromoBarX Database: Testing database connection');
+
         
         // Test basic connectivity
         $test_query = $this->wpdb->get_var("SELECT 1");
         if ($test_query !== '1') {
-            error_log('PromoBarX Database: Basic connectivity test failed');
+
             return false;
         }
         
@@ -62,7 +62,7 @@ class PromoBarX_Database {
             return false;
         }
         
-        error_log('PromoBarX Database: Database connection test passed');
+
         return true;
     }
 
@@ -406,7 +406,7 @@ class PromoBarX_Database {
      * Create or update promo bar
      */
     public function save_promo_bar($data) {
-        error_log('PromoBarX Database: Save method called with data: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' . print_r($data, true));
+
         
         // Test database connection first
         if (!$this->test_database_connection()) {
@@ -417,8 +417,7 @@ class PromoBarX_Database {
         // Extract assignments data before sanitization
         $assignments_data = [];
         if (isset($data['assignments'])) {
-            error_log('PromoBarX Database: Assignments field type: ' . gettype($data['assignments']));
-            error_log('PromoBarX Database: Assignments field content: ' . print_r($data['assignments'], true));
+            
             
             if (is_array($data['assignments'])) {
                 error_log('PromoBarX Database: Assignments is array, using directly');
@@ -458,7 +457,7 @@ class PromoBarX_Database {
             error_log('PromoBarX Database: Assignments field not set in data');
         }
 
-        error_log('PromoBarX Database: Final assignments_data: ' . print_r($assignments_data, true));
+
         
         // Remove assignments from main data to avoid conflicts
         unset($data['assignments']);
