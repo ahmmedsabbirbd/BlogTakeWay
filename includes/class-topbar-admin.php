@@ -120,7 +120,7 @@ class TOP_Admin {
      */
     public function enqueue_admin_scripts($hook) {
         // Debug: Log the current hook
-        error_log('PromoBarX Admin Hook: ' . $hook);
+
         
         // Check if we're on any of our plugin pages
         $allowed_hooks = [
@@ -132,7 +132,7 @@ class TOP_Admin {
         // Also check if the hook contains our plugin slug (more flexible approach)
         $is_plugin_page = in_array($hook, $allowed_hooks) || strpos($hook, $this->plugin_slug) !== false;
 
-        error_log('PromoBarX Is Plugin Page: ' . ($is_plugin_page ? 'true' : 'false'));
+
 
         if (!$is_plugin_page) {
             return;
@@ -314,9 +314,9 @@ class TOP_Admin {
             console.log("TopBar Manager Page Loaded");
             // Ensure promobarxAdmin is available immediately
             window.promobarxAdmin = window.promobarxAdmin || {
-                ajaxurl: "' . admin_url('admin-ajax.php') . '",
-                nonce: "' . wp_create_nonce('promobarx_admin_nonce') . '",
-                pluginUrl: "' . PromoBarX_PLUGIN_URL . '",
+                ajaxurl: "' . esc_url(admin_url('admin-ajax.php')) . '",
+                nonce: "' . esc_attr(wp_create_nonce('promobarx_admin_nonce')) . '",
+                pluginUrl: "' . esc_url(PromoBarX_PLUGIN_URL) . '",
                 strings: {
                     saving: "Saving...",
                     saved: "Saved successfully!",
@@ -345,10 +345,10 @@ class TOP_Admin {
             console.log("TopBar Editor Page Loaded");
             // Ensure promobarxAdmin is available immediately
             window.promobarxAdmin = window.promobarxAdmin || {
-                ajaxurl: "' . admin_url('admin-ajax.php') . '",
-                nonce: "' . wp_create_nonce('promobarx_admin_nonce') . '",
-                pluginUrl: "' . PromoBarX_PLUGIN_URL . '",
-                promoBarId: ' . $promo_bar_id . ',
+                ajaxurl: "' . esc_url(admin_url('admin-ajax.php')) . '",
+                nonce: "' . esc_attr(wp_create_nonce('promobarx_admin_nonce')) . '",
+                pluginUrl: "' . esc_url(PromoBarX_PLUGIN_URL) . '",
+                promoBarId: ' . esc_js($promo_bar_id) . ',
                 strings: {
                     saving: "Saving...",
                     saved: "Saved successfully!",

@@ -48,7 +48,6 @@ class PromoBarX_Database {
         );
         
         if (!$table_exists) {
-            error_log('PromoBarX Database: promo_bars table does not exist');
             return false;
         }
         
@@ -58,7 +57,6 @@ class PromoBarX_Database {
         );
         
         if (empty($columns)) {
-            error_log('PromoBarX Database: Could not get table structure');
             return false;
         }
         
@@ -72,7 +70,7 @@ class PromoBarX_Database {
     public function create_tables() {
         $charset_collate = $this->wpdb->get_charset_collate();
         
-        error_log('PromoBarX Database: Creating tables with prefix: ' . $this->table_prefix);
+
 
         // Main top bars table
         $sql_promo_bars = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bars (
@@ -98,10 +96,10 @@ class PromoBarX_Database {
             KEY template_id (template_id)
         ) $charset_collate;";
 
-        error_log('PromoBarX Database: Creating promo_bars table');
         $result = $this->wpdb->query($sql_promo_bars);
-        error_log('PromoBarX Database: promo_bars table creation result: ' . $result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        if ($result === false) {
+            // Failed to create promo_bars table
+        }
 
         // Assignments table for multiple assignments per promo bar
         $sql_assignments = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bar_assignments (
@@ -121,10 +119,10 @@ class PromoBarX_Database {
             FOREIGN KEY (promo_bar_id) REFERENCES {$this->table_prefix}promo_bars(id) ON DELETE CASCADE
         ) $charset_collate;";
 
-        error_log('PromoBarX Database: Creating promo_bar_assignments table');
         $result = $this->wpdb->query($sql_assignments);
-        error_log('PromoBarX Database: promo_bar_assignments table creation result: ' . $result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        if ($result === false) {
+            // Failed to create promo_bar_assignments table
+        }
 
         // Templates table
         $sql_templates = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bar_templates (
@@ -142,10 +140,10 @@ class PromoBarX_Database {
             KEY is_default (is_default)
         ) $charset_collate;";
 
-        error_log('PromoBarX Database: Creating promo_bar_assignments table');
         $result = $this->wpdb->query($sql_templates);
-        error_log('PromoBarX Database: promo_bar_assignments table creation result: ' . $result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        if ($result === false) {
+            // Failed to create templates table
+        }
 
         // Scheduling table
         $sql_schedules = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bar_schedules (
@@ -167,10 +165,10 @@ class PromoBarX_Database {
         ) $charset_collate;";
 
         
-        error_log('PromoBarX Database: Creating promo_bar_assignments table');
         $result = $this->wpdb->query($sql_schedules);
-        error_log('PromoBarX Database: promo_bar_assignments table creation result: ' . $result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        if ($result === false) {
+            // Failed to create schedules table
+        }
 
         // Analytics table
         $sql_analytics = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bar_analytics (
@@ -190,10 +188,10 @@ class PromoBarX_Database {
             FOREIGN KEY (promo_bar_id) REFERENCES {$this->table_prefix}promo_bars(id) ON DELETE CASCADE
         ) $charset_collate;";
 
-        error_log('PromoBarX Database: Creating analytics table');
         $result = $this->wpdb->query($sql_analytics);
-        error_log('PromoBarX Database: analytics table creation result: ' . $result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        if ($result === false) {
+            // Failed to create analytics table
+        }
 
         // Create default templates
         $this->insert_default_templates();
@@ -340,19 +338,18 @@ class PromoBarX_Database {
      * Get promo bar by ID
      */
     public function get_promo_bar($id) {
-        error_log('PromoBarX Database: Getting promo bar with ID: ' . $id);
+
         
         $sql = $this->wpdb->prepare(
             "SELECT * FROM {$this->table_prefix}promo_bars WHERE id = %d",
             $id
         );
         
-        error_log('PromoBarX Database: SQL query: ' . $sql);
+                $result = $this->wpdb->get_row($sql);
         
-        $result = $this->wpdb->get_row($sql);
-        
-        error_log('PromoBarX Database: Query result: ' . print_r($result, true));
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+        if ($this->wpdb->last_error) {
+            // Error getting promo bar from database
+        }
         
         if ($result) {
             // Get assignments for this promo bar
@@ -373,7 +370,7 @@ class PromoBarX_Database {
             // Add assignments to the result
             $result->assignments = $assignments_array;
             
-            error_log('PromoBarX Database: Added assignments to result: ' . print_r($assignments_array, true));
+
         }
         
         return $result;
@@ -383,8 +380,7 @@ class PromoBarX_Database {
      * Update promo bar
      */
     public function update_promo_bar($id, $data) {
-        error_log('PromoBarX Database: Updating promo bar with ID: ' . $id);
-        error_log('PromoBarX Database: Update data: ' . print_r($data, true));
+
         
         $data['updated_at'] = current_time('mysql');
         
@@ -396,8 +392,7 @@ class PromoBarX_Database {
             ['%d']
         );
         
-        error_log('PromoBarX Database: Update result: ' . print_r($result, true));
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+
         
         return $result !== false;
     }
@@ -410,7 +405,7 @@ class PromoBarX_Database {
         
         // Test database connection first
         if (!$this->test_database_connection()) {
-            error_log('PromoBarX Database: Database connection test failed');
+            // Database connection test failed
             return false;
         }
         
@@ -420,41 +415,37 @@ class PromoBarX_Database {
             
             
             if (is_array($data['assignments'])) {
-                error_log('PromoBarX Database: Assignments is array, using directly');
+
                 $assignments_data = $data['assignments'];
             } elseif (is_string($data['assignments'])) {
-                error_log('PromoBarX Database: Assignments is string, attempting JSON decode');
+
                 
                 // First attempt: direct JSON decode
                 $decoded = json_decode($data['assignments'], true);
-                error_log('PromoBarX Database: First JSON decode result: ' . print_r($decoded, true));
-                error_log('PromoBarX Database: First JSON last error: ' . json_last_error_msg());
+
                 
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    error_log('PromoBarX Database: First JSON decode successful, using decoded data');
+
                     $assignments_data = $decoded;
                 } else {
                     // Second attempt: try with stripslashes (in case of double encoding)
-                    error_log('PromoBarX Database: First decode failed, trying with stripslashes');
                     $stripped = stripslashes($data['assignments']);
-                    error_log('PromoBarX Database: Stripped string: ' . $stripped);
                     
                     $decoded = json_decode($stripped, true);
-                    error_log('PromoBarX Database: Second JSON decode result: ' . print_r($decoded, true));
-                    error_log('PromoBarX Database: Second JSON last error: ' . json_last_error_msg());
+
                     
                     if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                        error_log('PromoBarX Database: Second JSON decode successful, using decoded data');
+
                         $assignments_data = $decoded;
                     } else {
-                        error_log('PromoBarX Database: Both JSON decode attempts failed');
+                        // JSON decode failed for assignments data
                     }
                 }
             } else {
-                error_log('PromoBarX Database: Assignments is neither array nor string, type: ' . gettype($data['assignments']));
+
             }
         } else {
-            error_log('PromoBarX Database: Assignments field not set in data');
+
         }
 
 
@@ -465,7 +456,7 @@ class PromoBarX_Database {
         // Validate and sanitize input data
         $sanitized_data = $this->sanitize_promo_bar_data($data);
         if (is_wp_error($sanitized_data)) {
-            error_log('PromoBarX Database: Data validation failed: ' . $sanitized_data->get_error_message());
+            // Data validation failed
             return false;
         }
         
@@ -487,11 +478,11 @@ class PromoBarX_Database {
         ];
 
         $data = wp_parse_args($sanitized_data, $defaults);
-        error_log('PromoBarX Database: Parsed data: ' . print_r($data, true));
+
 
         // Ensure required fields are not empty
         if (empty($data['name'])) {
-            error_log('PromoBarX Database: Name is required but empty');
+
             return false;
         }
 
@@ -501,13 +492,12 @@ class PromoBarX_Database {
             unset($data['id']);
             $data['updated_at'] = current_time('mysql');
             
-            error_log('PromoBarX Database: Updating existing promo bar with ID: ' . $id);
-            error_log('PromoBarX Database: Update data: ' . print_r($data, true));
+
             
             // Check if promo bar exists
             $existing = $this->get_promo_bar($id);
             if (!$existing) {
-                error_log('PromoBarX Database: Promo bar with ID ' . $id . ' does not exist');
+
                 return false;
             }
             
@@ -517,11 +507,10 @@ class PromoBarX_Database {
                 ['id' => $id]
             );
             
-            error_log('PromoBarX Database: Update result: ' . print_r($result, true));
-            error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+
             
             if ($result === false) {
-                error_log('PromoBarX Database: Update failed with error: ' . $this->wpdb->last_error);
+                // Database update failed
                 return false;
             }
 
@@ -529,10 +518,10 @@ class PromoBarX_Database {
             
             // Update assignments if provided
             if (!empty($assignments_data)) {
-                error_log('PromoBarX Database: Updating assignments for promo bar ID: ' . $id);
+
                 $assignment_result = $this->save_assignments($id, $assignments_data);
                 if (!$assignment_result) {
-                    error_log('PromoBarX Database: Failed to update assignments');
+                    // Failed to update assignments
                 }
             }
             
@@ -542,20 +531,17 @@ class PromoBarX_Database {
             $data['created_at'] = current_time('mysql');
             $data['updated_at'] = current_time('mysql');
             
-            error_log('PromoBarX Database: Creating new promo bar');
-            error_log('PromoBarX Database: Insert data: ' . print_r($data, true));
+
             
             $result = $this->wpdb->insert(
                 $this->table_prefix . 'promo_bars',
                 $data
             );
             
-            error_log('PromoBarX Database: Insert result: ' . print_r($result, true));
-            error_log('PromoBarX Database: Insert ID: ' . $this->wpdb->insert_id);
-            error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+
             
             if ($result === false) {
-                error_log('PromoBarX Database: Insert failed with error: ' . $this->wpdb->last_error);
+                // Database insert failed
                 return false;
             }
             
@@ -563,14 +549,13 @@ class PromoBarX_Database {
             
             // Create assignments for new promo bar
             if (!empty($assignments_data)) {
-                error_log('PromoBarX Database: Creating assignments for new promo bar ID: ' . $new_promo_bar_id);
-                error_log('PromoBarX Database: Assignments data: ' . print_r($assignments_data, true));
+
                 $assignment_result = $this->save_assignments($new_promo_bar_id, $assignments_data);
                 
                 if ($assignment_result) {
-                    error_log('PromoBarX Database: Assignments created successfully');
+
                 } else {
-                    error_log('PromoBarX Database: Failed to create assignments');
+                    // Failed to create assignments
                 }
             } else {
                 // Create default assignment if no assignments provided
@@ -581,13 +566,13 @@ class PromoBarX_Database {
                     'priority' => 0
                 ];
                 
-                error_log('PromoBarX Database: Creating default assignment for new promo bar ID: ' . $new_promo_bar_id);
+
                 $assignment_result = $this->save_assignments($new_promo_bar_id, [$default_assignment]);
                 
                 if ($assignment_result) {
-                    error_log('PromoBarX Database: Default assignment created successfully');
+
                 } else {
-                    error_log('PromoBarX Database: Failed to create default assignment');
+                    // Failed to create default assignment
                 }
             }
             
@@ -644,8 +629,7 @@ class PromoBarX_Database {
             $sanitized['countdown_date'] = sanitize_text_field($data['countdown_date']);
         }
         
-        error_log('PromoBarX Database: Sanitizing JSON fields');
-        error_log(print_r($data['styling'], true));
+
         // Sanitize JSON fields
         $json_fields = ['cta_style', 'countdown_style', 'close_button_style', 'styling'];
         foreach ($json_fields as $field) {
@@ -659,19 +643,17 @@ class PromoBarX_Database {
                     if (json_last_error() === JSON_ERROR_NONE) {
                         $sanitized[$field] = $clean_value;
                     } else {
-                        error_log('PromoBarX Database: Invalid JSON in field ' . $field . ': ' . json_last_error_msg());
-                        error_log('PromoBarX Database: Raw value for ' . $field . ': ' . $data[$field]);
-                        error_log('PromoBarX Database: Cleaned value for ' . $field . ': ' . $clean_value);
+                        // Invalid JSON in field
                         
                         // Try to fix common JSON issues
                         $fixed_value = $this->fix_json_string($clean_value);
                         $decoded = json_decode($fixed_value, true);
                         if (json_last_error() === JSON_ERROR_NONE) {
                             $sanitized[$field] = $fixed_value;
-                            error_log('PromoBarX Database: Fixed JSON for ' . $field);
+
                         } else {
                             $sanitized[$field] = json_encode([]);
-                            error_log('PromoBarX Database: Could not fix JSON for ' . $field . ', using empty array');
+
                         }
                     }
                 } elseif (is_array($data[$field])) {
@@ -683,9 +665,7 @@ class PromoBarX_Database {
             }
         }
 
-        error_log('PromoBarX Database: Sanitizing JSON fields after');
-        error_log(print_r($sanitized, true));
-        error_log(print_r($sanitized['styling'], true));
+
         
         // Handle ID field for updates
         if (isset($data['id'])) {
@@ -797,16 +777,15 @@ class PromoBarX_Database {
      * Save assignments for a promo bar
      */
     public function save_assignments($promo_bar_id, $assignments) {
-        error_log('PromoBarX Database: Saving assignments for promo bar ID: ' . $promo_bar_id);
-        error_log('PromoBarX Database: Assignments data: ' . print_r($assignments, true));
+
       
         // First, delete existing assignments for this promo bar
         $delete_result = $this->delete_assignments($promo_bar_id);
-        error_log('PromoBarX Database: Delete existing assignments result: ' . ($delete_result ? 'true' : 'false'));
+
 
         // If no assignments provided, we're done
         if (empty($assignments)) {
-            error_log('PromoBarX Database: No assignments provided, returning true');
+
             return true;
         }
 
@@ -857,18 +836,15 @@ class PromoBarX_Database {
                 (promo_bar_id, assignment_type, target_id, target_value, priority, created_at, updated_at) 
                 VALUES " . implode(', ', $placeholders);
 
-        error_log('PromoBarX Database: Insert SQL: ' . $sql);
-        error_log('PromoBarX Database: Insert values: ' . print_r($values, true));
+
 
         // Try direct insert first
         $result = $this->wpdb->query($this->wpdb->prepare($sql, $values));
         
-        error_log('PromoBarX Database: Insert result: ' . $result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
-        error_log('PromoBarX Database: Last SQL query: ' . $this->wpdb->last_query);
+
 
         if ($result === false) {
-            error_log('PromoBarX Database: Insert failed, trying individual inserts');
+
             
             // Try individual inserts as fallback
             $success_count = 0;
@@ -918,12 +894,11 @@ class PromoBarX_Database {
                 if ($individual_result !== false) {
                     $success_count++;
                 } else {
-                    error_log('PromoBarX Database: Individual insert failed for assignment: ' . print_r($assignment, true));
-                    error_log('PromoBarX Database: Individual insert error: ' . $this->wpdb->last_error);
+                    // Individual insert failed
                 }
             }
             
-            error_log('PromoBarX Database: Individual inserts completed. Success: ' . $success_count . '/' . count($assignments));
+
             return $success_count > 0;
         }
 
@@ -934,7 +909,7 @@ class PromoBarX_Database {
      * Get assignments for a promo bar
      */
     public function get_assignments($promo_bar_id) {
-        error_log('PromoBarX Database: Getting assignments for promo bar ID: ' . $promo_bar_id);
+
         
         $sql = $this->wpdb->prepare(
             "SELECT * FROM {$this->table_prefix}promo_bar_assignments 
@@ -945,8 +920,7 @@ class PromoBarX_Database {
         
         $assignments = $this->wpdb->get_results($sql);
         
-        error_log('PromoBarX Database: Found ' . count($assignments) . ' assignments');
-        error_log('PromoBarX Database: Assignments: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' . print_r($assignments, true));
+
         
         return $assignments;
     }
@@ -955,7 +929,7 @@ class PromoBarX_Database {
      * Delete assignments for a promo bar
      */
     public function delete_assignments($promo_bar_id) {
-        error_log('PromoBarX Database: Deleting assignments for promo bar ID: ' . $promo_bar_id);
+
         
         $result = $this->wpdb->delete(
             $this->table_prefix . 'promo_bar_assignments',
@@ -963,8 +937,7 @@ class PromoBarX_Database {
             ['%d']
         );
         
-        error_log('PromoBarX Database: Delete result: ' . $result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+
         
         return $result !== false;
     }
@@ -1037,7 +1010,7 @@ class PromoBarX_Database {
      * Force create tables (useful for debugging)
      */
     public function force_create_tables() {
-        error_log('PromoBarX Database: Force creating tables');
+
         $this->create_tables();
         
         // Verify tables were created
@@ -1060,7 +1033,7 @@ class PromoBarX_Database {
             $results[$table] = $table_exists ? 'EXISTS' : 'MISSING';
         }
         
-        error_log('PromoBarX Database: Table creation verification: ' . print_r($results, true));
+
         return $results;
     }
 
@@ -1068,11 +1041,11 @@ class PromoBarX_Database {
      * Force recreate assignments table
      */
     public function force_recreate_assignments_table() {
-        error_log('PromoBarX Database: Force recreating assignments table');
+
         
         // Drop the table if it exists
         $drop_result = $this->wpdb->query("DROP TABLE IF EXISTS {$this->table_prefix}promo_bar_assignments");
-        error_log('PromoBarX Database: Drop table result: ' . $drop_result);
+
         
         // Recreate the table
         $charset_collate = $this->wpdb->get_charset_collate();
@@ -1093,8 +1066,7 @@ class PromoBarX_Database {
         ) $charset_collate;";
         
         $create_result = $this->wpdb->query($sql_assignments);
-        error_log('PromoBarX Database: Create table result: ' . $create_result);
-        error_log('PromoBarX Database: Last SQL error: ' . $this->wpdb->last_error);
+
         
         return $create_result !== false;
     }
@@ -1148,7 +1120,7 @@ class PromoBarX_Database {
      * Migrate database schema to add new assignment columns and remove old assignments column
      */
     public function migrate_assignment_schema() {
-        error_log('PromoBarX Database: Starting assignment schema migration');
+
         
         // Check if migration is needed
         $columns = $this->wpdb->get_results("DESCRIBE {$this->table_prefix}promo_bars");
@@ -1176,11 +1148,11 @@ class PromoBarX_Database {
         }
         
         if (!$migration_needed) {
-            error_log('PromoBarX Database: Migration not needed - schema is up to date');
+
             return true;
         }
         
-        error_log('PromoBarX Database: Migration needed - proceeding with schema update');
+
         
         // Start transaction
         $this->wpdb->query('START TRANSACTION');
@@ -1208,7 +1180,7 @@ class PromoBarX_Database {
             // Execute alter queries
             if (!empty($alter_queries)) {
                 $alter_sql = "ALTER TABLE {$this->table_prefix}promo_bars " . implode(', ', $alter_queries);
-                error_log('PromoBarX Database: Executing alter query: ' . $alter_sql);
+
                 
                 $result = $this->wpdb->query($alter_sql);
                 if ($result === false) {
@@ -1218,7 +1190,7 @@ class PromoBarX_Database {
             
             // Step 2: Migrate data from old assignments column to new columns
             if (in_array('assignments', $column_names)) {
-                error_log('PromoBarX Database: Migrating data from assignments column');
+
                 
                 $promo_bars = $this->wpdb->get_results("SELECT id, assignments FROM {$this->table_prefix}promo_bars WHERE assignments IS NOT NULL AND assignments != 'null' AND assignments != '[]'");
                 
@@ -1245,13 +1217,13 @@ class PromoBarX_Database {
                         );
                         
                         if ($result === false) {
-                            error_log('PromoBarX Database: Failed to migrate data for promo bar ID: ' . $promo_bar->id);
+                            // Failed to migrate data for promo bar
                         }
                     }
                 }
                 
                 // Step 3: Remove old assignments column
-                error_log('PromoBarX Database: Removing assignments column');
+
                 $drop_result = $this->wpdb->query("ALTER TABLE {$this->table_prefix}promo_bars DROP COLUMN assignments");
                 
                 if ($drop_result === false) {
@@ -1262,13 +1234,13 @@ class PromoBarX_Database {
             // Commit transaction
             $this->wpdb->query('COMMIT');
             
-            error_log('PromoBarX Database: Migration completed successfully');
+
             return true;
             
         } catch (Exception $e) {
             // Rollback transaction
             $this->wpdb->query('ROLLBACK');
-            error_log('PromoBarX Database: Migration failed: ' . $e->getMessage());
+            // Migration failed - check database logs
             return false;
         }
     }

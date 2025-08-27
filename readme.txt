@@ -1,6 +1,6 @@
-=== Promo Bar X – Customizable Campaign Top Bar | Countdown Timer | CTA ===  
+=== Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA ===  
 Contributors: wppool, ahmmedsabbirbd  
-Tags: top bar, countdown, call to action, campaign, banner, notification, marketing  
+Tags: top bar, countdown, call to action, campaign, banner  
 Requires at least: 5.0  
 Tested up to: 6.8  
 Stable tag: 1.0.0  
@@ -8,7 +8,7 @@ Requires PHP: 7.4
 License: GPLv2 or later  
 License URI: https://www.gnu.org/licenses/gpl-2.0.html  
 
-Minimal and customizable top bar for WordPress, featuring a title, countdown timer, CTA button, and close option. Built with block-style editing for easy no-code campaign management by product and CMS teams.
+Minimal and customizable top bar for WordPress with title, countdown timer, CTA button, and close option. Block-style editing for easy campaign management.
 
 == Description ==
 

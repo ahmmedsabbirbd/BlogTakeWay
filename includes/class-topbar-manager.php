@@ -64,44 +64,41 @@ class PromoBarX_Manager {
     public function get_active_promo_bar() {
         global $wp_query;
         
-        $current_url = $_SERVER['REQUEST_URI'] ?? '';
+        $current_url = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
         $post_id = get_queried_object_id();
         $post_type = get_post_type();
         
-        error_log('PromoBarX: get_active_promo_bar() called');
-        error_log('PromoBarX: Current URL: ' . $current_url);
-        error_log('PromoBarX: Post ID: ' . $post_id);
-        error_log('PromoBarX: Post Type: ' . $post_type);
+
         
         // Get user context for advanced targeting
         $user_context = $this->get_user_context();
-        error_log('PromoBarX: User context: ' . print_r($user_context, true));
+
         
         // Get all promo bars with their assignments (we'll filter by status and countdown in the loop)
         $promo_bars = $this->database->get_promo_bars_with_assignments(['status' => 'active']);
-        error_log('PromoBarX: Found ' . count($promo_bars) . ' total promo bars');
+
         
         $matching_promo_bars = [];
         
         foreach ($promo_bars as $promo_bar) {
-            error_log('PromoBarX: Checking promo bar ID: ' . $promo_bar->id . ', Name: ' . $promo_bar->name);
+
             
             // Check status and countdown date first
             if ($this->is_countdown_blocked($promo_bar->id, $user_context)) {
-                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' blocked (inactive or countdown not reached)');
+
                 continue;
             }
             
             // Check if promo bar has matching assignments (no scoring, just match/no match)
             if ($this->has_matching_assignments($promo_bar, $current_url, $post_id, $post_type)) {
-                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' has matching assignments');
+
                 $matching_promo_bars[] = $promo_bar;
             } else {
-                error_log('PromoBarX: Promo bar ' . $promo_bar->id . ' has no matching assignments');
+
             }
         }
         
-        error_log('PromoBarX: Found ' . count($matching_promo_bars) . ' matching promo bars');
+
         
         if (!empty($matching_promo_bars)) {
             // Sort by max priority from assignments (highest priority first)
@@ -113,17 +110,17 @@ class PromoBarX_Manager {
             
             $selected = $matching_promo_bars[0];
             $selected_priority = isset($selected->max_priority) ? $selected->max_priority : 0;
-            error_log('PromoBarX: Selected promo bar ID: ' . $selected->id . ', Name: ' . $selected->name . ', Priority: ' . $selected_priority);
+
             
             // Check if promo bar is scheduled
             if ($this->is_promo_bar_scheduled($selected)) {
-                error_log('PromoBarX: Promo bar is scheduled to show');
+
                 return $selected;
             } else {
-                error_log('PromoBarX: Promo bar is not scheduled to show');
+
             }
         } else {
-            error_log('PromoBarX: No matching promo bars found');
+
         }
         
         return null;
@@ -133,23 +130,23 @@ class PromoBarX_Manager {
      * Check if promo bar has matching assignments
      */
     private function has_matching_assignments($promo_bar, $current_url, $post_id, $post_type) {
-        error_log('PromoBarX: Checking assignments for promo bar ' . $promo_bar->id);
+
         
         // Check if promo bar has assignments
         if (!isset($promo_bar->assignments) || empty($promo_bar->assignments)) {
-            error_log('PromoBarX: No assignments found for promo bar ' . $promo_bar->id);
+
             return false;
         }
         
         // Check each assignment - if any match, return true
         foreach ($promo_bar->assignments as $assignment) {
             if ($this->assignment_matches($assignment, $current_url, $post_id, $post_type)) {
-                error_log('PromoBarX: Assignment matches for promo bar ' . $promo_bar->id);
+
                 return true;
             }
         }
         
-        error_log('PromoBarX: No assignments match for promo bar ' . $promo_bar->id);
+
         return false;
     }
 
@@ -161,50 +158,50 @@ class PromoBarX_Manager {
         $target_id = $assignment['target_id'] ?? 0;
         $target_value = $assignment['target_value'] ?? '';
         
-        error_log('PromoBarX: Checking assignment type: ' . $assignment_type . ', Target ID: ' . $target_id . ', Target Value: ' . $target_value);
+
         
         switch ($assignment_type) {
             case 'global':
-                error_log('PromoBarX: Global assignment - matches all pages');
+
                 return true;
                 
             case 'page':
                 if ($target_id == $post_id) {
-                    error_log('PromoBarX: Page match - target ID matches current post ID');
+
                     return true;
                 }
                 break;
                 
             case 'post_type':
                 if ($target_value === $post_type) {
-                    error_log('PromoBarX: Post type match - target value matches current post type');
+
                     return true;
                 }
                 break;
                 
             case 'category':
                 if (has_category($target_value, $post_id)) {
-                    error_log('PromoBarX: Category match - post has the specified category');
+
                     return true;
                 }
                 break;
                 
             case 'tag':
                 if (has_tag($target_value, $post_id)) {
-                    error_log('PromoBarX: Tag match - post has the specified tag');
+
                     return true;
                 }
                 break;
                 
             case 'custom':
                 if ($this->matches_custom_condition($target_value, $current_url, $post_id)) {
-                    error_log('PromoBarX: Custom condition match - URL contains the specified condition');
+
                     return true;
                 }
                 break;
         }
         
-        error_log('PromoBarX: Assignment does not match');
+
         return false;
     }
 
@@ -231,8 +228,8 @@ class PromoBarX_Manager {
             'timezone' => $this->get_user_timezone(),
             'session_id' => $this->get_session_id(),
             'current_time' => current_time('mysql'),
-            'day_of_week' => date('N'), // 1 (Monday) to 7 (Sunday)
-            'hour' => date('G'), // 0-23
+            'day_of_week' => gmdate('N'), // 1 (Monday) to 7 (Sunday)
+            'hour' => gmdate('G'), // 0-23
         ];
         
         return $context;
@@ -254,7 +251,7 @@ class PromoBarX_Manager {
      * Get device type
      */
     private function get_device_type() {
-        $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '';
         
         if (preg_match('/(tablet|ipad|playbook)|(android(?!.*(mobi|opera mini)))/i', strtolower($user_agent))) {
             return 'tablet';
@@ -271,7 +268,7 @@ class PromoBarX_Manager {
      * Get referrer
      */
     private function get_referrer() {
-        return $_SERVER['HTTP_REFERER'] ?? '';
+        return isset($_SERVER['HTTP_REFERER']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_REFERER'])) : '';
     }
 
     /**
@@ -291,7 +288,7 @@ class PromoBarX_Manager {
         
         foreach ($ip_keys as $key) {
             if (array_key_exists($key, $_SERVER) === true) {
-                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                foreach (explode(',', sanitize_text_field(wp_unslash($_SERVER[$key]))) as $ip) {
                     $ip = trim($ip);
                     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
                         return $ip;
@@ -300,7 +297,7 @@ class PromoBarX_Manager {
             }
         }
         
-        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        return isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : 'unknown';
     }
 
     /**
@@ -326,11 +323,21 @@ class PromoBarX_Manager {
     private function is_countdown_blocked($promo_bar_id, $user_context) {
         global $wpdb;
         
-        // Get the promo bar data to check status and countdown_date
-        $promo_bar = $wpdb->get_row($wpdb->prepare(
-            "SELECT status, countdown_date FROM {$wpdb->prefix}promo_bars WHERE id = %d",
-            $promo_bar_id
-        ));
+        // Try to get from cache first
+        $cache_key = 'promobarx_promo_bar_' . $promo_bar_id;
+        $promo_bar = wp_cache_get($cache_key, 'promobarx');
+        
+        if (false === $promo_bar) {
+            // Get the promo bar data to check status and countdown_date
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $promo_bar = $wpdb->get_row($wpdb->prepare(
+                "SELECT status, countdown_date FROM {$wpdb->prefix}promo_bars WHERE id = %d",
+                $promo_bar_id
+            ));
+            
+            // Cache for 5 minutes
+            wp_cache_set($cache_key, $promo_bar, 'promobarx', 300);
+        }
         
         if (!$promo_bar) {
             return true; // If promo bar doesn't exist, block it
@@ -338,7 +345,7 @@ class PromoBarX_Manager {
         
         // First check: Status must be 'active'
         if ($promo_bar->status !== 'active') {
-            error_log('PromoBarX: Promo bar ' . $promo_bar_id . ' is not active. Status: ' . $promo_bar->status);
+
             return true; // Block non-active promo bars
         }
         
@@ -348,7 +355,7 @@ class PromoBarX_Manager {
             $countdown_date = $promo_bar->countdown_date;
             
             if ($current_time >= $countdown_date) {
-                error_log('PromoBarX: Promo bar ' . $promo_bar_id . ' countdown has expired. Current: ' . $current_time . ', Countdown: ' . $countdown_date);
+
                 return true; // Return true to skip this promo bar (countdown has expired)
             }
         }
@@ -367,14 +374,15 @@ class PromoBarX_Manager {
         $data = [
             'promo_bar_id' => $promo_bar_id,
             'event_type' => $event_type,
-            'page_url' => $_SERVER['REQUEST_URI'] ?? '',
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            'page_url' => isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '',
+            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '',
             'ip_address' => $this->get_user_ip(),
             'user_id' => get_current_user_id(),
             'session_id' => $this->get_session_id(),
             'created_at' => current_time('mysql')
         ];
         
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
         $wpdb->insert(
             $wpdb->prefix . 'promo_bar_analytics',
             $data,
@@ -388,10 +396,20 @@ class PromoBarX_Manager {
     private function is_promo_bar_scheduled($promo_bar) {
         global $wpdb;
         
-        $schedule = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}promo_bar_schedules WHERE promo_bar_id = %d",
-            $promo_bar->id
-        ));
+        // Try to get from cache first
+        $cache_key = 'promobarx_schedule_' . $promo_bar->id;
+        $schedule = wp_cache_get($cache_key, 'promobarx');
+        
+        if (false === $schedule) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $schedule = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}promo_bar_schedules WHERE promo_bar_id = %d",
+                $promo_bar->id
+            ));
+            
+            // Cache for 10 minutes
+            wp_cache_set($cache_key, $schedule, 'promobarx', 600);
+        }
         
         if (!$schedule) {
             return true; // No schedule means always show
@@ -410,7 +428,7 @@ class PromoBarX_Manager {
         
         // Check time range
         if ($schedule->start_time && $schedule->end_time) {
-            $current_time = date('H:i:s');
+            $current_time = gmdate('H:i:s');
             if ($current_time < $schedule->start_time || $current_time > $schedule->end_time) {
                 return false;
             }
@@ -419,7 +437,7 @@ class PromoBarX_Manager {
         // Check days of week
         if ($schedule->days_of_week) {
             $days = json_decode($schedule->days_of_week, true);
-            $current_day = date('N'); // 1 (Monday) to 7 (Sunday)
+            $current_day = gmdate('N'); // 1 (Monday) to 7 (Sunday)
             if (!in_array($current_day, $days)) {
                 return false;
             }
@@ -432,25 +450,25 @@ class PromoBarX_Manager {
      * Render top bar in head
      */
     public function render_topbar() {
-        error_log('PromoBarX: render_topbar() called');
+
         
         $promo_bar = $this->get_active_promo_bar();
         
         if (!$promo_bar) {
-            error_log('PromoBarX: No active promo bar found');
+
             return;
         }
         
-        error_log('PromoBarX: Found active promo bar - ID: ' . $promo_bar->id . ', Name: ' . $promo_bar->name);
+
         
         // Check if user has closed this promo bar
         $cookie_name = 'promobarx_closed_' . $promo_bar->id;
         if (isset($_COOKIE[$cookie_name])) {
-            error_log('PromoBarX: Promo bar closed by user cookie');
+
             return;
         }
         
-        error_log('PromoBarX: Rendering promo bar HTML');
+
         $this->render_topbar_html($promo_bar);
         
         // Also pass data to React component
@@ -478,10 +496,22 @@ class PromoBarX_Manager {
         $template_config = [];
         if ($promo_bar->template_id > 0) {
             global $wpdb;
-            $template = $wpdb->get_row($wpdb->prepare(
-                "SELECT config FROM {$wpdb->prefix}promo_bar_templates WHERE id = %d",
-                $promo_bar->template_id
-            ));
+            
+            // Try to get from cache first
+            $cache_key = 'promobarx_template_' . $promo_bar->template_id;
+            $template = wp_cache_get($cache_key, 'promobarx');
+            
+            if (false === $template) {
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+                $template = $wpdb->get_row($wpdb->prepare(
+                    "SELECT config FROM {$wpdb->prefix}promo_bar_templates WHERE id = %d",
+                    $promo_bar->template_id
+                ));
+                
+                // Cache for 30 minutes (templates don't change often)
+                wp_cache_set($cache_key, $template, 'promobarx', 1800);
+            }
+            
             if ($template) {
                 $template_config = json_decode($template->config, true) ?: [];
             }
@@ -652,8 +682,8 @@ class PromoBarX_Manager {
         <script>
         window.promobarxData = {
             promoBar: <?php echo json_encode($promo_bar); ?>,
-            nonce: '<?php echo wp_create_nonce('promobarx_track'); ?>',
-            ajaxurl: '<?php echo admin_url('admin-ajax.php'); ?>'
+            nonce: '<?php echo esc_attr(wp_create_nonce('promobarx_track')); ?>',
+            ajaxurl: '<?php echo esc_url(admin_url('admin-ajax.php')); ?>'
         };
         </script>
         <?php
@@ -712,12 +742,12 @@ class PromoBarX_Manager {
         window.addEventListener('load', updatePromoBarHeight);
         
         function promobarxTrackEvent(promoId, eventType) {
-            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+            fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'action=promobarx_track_event&promo_id=' + promoId + '&event_type=' + eventType + '&nonce=<?php echo wp_create_nonce('promobarx_track'); ?>'
+                body: 'action=promobarx_track_event&promo_id=' + promoId + '&event_type=' + eventType + '&nonce=<?php echo esc_attr(wp_create_nonce('promobarx_track')); ?>'
             });
         }
         
@@ -793,15 +823,15 @@ class PromoBarX_Manager {
 
         
         // Verify nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'promobarx_admin_nonce')) {
-            error_log('PromoBarX: Nonce verification failed');
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'promobarx_admin_nonce')) {
+            // Security: Nonce verification failed
             wp_send_json_error('Security check failed. Please refresh the page and try again.');
             return;
         }
         
         // Check user permissions
         if (!current_user_can('manage_options')) {
-            error_log('PromoBarX: Unauthorized access attempt');
+            // Security: Unauthorized access attempt
             wp_send_json_error('You do not have permission to perform this action.');
             return;
         }
@@ -810,13 +840,13 @@ class PromoBarX_Manager {
         $required_fields = ['name', 'title'];
         $missing_fields = [];
         foreach ($required_fields as $field) {
-            if (!isset($_POST[$field]) || empty(trim($_POST[$field]))) {
+            if (!isset($_POST[$field]) || empty(trim(sanitize_text_field(wp_unslash($_POST[$field]))))) {
                 $missing_fields[] = $field;
             }
         }
         
         if (!empty($missing_fields)) {
-            error_log('PromoBarX: Missing required fields: ' . implode(', ', $missing_fields));
+
             wp_send_json_error('Please fill in all required fields: ' . implode(', ', $missing_fields));
             return;
         }
@@ -856,7 +886,7 @@ class PromoBarX_Manager {
             wp_die('Unauthorized');
         }
         
-        $id = intval($_POST['id']);
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         $result = $this->database->delete_promo_bar($id);
         
         if ($result) {
@@ -872,13 +902,13 @@ class PromoBarX_Manager {
     public function ajax_track_event() {
         check_ajax_referer('promobarx_track', 'nonce');
         
-        $promo_id = intval($_POST['promo_id']);
-        $event_type = sanitize_text_field($_POST['event_type']);
+        $promo_id = isset($_POST['promo_id']) ? intval($_POST['promo_id']) : 0;
+        $event_type = isset($_POST['event_type']) ? sanitize_text_field(wp_unslash($_POST['event_type'])) : '';
         
         $data = [
-            'page_url' => $_SERVER['HTTP_REFERER'] ?? '',
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
+            'page_url' => isset($_SERVER['HTTP_REFERER']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_REFERER'])) : '',
+            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : '',
+            'ip_address' => isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '',
             'user_id' => get_current_user_id()
         ];
         
@@ -902,7 +932,7 @@ class PromoBarX_Manager {
         }
         
         $args = [
-            'status' => isset($_POST['status']) ? sanitize_text_field($_POST['status']) : 'all',
+            'status' => isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : 'all',
             'limit' => isset($_POST['limit']) ? intval($_POST['limit']) : -1
         ];
         
@@ -920,16 +950,16 @@ class PromoBarX_Manager {
             wp_die('Unauthorized');
         }
         
-        $id = intval($_POST['id']);
-        error_log('PromoBarX: Fetching promo bar with ID: ' . $id);
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+
         
         $promo_bar = $this->database->get_promo_bar($id);
         
         if ($promo_bar) {
-            error_log('PromoBarX: Found promo bar data: ' . print_r($promo_bar, true));
+
             wp_send_json_success($promo_bar);
         } else {
-            error_log('PromoBarX: Promo bar not found with ID: ' . $id);
+
             wp_send_json_error('Promo bar not found');
         }
     }
@@ -944,7 +974,7 @@ class PromoBarX_Manager {
             wp_die('Unauthorized');
         }
         
-        $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
+        $category = isset($_POST['category']) ? sanitize_text_field(wp_unslash($_POST['category'])) : '';
         $templates = $this->database->get_templates($category);
         wp_send_json_success($templates);
     }
@@ -959,8 +989,8 @@ class PromoBarX_Manager {
             wp_die('Unauthorized');
         }
         
-        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
-        $post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : 'page';
+        $search = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+        $post_type = isset($_POST['post_type']) ? sanitize_text_field(wp_unslash($_POST['post_type'])) : 'page';
         
         $args = [
             'post_type' => $post_type,
@@ -1023,8 +1053,8 @@ class PromoBarX_Manager {
             wp_die('Unauthorized');
         }
         
-        $taxonomy = isset($_POST['taxonomy']) ? sanitize_text_field($_POST['taxonomy']) : 'category';
-        $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $taxonomy = isset($_POST['taxonomy']) ? sanitize_text_field(wp_unslash($_POST['taxonomy'])) : 'category';
+        $search = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
         
         $args = [
             'taxonomy' => $taxonomy,
@@ -1063,8 +1093,8 @@ class PromoBarX_Manager {
             wp_die('Unauthorized');
         }
         
-        $promo_bar_id = intval($_POST['promo_bar_id']);
-        error_log('PromoBarX: Getting assignments for promo bar ID: ' . $promo_bar_id);
+        $promo_bar_id = isset($_POST['promo_bar_id']) ? intval($_POST['promo_bar_id']) : 0;
+
         
         // Get assignments from the new assignments table
         $assignments = $this->database->get_assignments($promo_bar_id);
@@ -1082,10 +1112,10 @@ class PromoBarX_Manager {
                 ];
             }
             
-            error_log('PromoBarX: Returning assignments: ' . print_r($assignments_array, true));
+
             wp_send_json_success($assignments_array);
         } else {
-            error_log('PromoBarX: No assignments found for promo bar ID: ' . $promo_bar_id);
+
             wp_send_json_success([]);
         }
     }
@@ -1094,8 +1124,7 @@ class PromoBarX_Manager {
      * AJAX save assignments for a promo bar
      */
     public function ajax_save_assignments() {
-        error_log('PromoBarX: AJAX save assignments called');
-        error_log('PromoBarX: POST data: ' . print_r($_POST, true));
+
         
         check_ajax_referer('promobarx_admin_nonce', 'nonce');
         
@@ -1103,20 +1132,20 @@ class PromoBarX_Manager {
             wp_die('Unauthorized');
         }
         
-        $promo_bar_id = intval($_POST['promo_bar_id']);
-        $assignments = isset($_POST['assignments']) ? $_POST['assignments'] : [];
+        $promo_bar_id = isset($_POST['promo_bar_id']) ? intval($_POST['promo_bar_id']) : 0;
+        $assignments = isset($_POST['assignments']) ? wp_unslash($_POST['assignments']) : [];
         
-        error_log('PromoBarX: Promo bar ID: ' . $promo_bar_id);
-        error_log('PromoBarX: Raw assignments: ' . print_r($assignments, true));
+
+
         
         // If assignments is a JSON string, decode it
         if (is_string($assignments)) {
             $assignments = json_decode($assignments, true);
-            error_log('PromoBarX: Decoded assignments: ' . print_r($assignments, true));
+
         }
         
         if (!is_array($assignments)) {
-            error_log('PromoBarX: Invalid assignments data type: ' . gettype($assignments));
+
             wp_send_json_error('Invalid assignments data');
             return;
         }
@@ -1138,12 +1167,12 @@ class PromoBarX_Manager {
             $valid_assignments[] = $valid_assignment;
         }
         
-        error_log('PromoBarX: Validated assignments: ' . print_r($valid_assignments, true));
+
         
         // Save assignments using the new assignment system
         $result = $this->database->save_assignments($promo_bar_id, $valid_assignments);
         
-        error_log('PromoBarX: Save assignments result: ' . ($result ? 'true' : 'false'));
+
         
         if ($result) {
             wp_send_json_success('Assignments saved successfully');
@@ -1165,9 +1194,9 @@ class PromoBarX_Manager {
         $results = $this->database->force_create_tables();
         
         if (in_array('MISSING', $results)) {
-            wp_send_json_error('Some tables could not be created: ' . print_r($results, true));
+            wp_send_json_error('Some tables could not be created: ' . wp_json_encode($results));
         } else {
-            wp_send_json_success('All tables created successfully: ' . print_r($results, true));
+            wp_send_json_success('All tables created successfully: ' . wp_json_encode($results));
         }
     }
 
@@ -1196,19 +1225,29 @@ class PromoBarX_Manager {
     public function get_analytics_data($promo_bar_id, $days = 30) {
         global $wpdb;
         
-        $start_date = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        // Try to get from cache first
+        $cache_key = 'promobarx_analytics_' . $promo_bar_id . '_' . $days;
+        $results = wp_cache_get($cache_key, 'promobarx');
         
-        $sql = $wpdb->prepare(
-            "SELECT event_type, COUNT(*) as count, DATE(created_at) as date
-             FROM {$wpdb->prefix}promo_bar_analytics 
-             WHERE promo_bar_id = %d AND created_at >= %s
-             GROUP BY event_type, DATE(created_at)
-             ORDER BY date DESC, event_type",
-            $promo_bar_id,
-            $start_date
-        );
+        if (false === $results) {
+            $start_date = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
+            
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $results = $wpdb->get_results($wpdb->prepare(
+                "SELECT event_type, COUNT(*) as count, DATE(created_at) as date
+                 FROM {$wpdb->prefix}promo_bar_analytics 
+                 WHERE promo_bar_id = %d AND created_at >= %s
+                 GROUP BY event_type, DATE(created_at)
+                 ORDER BY date DESC, event_type",
+                $promo_bar_id,
+                $start_date
+            ));
+            
+            // Cache for 5 minutes (analytics change frequently)
+            wp_cache_set($cache_key, $results, 'promobarx', 300);
+        }
         
-        return $wpdb->get_results($sql);
+        return $results;
     }
 
     /**
@@ -1217,46 +1256,60 @@ class PromoBarX_Manager {
     public function get_assignment_stats() {
         global $wpdb;
         
-        $stats = [
-            'total_promo_bars' => 0,
-            'active_promo_bars' => 0,
-            'total_assignments' => 0,
-            'assignment_types' => [],
-            'most_used_assignments' => []
-        ];
+        // Try to get from cache first
+        $cache_key = 'promobarx_assignment_stats';
+        $stats = wp_cache_get($cache_key, 'promobarx');
         
-        // Total promo bars
-        $stats['total_promo_bars'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bars");
-        
-        // Active promo bars
-        $stats['active_promo_bars'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bars WHERE status = 'active'");
-        
-        // Total assignments
-        $stats['total_assignments'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bar_assignments");
-        
-        // Assignment types breakdown
-        $assignment_types = $wpdb->get_results(
-            "SELECT assignment_type, COUNT(*) as count 
-             FROM {$wpdb->prefix}promo_bar_assignments 
-             GROUP BY assignment_type 
-             ORDER BY count DESC"
-        );
-        
-        foreach ($assignment_types as $type) {
-            $stats['assignment_types'][$type->assignment_type] = $type->count;
+        if (false === $stats) {
+            $stats = [
+                'total_promo_bars' => 0,
+                'active_promo_bars' => 0,
+                'total_assignments' => 0,
+                'assignment_types' => [],
+                'most_used_assignments' => []
+            ];
+            
+            // Total promo bars
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $stats['total_promo_bars'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bars");
+            
+            // Active promo bars
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $stats['active_promo_bars'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bars WHERE status = 'active'");
+            
+            // Total assignments
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $stats['total_assignments'] = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}promo_bar_assignments");
+            
+            // Assignment types breakdown
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $assignment_types = $wpdb->get_results(
+                "SELECT assignment_type, COUNT(*) as count 
+                 FROM {$wpdb->prefix}promo_bar_assignments 
+                 GROUP BY assignment_type 
+                 ORDER BY count DESC"
+            );
+            
+            foreach ($assignment_types as $type) {
+                $stats['assignment_types'][$type->assignment_type] = $type->count;
+            }
+            
+            // Most used assignments
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $most_used = $wpdb->get_results(
+                "SELECT assignment_type, target_value, COUNT(*) as count 
+                 FROM {$wpdb->prefix}promo_bar_assignments 
+                 WHERE target_value != ''
+                 GROUP BY assignment_type, target_value 
+                 ORDER BY count DESC 
+                 LIMIT 10"
+            );
+            
+            $stats['most_used_assignments'] = $most_used;
+            
+            // Cache for 15 minutes (stats don't change very frequently)
+            wp_cache_set($cache_key, $stats, 'promobarx', 900);
         }
-        
-        // Most used assignments
-        $most_used = $wpdb->get_results(
-            "SELECT assignment_type, target_value, COUNT(*) as count 
-             FROM {$wpdb->prefix}promo_bar_assignments 
-             WHERE target_value != ''
-             GROUP BY assignment_type, target_value 
-             ORDER BY count DESC 
-             LIMIT 10"
-        );
-        
-        $stats['most_used_assignments'] = $most_used;
         
         return $stats;
     }
@@ -1275,30 +1328,40 @@ class PromoBarX_Manager {
         
         global $wpdb;
         
-        // Get analytics data for all promo bars
-        $sql = "SELECT 
+        // Try to get from cache first
+        $cache_key = 'promobarx_all_analytics';
+        $analytics_by_promo_bar = wp_cache_get($cache_key, 'promobarx');
+        
+        if (false === $analytics_by_promo_bar) {
+            // Get analytics data for all promo bars
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $analytics_results = $wpdb->get_results(
+                "SELECT 
                     pba.promo_bar_id,
                     pba.event_type,
                     COUNT(*) as count
                 FROM {$wpdb->prefix}promo_bar_analytics pba
                 INNER JOIN {$wpdb->prefix}promo_bars pb ON pba.promo_bar_id = pb.id
                 GROUP BY pba.promo_bar_id, pba.event_type
-                ORDER BY pba.promo_bar_id, pba.event_type";
-        
-        $analytics_results = $wpdb->get_results($sql);
-        
-        // Organize data by promo bar ID
-        $analytics_by_promo_bar = [];
-        foreach ($analytics_results as $result) {
-            if (!isset($analytics_by_promo_bar[$result->promo_bar_id])) {
-                $analytics_by_promo_bar[$result->promo_bar_id] = [
-                    'impression' => 0,
-                    'click' => 0,
-                    'close' => 0,
-                    'cta_click' => 0
-                ];
+                ORDER BY pba.promo_bar_id, pba.event_type"
+            );
+            
+            // Organize data by promo bar ID
+            $analytics_by_promo_bar = [];
+            foreach ($analytics_results as $result) {
+                if (!isset($analytics_by_promo_bar[$result->promo_bar_id])) {
+                    $analytics_by_promo_bar[$result->promo_bar_id] = [
+                        'impression' => 0,
+                        'click' => 0,
+                        'close' => 0,
+                        'cta_click' => 0
+                    ];
+                }
+                $analytics_by_promo_bar[$result->promo_bar_id][$result->event_type] = intval($result->count);
             }
-            $analytics_by_promo_bar[$result->promo_bar_id][$result->event_type] = intval($result->count);
+            
+            // Cache for 5 minutes (analytics change frequently)
+            wp_cache_set($cache_key, $analytics_by_promo_bar, 'promobarx', 300);
         }
         
         wp_send_json_success($analytics_by_promo_bar);
