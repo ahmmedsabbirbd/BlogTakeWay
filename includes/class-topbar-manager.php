@@ -790,8 +790,7 @@ class PromoBarX_Manager {
      */
     public function ajax_save_promo_bar() {
         // Debug logging
-        error_log('PromoBarX: Save request received');
-        error_log('PromoBarX: POST data: ' . print_r($_POST, true));
+
         
         // Verify nonce
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'promobarx_admin_nonce')) {
@@ -823,12 +822,9 @@ class PromoBarX_Manager {
         }
         
         $data = $_POST;
-        error_log('PromoBarX: Data to save: ' . print_r($data, true));
-        
         try {
-            error_log('PromoBarX: Data to save: cccccccccccccccccccccccccccccccccccccccccccc' . print_r($data, true));
             $result = $this->database->save_promo_bar($data);
-            error_log('PromoBarX: Save result: ' . print_r($result, true));
+
             
             if ($result) {
                 wp_send_json_success(['id' => $result]);
@@ -836,7 +832,7 @@ class PromoBarX_Manager {
                 // Get the last database error for debugging
                 global $wpdb;
                 $db_error = $wpdb->last_error;
-                error_log('PromoBarX: Database error: ' . $db_error);
+
                 
                 if (!empty($db_error)) {
                     wp_send_json_error('Database error: ' . $db_error);
@@ -845,7 +841,7 @@ class PromoBarX_Manager {
                 }
             }
         } catch (Exception $e) {
-            error_log('PromoBarX: Exception during save: ' . $e->getMessage());
+
             wp_send_json_error('An error occurred while saving: ' . $e->getMessage());
         }
     }
@@ -1265,24 +1261,7 @@ class PromoBarX_Manager {
         return $stats;
     }
 
-    /**
-     * Test conditional display system
-     */
-    public function test_conditional_display() {
-        $test_results = [
-            'database_connection' => $this->database->test_database_connection(),
-            'active_promo_bars' => count($this->database->get_promo_bars_with_assignments(['status' => 'active'])),
-            'current_page_context' => [
-                'url' => $_SERVER['REQUEST_URI'] ?? '',
-                'post_id' => get_queried_object_id(),
-                'post_type' => get_post_type(),
-                'user_context' => $this->get_user_context()
-            ],
-            'selected_promo_bar' => $this->get_active_promo_bar()
-        ];
-        
-        return $test_results;
-    }
+
 
     /**
      * AJAX get analytics data for promo bars

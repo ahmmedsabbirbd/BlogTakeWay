@@ -34,8 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const promoBarId = urlParams.get('id');
             
-            console.log('Simple Editor: URL params:', window.location.search);
-            console.log('Simple Editor: Promo bar ID from URL:', promoBarId);
+
             
             container.innerHTML = `
                 <div style="padding: 20px;">
@@ -56,12 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </svg>
                                 Load Data
                             </button>
-                            <button onclick="testLoadPromoBar()" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
-                                <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Test Load
-                            </button>
+
                             <button onclick="window.location.href='admin.php?page=promo-bar-x-topbar-manager'" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
                                 <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -339,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Load promo bar data if ID is provided
             if (promoBarId) {
-                console.log('Simple Editor: Loading promo bar data for ID:', promoBarId);
+    
                 loadPromoBarData();
             }
         }
@@ -530,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             
             if (existingAssignment) {
-                console.log('Assignment already exists:', existingAssignment);
+    
                 return; // Don't add duplicate
             }
             
@@ -544,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentAssignments.push(assignment);
             updateAssignmentsList();
-            console.log('Added new assignment:', assignment);
+
         }
         
         function removeDuplicateAssignments() {
@@ -557,32 +551,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     seen.add(key);
                     uniqueAssignments.push(assignment);
                 } else {
-                    console.log('Removing duplicate assignment:', assignment);
+        
                 }
             });
             
             if (uniqueAssignments.length !== currentAssignments.length) {
-                console.log(`Removed ${currentAssignments.length - uniqueAssignments.length} duplicate assignments`);
+    
                 currentAssignments = uniqueAssignments;
                 updateAssignmentsList();
             }
         }
         
         function removeAssignment(id) {
-            console.log('Removing assignment with ID:', id, 'Type:', typeof id);
-            console.log('Current assignments before removal:', currentAssignments);
-            console.log('Assignment IDs:', currentAssignments.map(a => ({ id: a.id, type: typeof a.id })));
+
             
             const beforeCount = currentAssignments.length;
             currentAssignments = currentAssignments.filter(a => {
                 const matches = a.id !== id;
-                console.log(`Comparing ${a.id} (${typeof a.id}) with ${id} (${typeof id}): ${matches}`);
+
                 return matches;
             });
             const afterCount = currentAssignments.length;
             
-            console.log(`Removed ${beforeCount - afterCount} assignments`);
-            console.log('Current assignments after removal:', currentAssignments);
+
             
             // Update the display after removal (don't normalize priorities automatically)
             updateAssignmentsList();
@@ -595,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const assignmentsList = document.getElementById('assignments-list');
             if (!assignmentsList) return;
             
-            console.log('Updating assignments list with:', currentAssignments);
+
             
             if (currentAssignments.length === 0) {
                 assignmentsList.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 14px;">No assignments yet</div>';
@@ -607,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             assignmentsList.innerHTML = sortedAssignments.map((assignment, index) => {
                 const label = getAssignmentLabel(assignment);
-                console.log('Creating assignment element for:', assignment, 'with ID:', assignment.id);
+
                 return `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
@@ -637,7 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${index === sortedAssignments.length - 1 ? 'disabled' : ''}
                             >↓</button>
                             <button 
-                                onclick="console.log('Button clicked for ID: ${assignment.id}'); removeAssignment('${assignment.id}')" 
+                                onclick="removeAssignment('${assignment.id}')" 
                                 style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px;"
                                 title="Remove assignment"
                             >×</button>
@@ -668,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Priority management functions
         window.updateAssignmentPriority = function(assignmentId, newPriority) {
-            console.log('Updating priority for assignment:', assignmentId, 'to:', newPriority);
+
             
             const assignment = currentAssignments.find(a => a.id === assignmentId);
             if (!assignment) {
@@ -679,12 +670,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const priority = parseInt(newPriority) || 1;
             assignment.priority = Math.max(1, Math.min(999, priority));
             
-            console.log('Updated assignment priority:', assignment);
+
             updateAssignmentsList();
         };
         
         window.moveAssignmentUp = function(assignmentId) {
-            console.log('Moving assignment up:', assignmentId);
+
             
             const assignment = currentAssignments.find(a => a.id === assignmentId);
             if (!assignment) {
@@ -697,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentIndex = sortedAssignments.findIndex(a => a.id === assignmentId);
             
             if (currentIndex <= 0) {
-                console.log('Assignment is already at the top');
+    
                 return;
             }
             
@@ -708,12 +699,12 @@ document.addEventListener('DOMContentLoaded', () => {
             assignment.priority = previousAssignment.priority;
             previousAssignment.priority = tempPriority;
             
-            console.log('Swapped priorities:', assignment.priority, previousAssignment.priority);
+
             updateAssignmentsList();
         };
         
         window.moveAssignmentDown = function(assignmentId) {
-            console.log('Moving assignment down:', assignmentId);
+
             
             const assignment = currentAssignments.find(a => a.id === assignmentId);
             if (!assignment) {
@@ -726,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentIndex = sortedAssignments.findIndex(a => a.id === assignmentId);
             
             if (currentIndex >= sortedAssignments.length - 1) {
-                console.log('Assignment is already at the bottom');
+    
                 return;
             }
             
@@ -737,14 +728,12 @@ document.addEventListener('DOMContentLoaded', () => {
             assignment.priority = nextAssignment.priority;
             nextAssignment.priority = tempPriority;
             
-            console.log('Swapped priorities:', assignment.priority, nextAssignment.priority);
+
             updateAssignmentsList();
         };
         
         // Function to normalize priorities (ensure they are sequential)
         window.normalizePriorities = function() {
-            console.log('Normalizing priorities...');
-            
             // Sort assignments by current priority
             const sortedAssignments = [...currentAssignments].sort((a, b) => (a.priority || 0) - (b.priority || 0));
             
@@ -753,7 +742,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 assignment.priority = index + 1;
             });
             
-            console.log('Normalized priorities:', sortedAssignments.map(a => ({ id: a.id, priority: a.priority })));
             updateAssignmentsList();
         };
         
@@ -784,7 +772,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => {
-                console.error('Error loading pages:', error);
                 pagesDropdown.innerHTML = '<option value="" disabled>Error loading pages</option>';
             });
         }
@@ -843,7 +830,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => {
-                console.error('Error loading categories:', error);
                 categoriesDropdown.innerHTML = '<option value="" disabled>Error loading categories</option>';
             });
         }
@@ -890,17 +876,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addAssignment = addAssignment;
         window.removeAssignment = removeAssignment;
         
-        // Debug function to test assignment removal
-        window.testRemoveAssignment = function(id) {
-            console.log('Testing removal of assignment with ID:', id);
-            removeAssignment(id);
-        };
-        
         // Function to clear all assignments
         window.clearAllAssignments = function() {
             currentAssignments = [];
             updateAssignmentsList();
-            console.log('Cleared all assignments');
         };
         
         // Function to remove duplicates
@@ -1071,7 +1050,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Make functions globally accessible
         window.savePromoBar = function() {
-            console.log('Save button clicked');
             
             // Get promo bar ID from URL if editing
             const urlParams = new URLSearchParams(window.location.search);
@@ -1102,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         countdownDate = localDate.toISOString().slice(0, 19).replace('T', ' ');
                     }
                 } catch (e) {
-                    console.error('Error converting countdown date:', e);
+                    // Handle date conversion error silently
                 }
             }
             
@@ -1160,7 +1138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Save assignments with their current priority values (don't normalize automatically)
             if (currentAssignments.length > 0) {
-                console.log('Saving assignments with current priorities:', currentAssignments.map(a => ({ id: a.id, priority: a.priority })));
                 data.assignments = JSON.stringify(currentAssignments);
             }
             
@@ -1169,8 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.id = promoBarId;
             }
             
-            console.log('Data to save:', data);
-            console.log('Admin data:', window.promobarxAdmin);
+
             
             if (window.promobarxAdmin && window.promobarxAdmin.ajaxurl) {
                 const formData = new URLSearchParams();
@@ -1182,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     formData.append(key, data[key]);
                 });
                 
-                console.log('Form data:', formData.toString());
+
                 
                 fetch(window.promobarxAdmin.ajaxurl, {
                     method: 'POST',
@@ -1192,11 +1168,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData.toString()
                 })
                 .then(response => {
-                    console.log('Response status:', response.status);
                     return response.json();
                 })
                 .then(result => {
-                    console.log('Save result:', result);
                     if (result.success) {
                         alert('Promo bar saved successfully!');
                         window.location.href = 'admin.php?page=promo-bar-x-topbar-manager';
@@ -1205,72 +1179,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     alert('Error saving promo bar. Please try again.');
                 });
             } else {
-                console.error('Admin data not available');
                 alert('Admin data not available. Please refresh the page.');
             }
         }
         
-        window.testSave = function() {
-            console.log('Test save clicked');
-            
-            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl) {
-                alert('Admin data not available');
-                return;
-            }
-            
-            const testData = {
-                name: 'Test Promo Bar',
-                title: 'Test Title',
-                cta_text: 'Test Button',
-                cta_url: 'https://example.com',
-                status: 'draft'
-            };
-            
-            const formData = new URLSearchParams();
-            formData.append('action', 'promobarx_save');
-            formData.append('nonce', window.promobarxAdmin.nonce);
-            
-            Object.keys(testData).forEach(key => {
-                formData.append(key, testData[key]);
-            });
-            
-            console.log('Test form data:', formData.toString());
-            
-            fetch(window.promobarxAdmin.ajaxurl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formData.toString()
-            })
-            .then(response => {
-                console.log('Test response status:', response.status);
-                return response.text();
-            })
-            .then(text => {
-                console.log('Test response text:', text);
-                try {
-                    const result = JSON.parse(text);
-                    console.log('Test parsed result:', result);
-                    if (result.success) {
-                        alert('Test save successful! ID: ' + result.data.id);
-                    } else {
-                        alert('Test save failed: ' + (result.data || 'Unknown error'));
-                    }
-                } catch (e) {
-                    console.error('Test JSON parse error:', e);
-                    alert('Test response not valid JSON: ' + text);
-                }
-            })
-            .catch(error => {
-                console.error('Test error:', error);
-                alert('Test save error: ' + error.message);
-            });
-        }
+
 
         window.loadPromoBarData = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1281,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            console.log('Loading promo bar data for ID:', promoBarId);
+
 
             if (window.promobarxAdmin && window.promobarxAdmin.ajaxurl) {
                 const formData = new URLSearchParams();
@@ -1289,7 +1205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('nonce', window.promobarxAdmin.nonce);
                 formData.append('id', promoBarId);
 
-                console.log('Form data for loading:', formData.toString());
+
 
                 fetch(window.promobarxAdmin.ajaxurl, {
                     method: 'POST',
@@ -1299,11 +1215,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData.toString()
                 })
                 .then(response => {
-                    console.log('Load response status:', response.status);
                     return response.json();
                 })
                 .then(result => {
-                    console.log('Load result:', result);
                     if (result.success && result.data) {
                         const promoBar = result.data;
                         
@@ -1313,7 +1227,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             try {
                                 styling = typeof promoBar.styling === 'string' ? JSON.parse(promoBar.styling) : promoBar.styling;
                             } catch (e) {
-                                console.error('Error parsing styling:', e);
                                 styling = {};
                             }
                         }
@@ -1324,7 +1237,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             try {
                                 ctaStyle = typeof promoBar.cta_style === 'string' ? JSON.parse(promoBar.cta_style) : promoBar.cta_style;
                             } catch (e) {
-                                console.error('Error parsing CTA style:', e);
                                 ctaStyle = {};
                             }
                         }
@@ -1348,7 +1260,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                     document.getElementById('promo-countdown-date').value = '';
                                 }
                             } catch (e) {
-                                console.error('Error parsing countdown date:', e);
                                 document.getElementById('promo-countdown-date').value = '';
                             }
                         } else {
@@ -1467,45 +1378,24 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }));
                                 updateAssignmentsList();
                             } catch (e) {
-                                console.error('Error parsing assignments:', e);
+                                // Handle assignment parsing error silently
                             }
                         }
                         
-                        console.log('Successfully loaded promo bar data:', promoBar);
+
                     } else {
                         alert('Error loading promo bar data: ' + (result.data || 'Unknown error'));
                     }
                 })
                 .catch(error => {
-                    console.error('Error loading promo bar data:', error);
                     alert('Error loading promo bar data. Please try again.');
                 });
             } else {
-                console.error('Admin data not available for loading');
                 alert('Admin data not available for loading. Please refresh the page.');
             }
         }
         
-        window.testLoadPromoBar = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const promoBarId = urlParams.get('id');
-            
-            console.log('Test: Current URL params:', window.location.search);
-            console.log('Test: Promo bar ID from URL:', promoBarId);
-            console.log('Test: Admin data available:', {
-                promobarxAdmin: window.promobarxAdmin,
-                ajaxurl: window.promobarxAdmin?.ajaxurl,
-                nonce: window.promobarxAdmin?.nonce
-            });
-            
-            if (promoBarId) {
-                console.log('Test: Attempting to load promo bar with ID:', promoBarId);
-                loadPromoBarData();
-            } else {
-                console.log('Test: No promo bar ID found in URL');
-                alert('No promo bar ID found in URL. Current URL: ' + window.location.href);
-            }
-        }
+
         
         // For other components, we'll use simple HTML if needed
     const dashboardContainer = document.getElementById('promo-bar-x-dashboard');
@@ -1561,7 +1451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
     } catch (error) {
-        console.error('Error initializing PromoBarX components:', error);
+        // Handle initialization error silently
         
         // Fallback for all containers
         const containers = document.querySelectorAll('[id*="promo-bar-x"]');

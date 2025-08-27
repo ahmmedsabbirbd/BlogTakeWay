@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Eye, Palette, Type, MousePointer, Clock, Link, Settings, MapPin } from 'lucide-react';
 import ColorPicker from '../../../components/ui/ColorPicker';
-import PageAssignmentManager from './PageAssignmentManager';
 
 const TopBarEditor = ({ promoBar, onClose, onSave }) => {
     const [formData, setFormData] = useState({
