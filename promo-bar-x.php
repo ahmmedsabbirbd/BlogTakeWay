@@ -89,8 +89,7 @@ class PROMO_BAR_X {
         define('PromoBarX_PLUGIN_DIR', plugin_dir_path(__FILE__));
         define('PromoBarX_PLUGIN_URL', plugin_dir_url(__FILE__));
         define('PromoBarX_TEXT_DOMAIN', 'promo-bar-x');
-        define('PromoBarX_CHAT_SESSION_COOKIE', 'promo_chat_session');
-        define('PromoBarX_GREAP_KEY', 'zcP5AsW6bwGApWF5NdyF4TvyKZs6w7KP');
+        define('PromoBarX_CHAT_SESSION_COOKIE', 'promo_chat_session'); 
 
         // Initialize components
         add_action('init', [ $this, 'init' ]); 
