@@ -1,6 +1,6 @@
 <?php
 
-namespace Aisk_Ai_Chat\Appsero;
+namespace PromoBarX\Appsero;
 
 /**
  * Appsero Insights
@@ -34,7 +34,7 @@ class Insights {
     protected $extra_data = [];
 
     /**
-     * Aisk_Ai_Chat\AppSero\Client
+     * PromoBarX\AppSero\Client
      *
      * @var object
      */
@@ -58,7 +58,7 @@ class Insights {
             $client = new Client($client, $name, $file);
         }
 
-        if ( is_object($client) && is_a($client, 'Aisk_Ai_Chat\Appsero\Client') ) {
+        if ( is_object($client) && is_a($client, 'PromoBarX\Appsero\Client') ) {
             $this->client = $client;
         }
     }

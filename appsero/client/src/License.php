@@ -1,6 +1,6 @@
 <?php
 
-namespace Aisk_Ai_Chat\Appsero;
+namespace PromoBarX\Appsero;
 
 /**
  * Appsero License Checker
@@ -10,7 +10,7 @@ namespace Aisk_Ai_Chat\Appsero;
 class License {
 
     /**
-     * Aisk_Ai_Chat\AppSero\Client
+     * PromoBarX\AppSero\Client
      *
      * @var object
      */

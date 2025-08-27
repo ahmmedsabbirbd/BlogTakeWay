@@ -96,8 +96,8 @@ class PROMO_BAR_X {
         add_action('init', [ $this, 'init' ]); 
         register_activation_hook(__FILE__, [ $this, 'activate' ]);
         
-        // $this->include_appsero_client();
-        // $this->appsero_init_tracker_promo_bar_x();
+        $this->include_appsero_client();
+        $this->appsero_init_tracker_promo_bar_x();
 
         // Load required files
         $this->load_dependencies(); 
@@ -177,7 +177,7 @@ class PROMO_BAR_X {
      * @return void
      */
     public function appsero_init_tracker_promo_bar_x() {
-        $client = new Aisk_Ai_Chat\Appsero\Client( 'e46991ff-ae9b-42f3-bf87-1ec87ab8bb77', 'Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA', PromoBarX_PLUGIN_FILE );
+        $client = new PromoBarX\Appsero\Client( '90ca1ab2-d744-4bbc-9914-54f176c8820a', 'Promo Bar X – Customizable Campaign Top Bar | Countdown | CTA', PromoBarX_PLUGIN_FILE );
 
         // Active insights.
         $client->insights()->init();
@@ -193,12 +193,12 @@ class PROMO_BAR_X {
      * @return void
      */
     public function include_appsero_client() {
-        if ( ! class_exists( 'Aisk_Ai_Chat\Appsero\Client' ) ) {
+        if ( ! class_exists( 'PromoBarX\Appsero\Client' ) ) {
             require_once __DIR__ . '/appsero/client/src/Client.php';
         }
 
-        if ( ! class_exists('Aisk_Ai_Chat\Appsero\Client') ) {
-            class_alias('Aisk_Ai_Chat\Appsero\Client','Aisk_Ai_Chat\Appsero\Client');
+        if ( ! class_exists('PromoBarX\Appsero\Client') ) {
+            class_alias('PromoBarX\Appsero\Client','PromoBarX\Appsero\Client');
         }
     }
     

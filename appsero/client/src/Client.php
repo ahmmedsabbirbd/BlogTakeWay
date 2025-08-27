@@ -1,6 +1,6 @@
 <?php
 
-namespace Aisk_Ai_Chat\Appsero;
+namespace PromoBarX\Appsero;
 
 /**
  * Appsero Client
@@ -110,7 +110,7 @@ class Client {
     /**
      * Initialize insights class
      *
-     * @return Aisk_Ai_Chat\Appsero\Insights
+     * @return PromoBarX\Appsero\Insights
      */
     public function insights() {
         if ( ! class_exists( __NAMESPACE__ . '\Insights' ) ) {
@@ -139,18 +139,18 @@ class Client {
         }
 
         // show deprecated notice
-        _deprecated_function( __CLASS__ . '::updater', '2.0', '\Aisk_Ai_Chat\Appsero\Updater::init($client);, for more details please visit: https://appsero.com/docs/appsero-developers-guide/appsero-client/appsero-sdk-updater-changes/' );
+        _deprecated_function( __CLASS__ . '::updater', '2.0', '\PromoBarX\Appsero\Updater::init($client);, for more details please visit: https://appsero.com/docs/appsero-developers-guide/appsero-client/appsero-sdk-updater-changes/' );
 
         // initialize the new updater
-        if ( method_exists( '\Aisk_Ai_Chat\Appsero\Updater', 'init' ) ) {
-            Aisk_Ai_Chat\Appsero\Updater::init( $this );
+        if ( method_exists( '\PromoBarX\Appsero\Updater', 'init' ) ) {
+            PromoBarX\Appsero\Updater::init( $this );
         }
     }
 
     /**
      * Initialize license checker
      *
-     * @return Aisk_Ai_Chat\Appsero\License
+     * @return PromoBarX\Appsero\License
      */
     public function license() {
         if ( ! class_exists( __NAMESPACE__ . '\License' ) ) {
