@@ -1133,7 +1133,18 @@ class PromoBarX_Manager {
         }
         
         $promo_bar_id = isset($_POST['promo_bar_id']) ? intval($_POST['promo_bar_id']) : 0;
-        $assignments = isset($_POST['assignments']) ? wp_unslash($_POST['assignments']) : [];
+        
+        // Sanitize assignments input - could be JSON string or array
+        if (isset($_POST['assignments']) && is_string($_POST['assignments'])) {
+            $assignments_raw = sanitize_textarea_field(wp_unslash($_POST['assignments']));
+        } elseif (isset($_POST['assignments']) && is_array($_POST['assignments'])) {
+            $assignments_raw = array_map('sanitize_text_field', wp_unslash($_POST['assignments']));
+        } else {
+            $assignments_raw = [];
+        }
+        
+        // Use the sanitized assignments data
+        $assignments = $assignments_raw;
         
 
 

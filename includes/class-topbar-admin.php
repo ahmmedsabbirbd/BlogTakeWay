@@ -338,7 +338,9 @@ class TOP_Admin {
      */
     public function render_editor_page() {
         // Get the promo bar ID from URL if editing
-        $promo_bar_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        // Using filter_input for secure parameter handling without nonce requirement for read-only operations
+        $promo_bar_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, array('options' => array('min_range' => 1)));
+        $promo_bar_id = $promo_bar_id ? $promo_bar_id : 0;
         
         echo '<div id="promo-bar-x-editor"></div>';
         echo '<script>
