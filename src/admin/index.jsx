@@ -78,184 +78,205 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div style="background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                             <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #111827;">Promo Bar Settings</h2>
                             
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Name</label>
-                                <input type="text" id="promo-name" placeholder="Enter promo bar name" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            <!-- Name Section -->
+                            <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label style="font-weight: 500; color: #374151; white-space: nowrap; min-width: 40px;">Name:</label>
+                                    <input type="text" id="promo-name" placeholder="Enter promo bar name" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
                             </div>
-                            
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Title</label>
-                                <input type="text" id="promo-title" placeholder="Enter main title" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                             </div>
                                                       
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Button Text</label>
-                                <input type="text" id="promo-cta-text" placeholder="e.g., Shop Now" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                            <!-- Title Section -->
+                            <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 8px; min-width: 300px; flex: 1;">
+                                        <label style="font-weight: 500; color: #374151; white-space: nowrap; min-width: 40px;">Title:</label>
+                                        <input type="text" id="promo-title" placeholder="Enter main title" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                            </div>
+                                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                        <span style="font-weight: 600; color: #111827; font-size: 13px;">Title Styling:</span>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <label style="font-size: 13px; color: #374151;">Color:</label>
+                                            <input type="color" id="title-color" value="#ffffff" style="width: 40px; height: 28px; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer;">
+                            </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <label style="font-size: 13px; color: #374151;">Size:</label>
+                                            <select id="title-font-size" style="padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px; min-width: 120px;">
+                                                <option value="inherit">Default</option>
+                                            <option value="12px">Small (12px)</option>
+                                            <option value="14px">Medium (14px)</option>
+                                            <option value="16px">Large (16px)</option>
+                                                <option value="18px">XL (18px)</option>
+                                            <option value="20px">XXL (20px)</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="custom-title-font-size-container" style="display: none; margin-top: 10px; padding-left: 60px;">
+                                    <div style="display: flex; gap: 6px; align-items: center; max-width: 150px;">
+                                        <input type="number" id="custom-title-font-size-value" placeholder="Size" min="8" max="72" style="width: 60px; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px;">
+                                        <select id="custom-title-font-size-unit" style="padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px;">
+                                                    <option value="px">px</option>
+                                                    <option value="em">em</option>
+                                                    <option value="rem">rem</option>
+                                                    <option value="%">%</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                            
+                            <!-- CTA Button Section -->
+                            <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                                                                <label style="display: flex; align-items: center; font-weight: 500; color: #374151;">
+                                            <input type="checkbox" id="promo-cta-enabled" style="margin-right: 8px;">
+                                            Enable CTA Button
+                                        </label>
+                                </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="display: flex; align-items: center; font-weight: 500; color: #374151;">
+                                            <input type="checkbox" id="promo-close-enabled" style="margin-right: 8px;">
+                                            Enable close button
+                                        </label>
+                            </div>
+                                    </div>
+                                <div id="cta-fields-container" style="display: block;">
+                                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;">
+                                        <div style="display: flex; align-items: center; gap: 8px; min-width: 200px; flex: 1;">
+                                            <label style="font-weight: 500; color: #374151; white-space: nowrap;">CTA Text:</label>
+                                            <input type="text" id="promo-cta-text" placeholder="e.g., Shop Now" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                            <span style="font-weight: 600; color: #111827; font-size: 13px;">CTA Button Styling:</span>
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <label style="font-size: 13px; color: #374151;">Background:</label>
+                                                <input type="color" id="promo-cta-color" value="#ffffff" style="width: 40px; height: 28px; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer;">
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <label style="font-size: 13px; color: #374151;">Text Color:</label>
+                                                <input type="color" id="cta-text-color" value="#3b82f6" style="width: 40px; height: 28px; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer;">
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <label style="font-size: 13px; color: #374151;">Size:</label>
+                                                <select id="cta-font-size" style="padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px; min-width: 120px;">
+                                                    <option value="inherit">Default</option>
+                                            <option value="12px">Small (12px)</option>
+                                            <option value="14px">Medium (14px)</option>
+                                            <option value="16px">Large (16px)</option>
+                                                    <option value="18px">XL (18px)</option>
+                                            <option value="20px">XXL (20px)</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; min-width: 300px;">
+                                        <label style="font-weight: 500; color: #374151; white-space: nowrap;">CTA URL:</label>
+                                        <input type="url" id="promo-cta-url" placeholder="https://example.com" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                                    </div>
+                                </div>
+                                <div id="custom-cta-font-size-container" style="display: none; margin-top: 10px; padding-left: 60px;">
+                                    <div style="display: flex; gap: 6px; align-items: center; max-width: 150px;">
+                                        <input type="number" id="custom-cta-font-size-value" placeholder="Size" min="8" max="72" style="width: 60px; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px;">
+                                        <select id="custom-cta-font-size-unit" style="padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px;">
+                                                    <option value="px">px</option>
+                                                    <option value="em">em</option>
+                                                    <option value="rem">rem</option>
+                                                    <option value="%">%</option>
+                                                </select>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Button URL</label>
-                                <input type="url" id="promo-cta-url" placeholder="https://example.com" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                            </div>
+                            <!-- Countdown Section -->
+                            <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="display: flex; align-items: center; font-weight: 500; color: #374151;">
+                                            <input type="checkbox" id="promo-countdown-enabled" style="margin-right: 8px;">
+                                            Enable Countdown Timer
+                                        </label>
+                                    </div>
+                                </div>
+                                <div id="countdown-fields-container" style="display: none;">
+                                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 12px;">
+                                        <span style="font-weight: 600; color: #111827; font-size: 13px;">Countdown Styling:</span>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <label style="font-size: 13px; color: #374151;">Color:</label>
+                                            <input type="color" id="countdown-color" value="#ffffff" style="width: 40px; height: 28px; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer;">
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <label style="font-size: 13px; color: #374151;">Size:</label>
+                                            <select id="countdown-font-size" style="padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px; min-width: 120px;">
+                                                <option value="inherit">Default</option>
+                                            <option value="12px">Small (12px)</option>
+                                            <option value="14px">Medium (14px)</option>
+                                            <option value="16px">Large (16px)</option>
+                                                <option value="18px">XL (18px)</option>
+                                            <option value="20px">XXL (20px)</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="font-weight: 500; color: #374151; white-space: nowrap;">Target Date:</label>
+                                        <input type="datetime-local" id="promo-countdown-date" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                                    </div>
+                                </div>
+                                <div id="custom-countdown-font-size-container" style="display: none; margin-top: 10px; padding-left: 60px;">
+                                    <div style="display: flex; gap: 6px; align-items: center; max-width: 150px;">
+                                        <input type="number" id="custom-countdown-font-size-value" placeholder="Size" min="8" max="72" style="width: 60px; padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px;">
+                                        <select id="custom-countdown-font-size-unit" style="padding: 4px 6px; border: 1px solid #d1d5db; border-radius: 3px; font-size: 13px;">
+                                                    <option value="px">px</option>
+                                                    <option value="em">em</option>
+                                                    <option value="rem">rem</option>
+                                                    <option value="%">%</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                             
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: flex; align-items: center; margin-bottom: 8px; font-weight: 500; color: #374151;">
-                                    <input type="checkbox" id="promo-countdown-enabled" style="margin-right: 8px;">
-                                    Enable Countdown Timer
-                                </label>
-                                <input type="datetime-local" id="promo-countdown-date" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; display: none;">
-                            </div>
-                            
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: flex; align-items: center; margin-bottom: 8px; font-weight: 500; color: #374151;">
-                                    <input type="checkbox" id="promo-close-enabled" checked style="margin-right: 8px;">
-                                    Show Close Button
-                                </label>
-                            </div>
-                            
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Status</label>
-                                <select id="promo-status" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                    <option value="draft">Draft</option>
-                                    <option value="active">Active</option>
-                                    <option value="paused">Paused</option>
-                                    <option value="archived">Archived</option>
-                                </select>
+                            <!-- Additional Options Section -->
+                            <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <label style="font-weight: 500; color: #374151; white-space: nowrap;">Status:</label>
+                                    <select id="promo-status" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; min-width: 120px;">
+                                        <option value="draft">Draft</option>
+                                        <option value="active">Active</option>
+                                        <option value="paused">Paused</option>
+                                        <option value="archived">Archived</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
                             
-                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Styling Options</h3>
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Basic Styling</h3>
                             
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Background Color</label>
-                                <input type="color" id="promo-bg-color" value="#3b82f6" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                            <!-- Basic Styling Options -->
+                            <div style="margin-bottom: 20px; padding: 12px; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">
+                                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="font-weight: 500; color: #374151; white-space: nowrap;">Background:</label>
+                                        <input type="color" id="promo-bg-color" value="#3b82f6" style="width: 50px; height: 32px; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer;">
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; min-width: 150px;">
+                                        <label style="font-weight: 500; color: #374151; white-space: nowrap;">Position:</label>
+                                        <select id="promo-position" style="flex: 1; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                                            <option value="top">Top of Page</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div style="margin-bottom: 20px; display: none;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Text Color</label>
-                                <input type="color" id="promo-text-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
-                            </div>
-                            
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Button Color</label>
-                                <input type="color" id="promo-cta-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                            <!-- Hidden Text Color Field (still needed for functionality) -->
+                            <div style="display: none;">
+                                <input type="color" id="promo-text-color" value="#ffffff">
                             </div>
                             
 
-                            
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Position</label>
-                                <select id="promo-position" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                    <option value="top">Top of Page</option>
-                                </select>
-                            </div>
-                            
-                            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
-                            
-                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Individual Element Styling</h3>
-                            
-                            <!-- Title Styling -->
-                            <div style="margin-bottom: 25px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #111827;">Title Styling</h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Title Color</label>
-                                        <input type="color" id="title-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Title Font Size</label>
-                                        <select id="title-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                            <option value="inherit">Inherit (Default)</option>
-                                            <option value="12px">Small (12px)</option>
-                                            <option value="14px">Medium (14px)</option>
-                                            <option value="16px">Large (16px)</option>
-                                            <option value="18px">Extra Large (18px)</option>
-                                            <option value="20px">XXL (20px)</option>
-                                            <option value="custom">Custom</option>
-                                        </select>
-                                        <div id="custom-title-font-size-container" style="display: none; margin-top: 10px;">
-                                            <div style="display: flex; gap: 10px; align-items: center;">
-                                                <input type="number" id="custom-title-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                                <select id="custom-title-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                                    <option value="px">px</option>
-                                                    <option value="em">em</option>
-                                                    <option value="rem">rem</option>
-                                                    <option value="%">%</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Countdown Styling -->
-                            <div style="margin-bottom: 25px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #111827;">Countdown Styling</h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Countdown Color</label>
-                                        <input type="color" id="countdown-color" value="#ffffff" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Countdown Font Size</label>
-                                        <select id="countdown-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                            <option value="inherit">Inherit (Default)</option>
-                                            <option value="12px">Small (12px)</option>
-                                            <option value="14px">Medium (14px)</option>
-                                            <option value="16px">Large (16px)</option>
-                                            <option value="18px">Extra Large (18px)</option>
-                                            <option value="20px">XXL (20px)</option>
-                                            <option value="custom">Custom</option>
-                                        </select>
-                                        <div id="custom-countdown-font-size-container" style="display: none; margin-top: 10px;">
-                                            <div style="display: flex; gap: 10px; align-items: center;">
-                                                <input type="number" id="custom-countdown-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                                <select id="custom-countdown-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                                    <option value="px">px</option>
-                                                    <option value="em">em</option>
-                                                    <option value="rem">rem</option>
-                                                    <option value="%">%</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- CTA Button Styling -->
-                            <div style="margin-bottom: 25px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 15px; color: #111827;">CTA Button Styling</h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Text Color</label>
-                                        <input type="color" id="cta-text-color" value="#3b82f6" style="width: 100%; height: 40px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">CTA Font Size</label>
-                                        <select id="cta-font-size" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                            <option value="inherit">Inherit (Default)</option>
-                                            <option value="12px">Small (12px)</option>
-                                            <option value="14px">Medium (14px)</option>
-                                            <option value="16px">Large (16px)</option>
-                                            <option value="18px">Extra Large (18px)</option>
-                                            <option value="20px">XXL (20px)</option>
-                                            <option value="custom">Custom</option>
-                                        </select>
-                                        <div id="custom-cta-font-size-container" style="display: none; margin-top: 10px;">
-                                            <div style="display: flex; gap: 10px; align-items: center;">
-                                                <input type="number" id="custom-cta-font-size-value" placeholder="Enter font size" min="8" max="72" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                                <select id="custom-cta-font-size-unit" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                                                    <option value="px">px</option>
-                                                    <option value="em">em</option>
-                                                    <option value="rem">rem</option>
-                                                    <option value="%">%</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             
                             <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
                             
@@ -331,25 +352,62 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add event listeners
             setupEditorEvents();
             
-            // Load promo bar data if ID is provided
+            // Load promo bar data if ID is provided, otherwise set defaults
             if (promoBarId) {
     
                 loadPromoBarData();
+            } else {
+                // Set default values for new promo bar
+                setDefaultValues();
             }
         }
         
+        function setDefaultValues() {
+            // Set default checkbox states for new promo bars
+            document.getElementById('promo-cta-enabled').checked = true; // CTA enabled by default
+            document.getElementById('promo-close-enabled').checked = true; // Close button enabled by default
+            document.getElementById('promo-countdown-enabled').checked = false; // Countdown disabled by default
+            
+            // Show/hide fields based on default states
+            const ctaFieldsContainer = document.getElementById('cta-fields-container');
+            if (ctaFieldsContainer) {
+                ctaFieldsContainer.style.display = 'block'; // Show CTA fields by default
+            }
+            
+            const countdownFieldsContainer = document.getElementById('countdown-fields-container');
+            if (countdownFieldsContainer) {
+                countdownFieldsContainer.style.display = 'none'; // Hide countdown fields by default
+            }
+            
+            // Update preview with default values
+            updatePreview();
+        }
+        
         function setupEditorEvents() {
+            // CTA Button toggle
+            const ctaCheckbox = document.getElementById('promo-cta-enabled');
+            const ctaFieldsContainer = document.getElementById('cta-fields-container');
+            
+            if (ctaCheckbox) {
+                ctaCheckbox.addEventListener('change', function() {
+                    // Show/hide CTA fields based on checkbox state
+                    ctaFieldsContainer.style.display = this.checked ? 'block' : 'none';
+                    updatePreview();
+                }); 
+            }
+            
             // Countdown toggle
             const countdownCheckbox = document.getElementById('promo-countdown-enabled');
-            const countdownDate = document.getElementById('promo-countdown-date');
+            const countdownFieldsContainer = document.getElementById('countdown-fields-container');
             
             if (countdownCheckbox) {
                 countdownCheckbox.addEventListener('change', function() {
-                    // Show/hide countdown date field based on checkbox state
-                    countdownDate.style.display = this.checked ? 'block' : 'none';
+                    // Show/hide countdown fields based on checkbox state
+                    countdownFieldsContainer.style.display = this.checked ? 'block' : 'none';
                     
                     // Set default date if empty and checkbox is checked
-                    if (this.checked && !countdownDate.value) {
+                    const countdownDate = document.getElementById('promo-countdown-date');
+                    if (this.checked && countdownDate && !countdownDate.value) {
                         const now = new Date();
                         const futureDate = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // 24 hours from now
                         countdownDate.value = futureDate.toISOString().slice(0, 16);
@@ -360,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Countdown date change handler
+            const countdownDate = document.getElementById('promo-countdown-date');
             if (countdownDate) {
                 countdownDate.addEventListener('change', updatePreview);
             }
@@ -381,6 +440,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.addEventListener('change', updatePreview);
                 }
             });
+            
+            // Add close button checkbox to preview updates
+            const closeCheckbox = document.getElementById('promo-close-enabled');
+            if (closeCheckbox) {
+                closeCheckbox.addEventListener('change', updatePreview);
+            }
             
 
             
@@ -957,6 +1022,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const title = document.getElementById('promo-title')?.value || 'Sample Title';
             const ctaText = document.getElementById('promo-cta-text')?.value || 'Shop Now';
+            const ctaEnabled = document.getElementById('promo-cta-enabled')?.checked || false;
             const countdownEnabled = document.getElementById('promo-countdown-enabled')?.checked || false;
             const countdownDate = document.getElementById('promo-countdown-date')?.value || '';
             const closeEnabled = document.getElementById('promo-close-enabled')?.checked || false;
@@ -1037,7 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div style="font-weight: 600; color: ${titleColor}; ${titleFontSizeStyle}">${title}</div>
                         </div>
                         ${countdownDisplay}
-                        <a href="#" style="background: ${ctaColor}; color: ${ctaTextColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; ${ctaFontSizeStyle}">${ctaText}</a>
+                        ${ctaEnabled ? `<a href="#" style="background: ${ctaColor}; color: ${ctaTextColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; ${ctaFontSizeStyle}">${ctaText}</a>` : ''}
                     </div>
                     ${closeEnabled ? '<button style="background: none; border: none; color: ' + textColor + '; font-size: 18px; cursor: pointer; opacity: 0.7;">×</button>' : ''}
                 </div>
@@ -1097,6 +1163,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     background: document.getElementById('promo-bg-color')?.value || '#3b82f6',
                     color: document.getElementById('promo-text-color')?.value || '#ffffff',
                     position: document.getElementById('promo-position')?.value || 'top',
+                    // CTA enabled state
+                    cta_enabled: document.getElementById('promo-cta-enabled')?.checked || false,
                     // Individual element styling
                     title_color: document.getElementById('title-color')?.value || document.getElementById('promo-text-color')?.value || '#ffffff',
                     title_font_size: (() => {
@@ -1246,7 +1314,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('promo-title').value = promoBar.title || '';
                         document.getElementById('promo-cta-text').value = promoBar.cta_text || '';
                         document.getElementById('promo-cta-url').value = promoBar.cta_url || '';
-                        document.getElementById('promo-countdown-enabled').checked = Boolean(promoBar.countdown_enabled);
+                        // Convert string '0'/'1' or boolean to proper boolean
+                        const countdownEnabled = promoBar.countdown_enabled === true || promoBar.countdown_enabled === 1 || promoBar.countdown_enabled === '1';
+                        document.getElementById('promo-countdown-enabled').checked = countdownEnabled;
                         
                         // Handle countdown date format conversion
                         if (promoBar.countdown_date) {
@@ -1277,6 +1347,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         document.getElementById('promo-position').value = styling.position || 'top';
                         document.getElementById('promo-cta-color').value = ctaStyle.background || '#ffffff';
+                        
+                        // Load CTA enabled state - convert string '0'/'1' or boolean to proper boolean
+                        const ctaEnabled = styling.cta_enabled !== undefined ? 
+                            (styling.cta_enabled === true || styling.cta_enabled === 1 || styling.cta_enabled === '1') : 
+                            true; // Default to true for backward compatibility
+                        document.getElementById('promo-cta-enabled').checked = ctaEnabled;
+                        
+                        // Show/hide CTA fields based on loaded state
+                        const ctaFieldsContainer = document.getElementById('cta-fields-container');
+                        if (ctaFieldsContainer) {
+                            ctaFieldsContainer.style.display = ctaEnabled ? 'block' : 'none';
+                        }
                         
                         // Load individual element styling
                         // Title styling
@@ -1358,10 +1440,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
 
-                        // Show/hide countdown date field
-                        const countdownDate = document.getElementById('promo-countdown-date');
-                        if (countdownDate) {
-                            countdownDate.style.display = promoBar.countdown_enabled ? 'block' : 'none';
+                        // Show/hide countdown fields container
+                        const countdownFieldsContainer = document.getElementById('countdown-fields-container');
+                        if (countdownFieldsContainer) {
+                            countdownFieldsContainer.style.display = countdownEnabled ? 'block' : 'none';
                         }
 
                         updatePreview(); // Update preview with loaded data

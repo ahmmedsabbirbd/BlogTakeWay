@@ -559,7 +559,17 @@ class PromoBarX_Manager {
                     </div>
                 <?php endif; ?>
                 
-                <?php if (!empty($promo_bar->cta_text) && !empty($promo_bar->cta_url)): ?>
+                <?php 
+                // Check if CTA is enabled in styling
+                $cta_enabled = $styling['cta_enabled'] ?? true; // Default to true for backward compatibility
+                // Convert various types to boolean
+                if (is_string($cta_enabled)) {
+                    $cta_enabled = ($cta_enabled === '1' || $cta_enabled === 'true');
+                } else {
+                    $cta_enabled = (bool) $cta_enabled;
+                }
+                ?>
+                <?php if ($cta_enabled && !empty($promo_bar->cta_text) && !empty($promo_bar->cta_url)): ?>
                     <?php 
                     $cta_individual_style = '';
                     if ($cta_text_color) {

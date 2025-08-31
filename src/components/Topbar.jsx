@@ -143,6 +143,11 @@ const Topbar = React.forwardRef((props, ref) => {
     const countdownFontSize = styling.countdown_font_size || 'inherit';
     const ctaTextColor = styling.cta_text_color || styling.background || '#3b82f6';
     const ctaFontSize = styling.cta_font_size || 'inherit';
+    
+    // Check if CTA is enabled
+    const ctaEnabled = styling.cta_enabled !== undefined ? 
+        (styling.cta_enabled === true || styling.cta_enabled === 1 || styling.cta_enabled === '1') : 
+        true; // Default to true for backward compatibility
 
     const generateStyles = (styleObj) => {
         const styles = {};
@@ -186,7 +191,7 @@ const Topbar = React.forwardRef((props, ref) => {
                     />
                 )}
                 
-                {promoBar.cta_text && promoBar.cta_url && (
+                {ctaEnabled && promoBar.cta_text && promoBar.cta_url && (
                     <a 
                         href={promoBar.cta_url}
                         className="promobarx-cta"
