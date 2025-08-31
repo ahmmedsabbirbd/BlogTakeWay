@@ -29,6 +29,23 @@
 
 .promobarx-title {
   font-weight: 600;
+  
+  // Anchor tag styling - removed conflicting color rules to allow JavaScript to handle colors
+  a {
+    text-decoration: underline;
+    transition: color 0.2s ease;
+  }
+  
+  // Enhanced anchor styling for inline styles
+  .promobarx-title-link {
+    text-decoration: underline;
+    transition: color 0.2s ease;
+    
+    &:hover {
+      text-decoration: underline;
+      // Remove opacity change to allow color changes to work properly
+    }
+  }
 }
 
 .promobarx-countdown {

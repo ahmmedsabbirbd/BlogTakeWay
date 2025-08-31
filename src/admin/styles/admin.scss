@@ -70,6 +70,16 @@
   }
 }
 
+// Global admin styles to ensure anchor hover colors work
+.promobarx-title-link {
+  transition: color 0.2s ease !important;
+  
+  &:hover {
+    opacity: 1 !important;
+    text-decoration: underline !important;
+  }
+}
+
 // DataGrid customizations
 .MuiDataGrid-root {
   border: none !important;
@@ -87,6 +97,26 @@
 
 // Rich Text Editor Styles
 .rich-text-editor {
+  // Ensure anchor hover colors work properly in admin
+  .promobarx-title-link {
+    transition: color 0.2s ease !important;
+    
+    &:hover {
+      // Remove any conflicting hover styles
+      opacity: 1 !important;
+      text-decoration: underline !important;
+    }
+  }
+  
+  // Override any WordPress admin styles that might interfere
+  a.promobarx-title-link {
+    color: inherit !important;
+    
+    &:hover {
+      color: inherit !important;
+      opacity: 1 !important;
+    }
+  }
   .toolbar {
     display: flex;
     align-items: center;

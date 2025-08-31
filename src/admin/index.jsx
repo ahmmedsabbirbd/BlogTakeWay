@@ -55,6 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </svg>
                                 Load Data
                             </button>
+                            <button onclick="testAnchorHover()" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                                <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Test Hover
+                            </button>
 
                             <button onclick="window.location.href='admin.php?page=promo-bar-x-topbar-manager'" style="display: inline-flex; align-items: center; padding: 10px 20px; background-color: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
                                 <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,6 +128,17 @@ document.addEventListener('DOMContentLoaded', () => {
                                             <option value="20px">XXL (20px)</option>
                                             <option value="custom">Custom</option>
                                         </select>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                        <span style="font-weight: 600; color: #111827; font-size: 13px;">Anchor Tag Styling:</span>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <label style="font-size: 13px; color: #374151;">Color:</label>
+                                            <input type="color" id="anchor-color" value="#3b82f6" style="width: 40px; height: 28px; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer;">
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <label style="font-size: 13px; color: #374151;">Hover Color:</label>
+                                            <input type="color" id="anchor-hover-color" value="#1d4ed8" style="width: 40px; height: 28px; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer;">
                                         </div>
                                     </div>
                                 </div>
@@ -361,6 +378,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add event listeners
             setupEditorEvents();
             
+            // Ensure anchor colors are properly initialized after setup
+            setTimeout(() => {
+                updateEditorAnchorColors();
+                console.log('🔧 Admin: Anchor colors initialized after setup');
+            }, 200);
+            
             // Load promo bar data if ID is provided, otherwise set defaults
             if (promoBarId) {
     
@@ -518,13 +541,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const linkTextToUse = text || selectedText || validUrl;
                 const linkHTML = `<a href="${validUrl}" target="_blank" rel="noopener noreferrer">${linkTextToUse}</a>`;
                 
-                const editor = document.getElementById('promo-title-editor');
-                if (editor) {
-                    editor.focus();
-                    document.execCommand('insertHTML', false, linkHTML);
-                    updateRichEditorValue();
-                    updatePreview();
-                }
+                                 const editor = document.getElementById('promo-title-editor');
+                 if (editor) {
+                     editor.focus();
+                     document.execCommand('insertHTML', false, linkHTML);
+                     updateRichEditorValue();
+                     updatePreview();
+                     
+                     // Apply anchor colors to the newly inserted link
+                     setTimeout(() => {
+                         updateEditorAnchorColors();
+                     }, 10);
+                 }
                 
                 document.body.removeChild(modal);
             };
@@ -572,6 +600,55 @@ document.addEventListener('DOMContentLoaded', () => {
             const hiddenInput = document.getElementById('promo-title');
             if (editor && hiddenInput) {
                 hiddenInput.value = editor.innerHTML;
+                
+                // Apply anchor colors to any new links that might have been added
+                setTimeout(() => {
+                    updateEditorAnchorColors();
+                }, 50);
+            }
+        }
+
+        function updateEditorAnchorColors() {
+            const editor = document.getElementById('promo-title-editor');
+            const anchorColor = document.getElementById('anchor-color')?.value || '#3b82f6';
+            const anchorHoverColor = document.getElementById('anchor-hover-color')?.value || '#1d4ed8';
+            
+            if (editor) {
+                // Get all links in the editor
+                const links = editor.querySelectorAll('a');
+                
+                links.forEach(link => {
+                    // Update the color style with higher specificity
+                    link.style.setProperty('color', anchorColor, 'important');
+                    link.style.textDecoration = 'underline';
+                    link.style.transition = 'color 0.2s ease';
+                    link.className = 'promobarx-title-link';
+                    link.setAttribute('data-hover-color', anchorHoverColor);
+                    link.setAttribute('data-original-color', anchorColor);
+                    
+                    // Remove old event listeners
+                    link.onmouseover = null;
+                    link.onmouseout = null;
+                    link.removeEventListener('mouseenter', link._mouseenterHandler);
+                    link.removeEventListener('mouseleave', link._mouseleaveHandler);
+                    
+                    // Create new event handlers with better color management
+                    link._mouseenterHandler = function() {
+                        console.log('🎨 Admin: Mouse enter - changing to hover color:', anchorHoverColor);
+                        this.style.setProperty('color', anchorHoverColor, 'important');
+                    };
+                    
+                    link._mouseleaveHandler = function() {
+                        console.log('🎨 Admin: Mouse leave - changing back to original color:', anchorColor);
+                        this.style.setProperty('color', anchorColor, 'important');
+                    };
+                    
+                    // Add new event listeners
+                    link.addEventListener('mouseenter', link._mouseenterHandler);
+                    link.addEventListener('mouseleave', link._mouseleaveHandler);
+                    
+                    console.log('✅ Admin: Event listeners added for link with colors:', { anchorColor, anchorHoverColor });
+                });
             }
         }
 
@@ -599,16 +676,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
                 
-                // Update button states on selection change
-                editor.addEventListener('keyup', updateButtonStates);
-                editor.addEventListener('mouseup', updateButtonStates);
-                editor.addEventListener('input', updateButtonStates);
+                                 // Update button states on selection change
+                 editor.addEventListener('keyup', updateButtonStates);
+                 editor.addEventListener('mouseup', updateButtonStates);
+                 editor.addEventListener('input', updateButtonStates);
+                 
+                 // Apply anchor colors to existing links
+                 updateEditorAnchorColors();
             }
         }
         
         function setupEditorEvents() {
             // Setup rich text editor
             setupRichEditor();
+            
+            // Initialize anchor colors after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                updateEditorAnchorColors();
+            }, 100);
             
             // CTA Button toggle
             const ctaCheckbox = document.getElementById('promo-cta-enabled');
@@ -685,7 +770,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const individualStylingInputs = [
                 'title-color', 'title-font-size', 'custom-title-font-size-value', 'custom-title-font-size-unit',
                 'countdown-color', 'countdown-font-size', 'custom-countdown-font-size-value', 'custom-countdown-font-size-unit',
-                'cta-text-color', 'cta-font-size', 'custom-cta-font-size-value', 'custom-cta-font-size-unit'
+                'cta-text-color', 'cta-font-size', 'custom-cta-font-size-value', 'custom-cta-font-size-unit',
+                'anchor-color', 'anchor-hover-color'
             ];
             
             individualStylingInputs.forEach(id => {
@@ -694,6 +780,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.addEventListener('change', updatePreview);
                     if (input.type === 'number') {
                         input.addEventListener('input', updatePreview);
+                    }
+                    // Add debugging for anchor color controls
+                    if (id === 'anchor-color' || id === 'anchor-hover-color') {
+                        console.log(`Anchor color control ${id} found and event listener added`);
+                        input.addEventListener('change', () => {
+                            console.log(`${id} changed to:`, input.value);
+                            updateEditorAnchorColors();
+                        });
+                    }
+                } else {
+                    // Log missing elements for debugging
+                    if (id === 'anchor-color' || id === 'anchor-hover-color') {
+                        console.warn(`Anchor color control ${id} not found in DOM`);
                     }
                 }
             });
@@ -1275,6 +1374,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleColor = document.getElementById('title-color')?.value || textColor;
             const countdownColor = document.getElementById('countdown-color')?.value || textColor;
             const ctaTextColor = document.getElementById('cta-text-color')?.value || bgColor;
+            const anchorColor = document.getElementById('anchor-color')?.value || '#3b82f6';
+            const anchorHoverColor = document.getElementById('anchor-hover-color')?.value || '#1d4ed8';
             
             // Handle title font size
             let titleFontSize = document.getElementById('title-font-size')?.value || 'inherit';
@@ -1334,14 +1435,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusText = promoEnabled ? 'Enabled' : 'Disabled';
             const statusColor = promoEnabled ? '#10b981' : '#ef4444';
             
+            // Process title content to apply anchor colors to links
+            let processedTitle = title;
+            if (title.includes('<a ')) {
+                // Replace existing link styles with our anchor colors
+                processedTitle = title.replace(
+                    /<a\s+([^>]*?)>/gi,
+                    `<a $1 style="color: ${anchorColor} !important; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="${anchorHoverColor}" data-original-color="${anchorColor}">`
+                );
+            }
+            
             preview.innerHTML = `
                 <div style="background: ${bgColor}; color: ${textColor}; padding: 12px 20px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: ${fontSize}; ${disabledStyle}">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1;">
                         <div>
-                            <div style="font-weight: 600; color: ${titleColor}; ${titleFontSizeStyle}">${title}</div>
+                            <div style="font-weight: 600; color: ${titleColor}; ${titleFontSizeStyle}">${processedTitle}</div>
                         </div>
                         ${countdownDisplay}
-                        ${ctaEnabled ? `<a href="#" style="background: ${ctaColor}; color: ${ctaTextColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; ${ctaFontSizeStyle}">${ctaText}</a>` : ''}
+                        ${ctaEnabled ? `<a href="#" style="background: ${ctaColor}; color: ${ctaTextColor}; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: 500; ${ctaFontSizeStyle}; transition: all 0.2s ease;">${ctaText}</a>` : ''}
                     </div>
                     ${closeEnabled ? '<button style="background: none; border: none; color: ' + textColor + '; font-size: 18px; cursor: pointer; opacity: 0.7;">×</button>' : ''}
                 </div>
@@ -1350,7 +1461,57 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${countdownEnabled && countdownDate ? `<br>Countdown Target: ${new Date(countdownDate).toLocaleDateString()} ${new Date(countdownDate).toLocaleTimeString()}` : ''}
                 </div>
             `;
+            
+            // Add hover handling for anchor links in preview
+            setTimeout(() => {
+                const titleLinks = preview.querySelectorAll('.promobarx-title-link');
+                titleLinks.forEach(link => {
+                    const hoverColor = link.getAttribute('data-hover-color');
+                    const originalColor = link.getAttribute('data-original-color') || link.style.color || getComputedStyle(link).color;
+                    
+                    if (hoverColor) {
+                        // Remove any existing event listeners
+                        link.removeEventListener('mouseenter', link._mouseenterHandler);
+                        link.removeEventListener('mouseleave', link._mouseleaveHandler);
+                        
+                        // Create new event handlers with better color management
+                        link._mouseenterHandler = function() {
+                            console.log('🎨 Preview: Mouse enter - changing to hover color:', hoverColor);
+                            this.style.setProperty('color', hoverColor, 'important');
+                        };
+                        
+                        link._mouseleaveHandler = function() {
+                            console.log('🎨 Preview: Mouse leave - changing back to original color:', originalColor);
+                            this.style.setProperty('color', originalColor, 'important');
+                        };
+                        
+                        // Add event listeners
+                        link.addEventListener('mouseenter', link._mouseenterHandler);
+                        link.addEventListener('mouseleave', link._mouseleaveHandler);
+                        
+                        console.log('✅ Preview: Event listeners added for link with colors:', { originalColor, hoverColor });
+                    }
+                });
+            }, 0);
         }
+        
+        // Debug function to test anchor hover functionality
+        window.testAnchorHover = function() {
+            console.log('🧪 Testing anchor hover functionality...');
+            const links = document.querySelectorAll('.promobarx-title-link');
+            console.log('Found links:', links.length);
+            
+            links.forEach((link, index) => {
+                const hoverColor = link.getAttribute('data-hover-color');
+                const originalColor = link.getAttribute('data-original-color');
+                console.log(`Link ${index + 1}:`, {
+                    hoverColor,
+                    originalColor,
+                    currentColor: link.style.color,
+                    hasEventListeners: !!link._mouseenterHandler
+                });
+            });
+        };
         
         // Make functions globally accessible
         window.savePromoBar = function() {
@@ -1433,7 +1594,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             return customValue + customUnit;
                         }
                         return fontSize;
-                    })()
+                    })(),
+                    anchor_color: document.getElementById('anchor-color')?.value || '#3b82f6',
+                    anchor_hover_color: document.getElementById('anchor-hover-color')?.value || '#1d4ed8'
                 }),
                 cta_style: JSON.stringify({
                     background: document.getElementById('promo-cta-color')?.value || '#ffffff',
@@ -1690,6 +1853,15 @@ document.addEventListener('DOMContentLoaded', () => {
                                 customCtaFontSizeUnit.value = 'px';
                             }
                         }
+                        
+                                                 // Anchor styling
+                         document.getElementById('anchor-color').value = styling.anchor_color || '#3b82f6';
+                         document.getElementById('anchor-hover-color').value = styling.anchor_hover_color || '#1d4ed8';
+                         
+                         // Apply anchor colors to editor links
+                         setTimeout(() => {
+                             updateEditorAnchorColors();
+                         }, 100);
 
                         // Show/hide countdown fields container
                         const countdownFieldsContainer = document.getElementById('countdown-fields-container');

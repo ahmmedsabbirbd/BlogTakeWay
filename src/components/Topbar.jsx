@@ -69,6 +69,45 @@ const Topbar = React.forwardRef((props, ref) => {
                     // Add the active class to body
                     document.body.classList.add('promobarx-active');
                 }
+                
+                // Handle anchor hover effects for title links
+                const titleLinks = document.querySelectorAll('.promobarx-title-link');
+                console.log('🔍 Found title links:', titleLinks.length);
+                titleLinks.forEach((link, index) => {
+                    const hoverColor = link.getAttribute('data-hover-color');
+                    const originalColor = link.style.color || getComputedStyle(link).color;
+                    
+                    console.log(`🔍 Link ${index + 1}:`, {
+                        hoverColor,
+                        originalColor,
+                        hasDataHoverColor: !!hoverColor
+                    });
+                    
+                    if (hoverColor) {
+                        // Remove any existing event listeners
+                        link.removeEventListener('mouseenter', link._mouseenterHandler);
+                        link.removeEventListener('mouseleave', link._mouseleaveHandler);
+                        
+                        // Create new event handlers
+                        link._mouseenterHandler = function() {
+                            console.log(`🎨 Mouse enter: changing color to ${hoverColor}`);
+                            this.style.color = hoverColor + ' !important';
+                        };
+                        
+                        link._mouseleaveHandler = function() {
+                            console.log(`🎨 Mouse leave: changing color back to ${originalColor}`);
+                            this.style.color = originalColor;
+                        };
+                        
+                        // Add event listeners
+                        link.addEventListener('mouseenter', link._mouseenterHandler);
+                        link.addEventListener('mouseleave', link._mouseleaveHandler);
+                        
+                        console.log(`✅ Event listeners added to link ${index + 1}`);
+                    } else {
+                        console.log(`❌ No hover color found for link ${index + 1}`);
+                    }
+                });
             }, 0);
         }
         
@@ -136,6 +175,8 @@ const Topbar = React.forwardRef((props, ref) => {
     const countdownStyle = promoBar.countdown_style ? JSON.parse(promoBar.countdown_style) : {};
     const closeStyle = promoBar.close_button_style ? JSON.parse(promoBar.close_button_style) : {};
     
+console.log(styling.anchor_color);
+    
     // Extract individual element styling
     const titleColor = styling.title_color || styling.color || '#ffffff';
     const titleFontSize = styling.title_font_size || 'inherit';
@@ -143,6 +184,17 @@ const Topbar = React.forwardRef((props, ref) => {
     const countdownFontSize = styling.countdown_font_size || 'inherit';
     const ctaTextColor = styling.cta_text_color || styling.background || '#3b82f6';
     const ctaFontSize = styling.cta_font_size || 'inherit';
+    const anchorColor = styling.anchor_color || '#3b82f6';
+    const anchorHoverColor = styling.anchor_hover_color || '#1d4ed8';
+    
+    // Debug styling data
+    console.log('🎨 Styling data received:', {
+        styling,
+        anchor_color: styling.anchor_color,
+        anchor_hover_color: styling.anchor_hover_color,
+        computed_anchor_color: anchorColor,
+        computed_anchor_hover_color: anchorHoverColor
+    });
     
     // Check if CTA is enabled
     const ctaEnabled = styling.cta_enabled !== undefined ? 
@@ -160,6 +212,57 @@ const Topbar = React.forwardRef((props, ref) => {
         return styles;
     };
 
+    // Process title content to apply anchor colors to links
+    const processTitleContent = (title) => {
+        console.log('🔍 processTitleContent called with:', title);
+        console.log('🔍 anchorColor:', anchorColor);
+        console.log('🔍 anchorHoverColor:', anchorHoverColor);
+        
+        if (!title || !title.includes('<a ')) {
+            console.log('🔍 No links found in title, returning original');
+            return title;
+        }
+
+        console.log('🔍 Links found, processing...');
+        
+        // Test regex pattern
+        const linkMatches = title.match(/<a\s+([^>]*?)>/gi);
+        console.log('🔍 Link matches found:', linkMatches);
+        
+        // Apply inline styles to anchor tags with proper CSS-in-JS approach
+        const processed = title.replace(
+            /<a\s+([^>]*?)>/gi,
+            `<a $1 style="color: ${anchorColor} !important; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="${anchorHoverColor}">`
+        );
+        
+        console.log('🔍 Processed result:', processed);
+        return processed;
+    };
+
+    // Fallback function to ensure anchor colors are applied even if data is missing
+    const ensureAnchorColors = (title) => {
+        console.log('🛡️ ensureAnchorColors called with:', title);
+        
+        if (!title || !title.includes('<a ')) {
+            console.log('🛡️ No links found in title, returning original');
+            return title;
+        }
+
+        // Use anchor colors or fallback to defaults
+        const fallbackAnchorColor = anchorColor || '#3b82f6';
+        const fallbackHoverColor = anchorHoverColor || '#1d4ed8';
+        
+        console.log('🛡️ Using fallback colors:', fallbackAnchorColor, fallbackHoverColor);
+
+        // Apply anchor colors to all links with proper CSS-in-JS approach
+        const result = title.replace(
+            /<a\s+([^>]*?)>/gi,
+            `<a $1 style="color: ${fallbackAnchorColor} !important; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="${fallbackHoverColor}">`
+        );
+        console.log('🛡️ Fallback result:', result);
+        return result;
+    };
+
     return (
         <div 
             id={`promobarx-topbar-${promoBar.id}`}
@@ -175,7 +278,21 @@ const Topbar = React.forwardRef((props, ref) => {
                             color: titleColor,
                             fontSize: titleFontSize !== 'inherit' ? titleFontSize : undefined
                         }}
-                        dangerouslySetInnerHTML={{ __html: promoBar.title }}
+                        dangerouslySetInnerHTML={{ __html: (() => {
+                            try {
+                                console.log('🎯 Processing title for promo bar:', promoBar.id);
+                                console.log('🎯 Raw title:', promoBar.title);
+                                console.log('🎯 Raw styling:', promoBar.styling);
+                                
+                                const processed = processTitleContent(promoBar.title);
+                                const final = ensureAnchorColors(processed);
+                                console.log('📝 Final title HTML:', final);
+                                return final;
+                            } catch (error) {
+                                console.error('❌ Error processing title:', error);
+                                return promoBar.title;
+                            }
+                        })() }}
                     />
                 )}
                 

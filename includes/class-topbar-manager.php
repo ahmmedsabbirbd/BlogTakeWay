@@ -537,8 +537,22 @@ class PromoBarX_Manager {
                     if ($title_font_size && $title_font_size !== 'inherit') {
                         $title_style .= 'font-size: ' . esc_attr($title_font_size) . ';';
                     }
+                    
+                    // Process title content to apply inline styles to anchor tags
+                    $processed_title = $promo_bar->title;
+                    $anchor_color = $styling['anchor_color'] ?? '#3b82f6';
+                    $anchor_hover_color = $styling['anchor_hover_color'] ?? '#1d4ed8';
+                    
+                    // Apply inline styles to anchor tags within the title
+                    if (strpos($processed_title, '<a ') !== false) {
+                        $processed_title = preg_replace(
+                            '/<a\s+([^>]*?)>/i',
+                            '<a $1 style="color: ' . esc_attr($anchor_color) . ' !important; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="' . esc_attr($anchor_hover_color) . '">',
+                            $processed_title
+                        );
+                    }
                     ?>
-                    <div class="promobarx-title" style="<?php echo esc_attr($title_style); ?>"><?php echo wp_kses_post($promo_bar->title); ?></div>
+                    <div class="promobarx-title" style="<?php echo esc_attr($title_style); ?>"><?php echo wp_kses_post($processed_title); ?></div>
                 <?php endif; ?>
                 
                 <?php if ($promo_bar->countdown_enabled && !empty($promo_bar->countdown_date)): ?>
@@ -631,6 +645,20 @@ class PromoBarX_Manager {
         .promobarx-title {
             font-weight: 600;
         }
+        
+        .promobarx-title a,
+        .promobarx-title .promobarx-title-link {
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+        
+        .promobarx-title a:hover,
+        .promobarx-title .promobarx-title-link:hover {
+            text-decoration: underline;
+            color: <?php echo esc_attr($anchor_hover_color); ?> !important;
+        }
+        
+        /* JavaScript will handle the color changes dynamically */
         
         .promobarx-countdown {
             font-weight: 600;
@@ -736,6 +764,45 @@ class PromoBarX_Manager {
                 // Add the active class to body
                 document.body.classList.add('promobarx-active');
             }
+            
+            // Handle anchor hover effects for title links
+            const titleLinks = document.querySelectorAll('.promobarx-title-link');
+            console.log('🔍 PHP: Found title links:', titleLinks.length);
+            titleLinks.forEach((link, index) => {
+                const hoverColor = link.getAttribute('data-hover-color');
+                const originalColor = link.style.color || getComputedStyle(link).color;
+                
+                console.log(`🔍 PHP: Link ${index + 1}:`, {
+                    hoverColor,
+                    originalColor,
+                    hasDataHoverColor: !!hoverColor
+                });
+                
+                if (hoverColor) {
+                    // Remove any existing event listeners
+                    link.removeEventListener('mouseenter', link._mouseenterHandler);
+                    link.removeEventListener('mouseleave', link._mouseleaveHandler);
+                    
+                    // Create new event handlers
+                    link._mouseenterHandler = function() {
+                        console.log(`🎨 PHP: Mouse enter: changing color to ${hoverColor}`);
+                        this.style.color = hoverColor + ' !important';
+                    };
+                    
+                    link._mouseleaveHandler = function() {
+                        console.log(`🎨 PHP: Mouse leave: changing color back to ${originalColor}`);
+                        this.style.color = originalColor;
+                    };
+                    
+                    // Add event listeners
+                    link.addEventListener('mouseenter', link._mouseenterHandler);
+                    link.addEventListener('mouseleave', link._mouseleaveHandler);
+                    
+                    console.log(`✅ PHP: Event listeners added to link ${index + 1}`);
+                } else {
+                    console.log(`❌ PHP: No hover color found for link ${index + 1}`);
+                }
+            });
         });
         
         // Function to update promo bar height on window resize
