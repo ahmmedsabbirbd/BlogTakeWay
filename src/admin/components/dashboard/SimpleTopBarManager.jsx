@@ -5,6 +5,7 @@ const SimpleTopBarManager = ({ containerId }) => {
     const [analyticsData, setAnalyticsData] = useState({});
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('manage');
+    const [toggleLoading, setToggleLoading] = useState(null);
 
     useEffect(() => {
         console.log('SimpleTopBarManager: Component mounted');
@@ -101,7 +102,17 @@ const SimpleTopBarManager = ({ containerId }) => {
     };
 
     const toggleStatus = async (promoBar) => {
-        const newStatus = promoBar.status === 'active' ? 'paused' : 'active';
+        const newStatus = promoBar.status === 'active' ? 'draft' : 'active';
+        const action = promoBar.status === 'active' ? 'disable' : 'enable';
+        
+        // Show confirmation for disabling active promo bars
+        if (promoBar.status === 'active') {
+            const confirmed = confirm(`Are you sure you want to disable "${promoBar.name}"? It will no longer be visible to visitors.`);
+            if (!confirmed) return;
+        }
+        
+        // Set loading state
+        setToggleLoading(promoBar.id);
         
         try {
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
@@ -109,15 +120,41 @@ const SimpleTopBarManager = ({ containerId }) => {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `action=promobarx_save&id=${promoBar.id}&status=${newStatus}&nonce=${window.promobarxAdmin.nonce}`
+                body: `action=promobarx_update_status&id=${promoBar.id}&status=${newStatus}&nonce=${window.promobarxAdmin.nonce}`
             });
             
             const data = await response.json();
             if (data.success) {
+                // Show success message
+                console.log(`Promo bar "${promoBar.name}" has been ${action}d successfully.`);
+                
+                // Show a brief success notification
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div style="position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10000; font-size: 14px; font-weight: 500;">
+                        ✅ Promo bar "${promoBar.name}" has been ${action}d successfully!
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                // Remove notification after 3 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+                
+                // Reload to ensure data consistency
                 await loadPromoBars();
+            } else {
+                alert(`Failed to ${action} promo bar: ${data.data || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error updating status:', error);
+            alert(`Failed to ${action} promo bar. Please try again.`);
+        } finally {
+            // Clear loading state
+            setToggleLoading(null);
         }
     };
 
@@ -131,10 +168,10 @@ const SimpleTopBarManager = ({ containerId }) => {
 
     const getStatusBadge = (status) => {
         const config = {
-            draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' },
-            active: { color: 'bg-green-100 text-green-800', label: 'Active' },
-            paused: { color: 'bg-yellow-100 text-yellow-800', label: 'Paused' },
-            archived: { color: 'bg-red-100 text-red-800', label: 'Archived' }
+            draft: { color: 'bg-gray-100 text-gray-800', label: 'Disabled' },
+            active: { color: 'bg-green-100 text-green-800', label: 'Enabled' },
+            paused: { color: 'bg-gray-100 text-gray-800', label: 'Disabled' },
+            archived: { color: 'bg-gray-100 text-gray-800', label: 'Disabled' }
         };
         
         const statusConfig = config[status] || config.draft;
@@ -404,24 +441,55 @@ const SimpleTopBarManager = ({ containerId }) => {
                                                 <div className="flex items-center justify-end space-x-2">
                                                     <button 
                                                         onClick={() => toggleStatus(promoBar)}
-                                                        className="text-gray-400 hover:text-gray-600"
-                                                        title={promoBar.status === 'active' ? 'Pause' : 'Activate'}
+                                                        disabled={toggleLoading === promoBar.id}
+                                                        className={`inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 ${
+                                                            toggleLoading === promoBar.id
+                                                                ? 'bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-300'
+                                                                : promoBar.status === 'active' 
+                                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-300' 
+                                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                                                        }`}
+                                                        title={toggleLoading === promoBar.id 
+                                                            ? 'Processing...' 
+                                                            : promoBar.status === 'active' 
+                                                                ? 'Click to disable this promo bar' 
+                                                                : 'Click to enable this promo bar'
+                                                        }
                                                     >
-                                                        {promoBar.status === 'active' ? '⏸️' : '▶️'}
+                                                        {toggleLoading === promoBar.id ? (
+                                                            <>
+                                                                <svg className="animate-spin w-3 h-3 mr-2" fill="none" viewBox="0 0 24 24">
+                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                </svg>
+                                                                Processing...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                                                                    promoBar.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
+                                                                }`}></span>
+                                                                {promoBar.status === 'active' ? 'Enabled' : 'Disabled'}
+                                                            </>
+                                                        )}
                                                     </button>
                                                     <button 
                                                         onClick={() => editPromoBar(promoBar)}
-                                                        className="text-blue-600 hover:text-blue-900"
-                                                        title="Edit"
+                                                        className="inline-flex items-center px-2 py-1 rounded-md text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200"
+                                                        title="Edit this promo bar"
                                                     >
-                                                        ✏️
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
                                                     </button>
                                                     <button 
                                                         onClick={() => deletePromoBar(promoBar.id)}
-                                                        className="text-red-600 hover:text-red-900"
-                                                        title="Delete"
+                                                        className="inline-flex items-center px-2 py-1 rounded-md text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
+                                                        title="Delete this promo bar"
                                                     >
-                                                        🗑️
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
                                                     </button>
                                                 </div>
                                             </td>

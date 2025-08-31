@@ -56,6 +56,7 @@ class PromoBarX_Manager {
         add_action('wp_ajax_promobarx_force_create_tables', [$this, 'ajax_force_create_tables']);
         add_action('wp_ajax_promobarx_force_recreate_assignments_table', [$this, 'ajax_force_recreate_assignments_table']);
         add_action('wp_ajax_promobarx_get_analytics', [$this, 'ajax_get_analytics']);
+        add_action('wp_ajax_promobarx_update_status', [$this, 'ajax_update_status']);
     }
 
     /**
@@ -1386,5 +1387,40 @@ class PromoBarX_Manager {
         }
         
         wp_send_json_success($analytics_by_promo_bar);
+    }
+
+    /**
+     * AJAX update promo bar status
+     */
+    public function ajax_update_status() {
+        check_ajax_referer('promobarx_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
+        
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        $status = isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : '';
+        
+        if (!$id || !$status) {
+            wp_send_json_error('Invalid parameters');
+            return;
+        }
+        
+        // Validate status
+        $allowed_statuses = ['draft', 'active', 'paused', 'archived'];
+        if (!in_array($status, $allowed_statuses)) {
+            wp_send_json_error('Invalid status');
+            return;
+        }
+        
+        // Update only the status
+        $result = $this->database->update_promo_bar($id, ['status' => $status]);
+        
+        if ($result) {
+            wp_send_json_success(['message' => 'Status updated successfully']);
+        } else {
+            wp_send_json_error('Failed to update status');
+        }
     }
 }

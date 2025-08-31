@@ -241,13 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <!-- Additional Options Section -->
                             <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <label style="font-weight: 500; color: #374151; white-space: nowrap;">Status:</label>
-                                    <select id="promo-status" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; min-width: 120px;">
-                                        <option value="draft">Draft</option>
-                                        <option value="active">Active</option>
-                                        <option value="paused">Paused</option>
-                                        <option value="archived">Archived</option>
-                                    </select>
+                                    <label style="display: flex; align-items: center; font-weight: 500; color: #374151;">
+                                        <input type="checkbox" id="promo-enabled" style="margin-right: 8px;">
+                                        Enable Promo Bar
+                                    </label>
                                 </div>
                             </div>
                             
@@ -367,6 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('promo-cta-enabled').checked = true; // CTA enabled by default
             document.getElementById('promo-close-enabled').checked = true; // Close button enabled by default
             document.getElementById('promo-countdown-enabled').checked = false; // Countdown disabled by default
+            document.getElementById('promo-enabled').checked = true; // Promo bar enabled by default
             
             // Show/hide fields based on default states
             const ctaFieldsContainer = document.getElementById('cta-fields-container');
@@ -445,6 +443,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const closeCheckbox = document.getElementById('promo-close-enabled');
             if (closeCheckbox) {
                 closeCheckbox.addEventListener('change', updatePreview);
+            }
+            
+            // Add enabled checkbox to preview updates
+            const enabledCheckbox = document.getElementById('promo-enabled');
+            if (enabledCheckbox) {
+                enabledCheckbox.addEventListener('change', updatePreview);
             }
             
 
@@ -1026,6 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const countdownEnabled = document.getElementById('promo-countdown-enabled')?.checked || false;
             const countdownDate = document.getElementById('promo-countdown-date')?.value || '';
             const closeEnabled = document.getElementById('promo-close-enabled')?.checked || false;
+            const promoEnabled = document.getElementById('promo-enabled')?.checked || false;
             
             // Get base styling values
             const bgColor = document.getElementById('promo-bg-color')?.value || '#3b82f6';
@@ -1096,8 +1101,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleFontSizeStyle = titleFontSize !== 'inherit' ? `font-size: ${titleFontSize};` : '';
             const ctaFontSizeStyle = ctaFontSize !== 'inherit' ? `font-size: ${ctaFontSize};` : '';
             
+            const disabledStyle = promoEnabled ? '' : 'opacity: 0.5; filter: grayscale(50%);';
+            const statusText = promoEnabled ? 'Enabled' : 'Disabled';
+            const statusColor = promoEnabled ? '#10b981' : '#ef4444';
+            
             preview.innerHTML = `
-                <div style="background: ${bgColor}; color: ${textColor}; padding: 12px 20px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: ${fontSize};">
+                <div style="background: ${bgColor}; color: ${textColor}; padding: 12px 20px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: ${fontSize}; ${disabledStyle}">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex: 1;">
                         <div>
                             <div style="font-weight: 600; color: ${titleColor}; ${titleFontSizeStyle}">${title}</div>
@@ -1108,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${closeEnabled ? '<button style="background: none; border: none; color: ' + textColor + '; font-size: 18px; cursor: pointer; opacity: 0.7;">×</button>' : ''}
                 </div>
                 <div style="margin-top: 10px; font-size: 12px; color: #6b7280; text-align: center;">
-                    Position: Top of Page
+                    <span style="color: ${statusColor}; font-weight: 600;">Status: ${statusText}</span> | Position: Top of Page
                     ${countdownEnabled && countdownDate ? `<br>Countdown Target: ${new Date(countdownDate).toLocaleDateString()} ${new Date(countdownDate).toLocaleTimeString()}` : ''}
                 </div>
             `;
@@ -1158,7 +1167,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 countdown_enabled: document.getElementById('promo-countdown-enabled')?.checked || false,
                 countdown_date: countdownDate,
                 close_button_enabled: document.getElementById('promo-close-enabled')?.checked || false,
-                status: document.getElementById('promo-status')?.value || 'draft',
+                status: document.getElementById('promo-enabled')?.checked ? 'active' : 'draft',
                 styling: JSON.stringify({
                     background: document.getElementById('promo-bg-color')?.value || '#3b82f6',
                     color: document.getElementById('promo-text-color')?.value || '#ffffff',
@@ -1337,7 +1346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         
                         document.getElementById('promo-close-enabled').checked = Boolean(promoBar.close_button_enabled);
-                        document.getElementById('promo-status').value = promoBar.status || 'draft';
+                        document.getElementById('promo-enabled').checked = promoBar.status === 'active';
                         
                         // Fill styling fields
                         document.getElementById('promo-bg-color').value = styling.background || '#3b82f6';

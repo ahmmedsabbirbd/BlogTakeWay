@@ -625,19 +625,15 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                             {activeTab === 'settings' && (
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Status
+                                        <label className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.status === 'active'}
+                                                onChange={(e) => handleInputChange('status', e.target.checked ? 'active' : 'draft')}
+                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                            />
+                                            <span className="text-sm font-medium text-gray-700">Enable Promo Bar</span>
                                         </label>
-                                        <select
-                                            value={formData.status}
-                                            onChange={(e) => handleInputChange('status', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            <option value="draft">Draft</option>
-                                            <option value="active">Active</option>
-                                            <option value="paused">Paused</option>
-                                            <option value="archived">Archived</option>
-                                        </select>
                                     </div>
 
 
