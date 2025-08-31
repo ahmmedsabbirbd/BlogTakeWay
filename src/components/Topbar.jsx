@@ -175,9 +175,8 @@ const Topbar = React.forwardRef((props, ref) => {
                             color: titleColor,
                             fontSize: titleFontSize !== 'inherit' ? titleFontSize : undefined
                         }}
-                    >
-                        {promoBar.title}
-                    </div>
+                        dangerouslySetInnerHTML={{ __html: promoBar.title }}
+                    />
                 )}
                 
                 {promoBar.countdown_enabled && promoBar.countdown_date && (

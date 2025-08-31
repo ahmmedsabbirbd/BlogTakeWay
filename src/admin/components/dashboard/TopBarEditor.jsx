@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Eye, Palette, Type, MousePointer, Clock, Link, Settings, MapPin } from 'lucide-react';
 import ColorPicker from '../../../components/ui/ColorPicker';
+import RichTextEditor from '../../../components/ui/RichTextEditor';
 
 const TopBarEditor = ({ promoBar, onClose, onSave }) => {
     const [formData, setFormData] = useState({
@@ -400,13 +401,15 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Title
                                         </label>
-                                        <input
-                                            type="text"
+                                        <RichTextEditor
                                             value={formData.title}
-                                            onChange={(e) => handleInputChange('title', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Enter main title"
+                                            onChange={(value) => handleInputChange('title', value)}
+                                            placeholder="Enter main title with rich formatting..."
+                                            className="w-full"
                                         />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Use the toolbar above to make text <strong>bold</strong>, <u>underlined</u>, or add <a href="#" className="text-blue-600 underline">links</a>.
+                                        </p>
                                     </div>
 
                                     <div className="flex space-x-4">
@@ -635,8 +638,6 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                                             <span className="text-sm font-medium text-gray-700">Enable Promo Bar</span>
                                         </label>
                                     </div>
-
-
                                 </div>
                             )}
                         </div>
@@ -657,7 +658,10 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                                 >
                                     <div className="flex items-center justify-center gap-4 p-4">
                                         {formData.title && (
-                                            <div className="font-semibold">{formData.title}</div>
+                                            <div 
+                                                className="font-semibold"
+                                                dangerouslySetInnerHTML={{ __html: formData.title }}
+                                            />
                                         )}
 
                                         {formData.countdown_enabled && formData.countdown_date && (
@@ -714,3 +718,5 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
 };
 
 export default TopBarEditor;
+
+

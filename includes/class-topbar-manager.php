@@ -538,7 +538,7 @@ class PromoBarX_Manager {
                         $title_style .= 'font-size: ' . esc_attr($title_font_size) . ';';
                     }
                     ?>
-                    <div class="promobarx-title" style="<?php echo esc_attr($title_style); ?>"><?php echo esc_html($promo_bar->title); ?></div>
+                    <div class="promobarx-title" style="<?php echo esc_attr($title_style); ?>"><?php echo wp_kses_post($promo_bar->title); ?></div>
                 <?php endif; ?>
                 
                 <?php if ($promo_bar->countdown_enabled && !empty($promo_bar->countdown_date)): ?>
@@ -848,12 +848,17 @@ class PromoBarX_Manager {
         }
         
         // Validate required fields
-        $required_fields = ['name', 'title'];
+        $required_fields = ['name'];
         $missing_fields = [];
         foreach ($required_fields as $field) {
             if (!isset($_POST[$field]) || empty(trim(sanitize_text_field(wp_unslash($_POST[$field]))))) {
                 $missing_fields[] = $field;
             }
+        }
+        
+        // Validate title field separately to allow HTML content
+        if (!isset($_POST['title']) || empty(trim(wp_unslash($_POST['title'])))) {
+            $missing_fields[] = 'title';
         }
         
         if (!empty($missing_fields)) {

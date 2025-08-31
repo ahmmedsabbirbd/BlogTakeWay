@@ -75,7 +75,7 @@ class PromoBarX_Database {
         $sql_promo_bars = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}promo_bars (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
-            title varchar(500),
+            title text,
             cta_text varchar(255),
             cta_url varchar(500),
             cta_style JSON,
@@ -598,11 +598,34 @@ class PromoBarX_Database {
         $sanitized = [];
         
         // Sanitize basic text fields
-        $text_fields = ['name', 'title', 'cta_text', 'cta_url'];
+        $text_fields = ['name', 'cta_text', 'cta_url'];
         foreach ($text_fields as $field) {
             if (isset($data[$field])) {
                 $sanitized[$field] = sanitize_text_field($data[$field]);
             }
+        }
+        
+        // Sanitize title field - allow HTML for rich text editing
+        if (isset($data['title'])) {
+            // Use wp_kses to allow safe HTML tags for rich text editing
+            $allowed_html = array(
+                'a' => array(
+                    'href' => array(),
+                    'target' => array(),
+                    'rel' => array(),
+                    'title' => array()
+                ),
+                'b' => array(),
+                'strong' => array(),
+                'i' => array(),
+                'em' => array(),
+                'u' => array(),
+                'br' => array(),
+                'span' => array(
+                    'style' => array()
+                )
+            );
+            $sanitized['title'] = wp_kses($data['title'], $allowed_html);
         }
         
         // Sanitize numeric fields

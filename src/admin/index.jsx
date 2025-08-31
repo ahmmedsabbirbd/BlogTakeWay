@@ -91,7 +91,19 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                                     <div style="display: flex; align-items: center; gap: 8px; min-width: 300px; flex: 1;">
                                         <label style="font-weight: 500; color: #374151; white-space: nowrap; min-width: 40px;">Title:</label>
-                                        <input type="text" id="promo-title" placeholder="Enter main title" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+                                        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                                            <!-- Rich Text Editor Toolbar -->
+                                            <div style="display: flex; align-items: center; gap: 4px; padding: 6px; background: #f9fafb; border: 1px solid #d1d5db; border-bottom: none; border-radius: 4px 4px 0 0;">
+                                                <button type="button" onclick="execRichCommand('bold')" id="bold-btn" style="padding: 4px 8px; border: none; background: none; cursor: pointer; border-radius: 3px; font-weight: bold; color: #374151; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='transparent'" title="Bold">B</button>
+                                                <button type="button" onclick="execRichCommand('underline')" id="underline-btn" style="padding: 4px 8px; border: none; background: none; cursor: pointer; border-radius: 3px; text-decoration: underline; color: #374151; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='transparent'" title="Underline">U</button>
+                                                <div style="width: 1px; height: 16px; background: #d1d5db; margin: 0 4px;"></div>
+                                                <button type="button" onclick="openLinkModal()" style="padding: 4px 8px; border: none; background: none; cursor: pointer; border-radius: 3px; color: #3b82f6; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#dbeafe'" onmouseout="this.style.backgroundColor='transparent'" title="Insert Link">🔗</button>
+                                                <button type="button" onclick="execRichCommand('unlink')" style="padding: 4px 8px; border: none; background: none; cursor: pointer; border-radius: 3px; color: #6b7280; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='transparent'" title="Remove Link">🔗❌</button>
+                                            </div>
+                                            <!-- Rich Text Editor -->
+                                            <div id="promo-title-editor" contenteditable="true" placeholder="Enter main title with rich formatting..." style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-top: none; border-radius: 0 0 4px 4px; font-size: 14px; min-height: 60px; outline: none; word-wrap: break-word; overflow-wrap: break-word;"></div>
+                                            <input type="hidden" id="promo-title" value="">
+                                        </div>
                             </div>
                                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                                         <span style="font-weight: 600; color: #111827; font-size: 13px;">Title Styling:</span>
@@ -366,6 +378,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('promo-countdown-enabled').checked = false; // Countdown disabled by default
             document.getElementById('promo-enabled').checked = true; // Promo bar enabled by default
             
+            // Set default content for rich text editor
+            const titleEditor = document.getElementById('promo-title-editor');
+            const titleHiddenInput = document.getElementById('promo-title');
+            if (titleEditor && titleHiddenInput) {
+                titleEditor.innerHTML = 'Sample Title';
+                titleHiddenInput.value = 'Sample Title';
+            }
+            
             // Show/hide fields based on default states
             const ctaFieldsContainer = document.getElementById('cta-fields-container');
             if (ctaFieldsContainer) {
@@ -381,7 +401,215 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePreview();
         }
         
+        // Rich Text Editor Functions
+        window.execRichCommand = function(command) {
+            const editor = document.getElementById('promo-title-editor');
+            if (editor) {
+                editor.focus();
+                document.execCommand(command, false, null);
+                updateRichEditorValue();
+                updatePreview();
+                updateButtonStates();
+            }
+        };
+
+        function updateButtonStates() {
+            const boldBtn = document.getElementById('bold-btn');
+            const underlineBtn = document.getElementById('underline-btn');
+            
+            if (boldBtn) {
+                if (document.queryCommandState('bold')) {
+                    boldBtn.style.backgroundColor = '#dbeafe';
+                    boldBtn.style.color = '#2563eb';
+                } else {
+                    boldBtn.style.backgroundColor = 'transparent';
+                    boldBtn.style.color = '#374151';
+                }
+            }
+            
+            if (underlineBtn) {
+                if (document.queryCommandState('underline')) {
+                    underlineBtn.style.backgroundColor = '#dbeafe';
+                    underlineBtn.style.color = '#2563eb';
+                } else {
+                    underlineBtn.style.backgroundColor = 'transparent';
+                    underlineBtn.style.color = '#374151';
+                }
+            }
+        }
+
+        window.openLinkModal = function() {
+            // Get selected text
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+            
+            // Create a simple modal for better UX
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                width: 400px;
+                max-width: 90vw;
+            `;
+            
+            modalContent.innerHTML = `
+                <h3 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">Insert Link</h3>
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">URL *</label>
+                    <input type="url" id="link-url" placeholder="https://example.com" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Link Text ${selectedText ? '(pre-filled with selected text)' : '(optional)'}</label>
+                    <input type="text" id="link-text" placeholder="${selectedText || 'Link text'}" value="${selectedText || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div style="text-align: right;">
+                    <button id="link-cancel" style="margin-right: 10px; padding: 8px 16px; border: 1px solid #ddd; background: #f5f5f5; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button id="link-insert" style="padding: 8px 16px; border: none; background: #3b82f6; color: white; border-radius: 4px; cursor: pointer;">Insert Link</button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            const urlInput = modal.querySelector('#link-url');
+            const textInput = modal.querySelector('#link-text');
+            const cancelBtn = modal.querySelector('#link-cancel');
+            const insertBtn = modal.querySelector('#link-insert');
+            
+            urlInput.focus();
+            
+            const insertLink = () => {
+                const url = urlInput.value.trim();
+                const text = textInput.value.trim();
+                
+                if (!url) {
+                    alert('Please enter a valid URL');
+                    return;
+                }
+                
+                // Validate URL format
+                let validUrl = url;
+                if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+                    validUrl = 'https://' + validUrl;
+                }
+                
+                try {
+                    new URL(validUrl);
+                } catch (e) {
+                    alert('Please enter a valid URL');
+                    return;
+                }
+                
+                const linkTextToUse = text || selectedText || validUrl;
+                const linkHTML = `<a href="${validUrl}" target="_blank" rel="noopener noreferrer">${linkTextToUse}</a>`;
+                
+                const editor = document.getElementById('promo-title-editor');
+                if (editor) {
+                    editor.focus();
+                    document.execCommand('insertHTML', false, linkHTML);
+                    updateRichEditorValue();
+                    updatePreview();
+                }
+                
+                document.body.removeChild(modal);
+            };
+            
+            const closeModal = () => {
+                document.body.removeChild(modal);
+            };
+            
+            cancelBtn.addEventListener('click', closeModal);
+            insertBtn.addEventListener('click', insertLink);
+            
+            // Handle Enter key
+            urlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    insertLink();
+                }
+            });
+            
+            textInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    insertLink();
+                }
+            });
+            
+            // Handle Escape key
+            modal.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeModal();
+                }
+            });
+            
+            // Close on outside click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        };
+
+        function updateRichEditorValue() {
+            const editor = document.getElementById('promo-title-editor');
+            const hiddenInput = document.getElementById('promo-title');
+            if (editor && hiddenInput) {
+                hiddenInput.value = editor.innerHTML;
+            }
+        }
+
+        function setupRichEditor() {
+            const editor = document.getElementById('promo-title-editor');
+            const hiddenInput = document.getElementById('promo-title');
+            
+            if (editor && hiddenInput) {
+                // Sync content on input
+                editor.addEventListener('input', updateRichEditorValue);
+                editor.addEventListener('blur', updateRichEditorValue);
+                
+                // Handle paste to strip formatting
+                editor.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const text = e.clipboardData.getData('text/plain');
+                    document.execCommand('insertText', false, text);
+                });
+                
+                // Handle enter key
+                editor.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        document.execCommand('insertHTML', false, '<br>');
+                    }
+                });
+                
+                // Update button states on selection change
+                editor.addEventListener('keyup', updateButtonStates);
+                editor.addEventListener('mouseup', updateButtonStates);
+                editor.addEventListener('input', updateButtonStates);
+            }
+        }
+        
         function setupEditorEvents() {
+            // Setup rich text editor
+            setupRichEditor();
+            
             // CTA Button toggle
             const ctaCheckbox = document.getElementById('promo-cta-enabled');
             const ctaFieldsContainer = document.getElementById('cta-fields-container');
@@ -1024,7 +1252,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const preview = document.getElementById('promo-preview');
             if (!preview) return;
             
-            const title = document.getElementById('promo-title')?.value || 'Sample Title';
+            const titleElement = document.getElementById('promo-title');
+            const title = titleElement?.value || 'Sample Title';
             const ctaText = document.getElementById('promo-cta-text')?.value || 'Shop Now';
             const ctaEnabled = document.getElementById('promo-cta-enabled')?.checked || false;
             const countdownEnabled = document.getElementById('promo-countdown-enabled')?.checked || false;
@@ -1320,7 +1549,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         // Fill form fields
                         document.getElementById('promo-name').value = promoBar.name || '';
-                        document.getElementById('promo-title').value = promoBar.title || '';
+                        
+                        // Handle rich text editor for title
+                        const titleEditor = document.getElementById('promo-title-editor');
+                        const titleHiddenInput = document.getElementById('promo-title');
+                        if (titleEditor && titleHiddenInput) {
+                            titleEditor.innerHTML = promoBar.title || '';
+                            titleHiddenInput.value = promoBar.title || '';
+                        } else {
+                            // Fallback for regular input
+                            const titleInput = document.getElementById('promo-title');
+                            if (titleInput) {
+                                titleInput.value = promoBar.title || '';
+                            }
+                        }
                         document.getElementById('promo-cta-text').value = promoBar.cta_text || '';
                         document.getElementById('promo-cta-url').value = promoBar.cta_url || '';
                         // Convert string '0'/'1' or boolean to proper boolean
