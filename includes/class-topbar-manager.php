@@ -547,7 +547,7 @@ class PromoBarX_Manager {
                     if (strpos($processed_title, '<a ') !== false) {
                         $processed_title = preg_replace(
                             '/<a\s+([^>]*?)>/i',
-                            '<a $1 style="color: ' . esc_attr($anchor_color) . ' !important; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="' . esc_attr($anchor_hover_color) . '">',
+                            '<a $1 style="color: ' . esc_attr($anchor_color) . '; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="' . esc_attr($anchor_hover_color) . '">',
                             $processed_title
                         );
                     }
