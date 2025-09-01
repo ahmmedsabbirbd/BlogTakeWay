@@ -1170,26 +1170,28 @@ document.addEventListener('DOMContentLoaded', () => {
             
 
             
-            if (currentAssignments.length === 0) {
-                assignmentsList.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 14px;">No assignments yet</div>';
+            // Check if there are any inclusions (non-exclusions)
+            const inclusions = currentAssignments.filter(a => !(a.is_exclusion == 1 || a.is_exclusion === '1'));
+            if (inclusions.length === 0) {
+                assignmentsList.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 14px;">No inclusions yet</div>';
                 return;
             }
             
             // Sort assignments by priority
-            const sortedAssignments = [...currentAssignments].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+            const sortedAssignments = [...inclusions].sort((a, b) => (a.priority || 0) - (b.priority || 0));
             
             assignmentsList.innerHTML = sortedAssignments.map((assignment, index) => {
                 const label = getAssignmentLabel(assignment);
-                const isExclusion = assignment.is_exclusion == 1 || assignment.is_exclusion === '1';
-                const backgroundColor = isExclusion ? '#fef2f2' : 'white';
-                const borderColor = isExclusion ? '#fecaca' : '#e5e7eb';
-                const textColor = isExclusion ? '#dc2626' : '#374151';
+                // Since we're only showing inclusions, we can use consistent styling
+                const backgroundColor = 'white';
+                const borderColor = '#e5e7eb';
+                const textColor = '#374151';
 
                 return `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: ${backgroundColor}; border: 1px solid ${borderColor}; border-radius: 4px; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
                             <span style="font-size: 12px; color: #6b7280; min-width: 20px;">${assignment.priority || index + 1}</span>
-                            <span style="font-size: 10px; background: ${isExclusion ? '#dc2626' : '#10b981'}; color: white; padding: 2px 6px; border-radius: 10px; font-weight: bold;" title="is_exclusion: ${assignment.is_exclusion || 0}">${isExclusion ? 'EXC' : 'INC'}</span>
+                            <span style="font-size: 10px; background: #10b981; color: white; padding: 2px 6px; border-radius: 10px; font-weight: bold;" title="Inclusion">INC</span>
                             <span style="font-size: 14px; color: ${textColor}; flex: 1;">${label}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 4px;">
