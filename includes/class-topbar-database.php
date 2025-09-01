@@ -296,7 +296,7 @@ class PromoBarX_Database {
         $sql = "SELECT pb.*, 
                        COALESCE(MAX(pa.priority), 0) as max_priority,
                        GROUP_CONCAT(
-                           CONCAT(pa.assignment_type, ':', pa.target_id, ':', pa.target_value, ':', pa.priority)
+                           CONCAT(pa.assignment_type, ':', pa.target_id, ':', pa.target_value, ':', pa.priority, ':', IFNULL(pa.is_exclusion, IFNULL(pa.is_exclusion, 0)))
                            ORDER BY pa.priority DESC, pa.id ASC
                            SEPARATOR '|'
                        ) as assignments_data
@@ -324,12 +324,13 @@ class PromoBarX_Database {
                 
                 foreach ($assignments_parts as $part) {
                     $assignment_parts = explode(':', $part);
-                    if (count($assignment_parts) >= 4) {
+                    if (count($assignment_parts) >= 5) {
                         $assignments_array[] = [
                             'assignment_type' => $assignment_parts[0],
                             'target_id' => $assignment_parts[1],
                             'target_value' => $assignment_parts[2],
-                            'priority' => $assignment_parts[3]
+                            'priority' => $assignment_parts[3],
+                            'is_exclusion' => intval($assignment_parts[4])
                         ];
                     }
                 }
@@ -377,10 +378,10 @@ class PromoBarX_Database {
                     'target_id' => $assignment->target_id,
                     'target_value' => $assignment->target_value,
                     'priority' => $assignment->priority,
-                    // Backward compatibility: some installations may have a misspelled column 'is_exclution'
+                    // Backward compatibility: some installations may have a misspelled column 'is_exclusion'
                     'is_exclusion' => isset($assignment->is_exclusion)
                         ? intval($assignment->is_exclusion)
-                        : (isset($assignment->is_exclution) ? intval($assignment->is_exclution) : 0)
+                        : (isset($assignment->is_exclusion) ? intval($assignment->is_exclusion) : 0)
                 ];
             }
             
@@ -832,15 +833,15 @@ class PromoBarX_Database {
             return true;
         }
 
-        // Determine actual exclusion column name (handle legacy typo 'is_exclution')
+        // Determine actual exclusion column name (handle legacy typo 'is_exclusion')
         $exclusion_column = 'is_exclusion';
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
         $has_is_exclusion = $this->wpdb->get_var("SHOW COLUMNS FROM {$this->table_prefix}promo_bar_assignments LIKE 'is_exclusion'");
         if (!$has_is_exclusion) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $has_is_exclution = $this->wpdb->get_var("SHOW COLUMNS FROM {$this->table_prefix}promo_bar_assignments LIKE 'is_exclution'");
-            if ($has_is_exclution) {
-                $exclusion_column = 'is_exclution';
+            $has_is_exclusion = $this->wpdb->get_var("SHOW COLUMNS FROM {$this->table_prefix}promo_bar_assignments LIKE 'is_exclusion'");
+            if ($has_is_exclusion) {
+                $exclusion_column = 'is_exclusion';
             }
         }
 
@@ -1027,7 +1028,7 @@ class PromoBarX_Database {
 
         $sql = "SELECT pb.*, 
                        GROUP_CONCAT(
-                           CONCAT(pa.assignment_type, ':', pa.target_id, ':', pa.target_value, ':', pa.priority)
+                           CONCAT(pa.assignment_type, ':', pa.target_id, ':', pa.target_value, ':', pa.priority, ':', IFNULL(pa.is_exclusion, IFNULL(pa.is_exclusion, 0)))
                            ORDER BY pa.priority DESC, pa.id ASC
                            SEPARATOR '|'
                        ) as assignments_data,
@@ -1055,12 +1056,13 @@ class PromoBarX_Database {
                 $assignments_array = explode('|', $result->assignments_data);
                 foreach ($assignments_array as $assignment_str) {
                     $parts = explode(':', $assignment_str);
-                    if (count($parts) >= 4) {
+                    if (count($parts) >= 5) {
                         $result->assignments[] = [
                             'assignment_type' => $parts[0],
                             'target_id' => intval($parts[1]),
                             'target_value' => $parts[2],
-                            'priority' => intval($parts[3])
+                            'priority' => intval($parts[3]),
+                            'is_exclusion' => intval($parts[4])
                         ];
                     }
                 }
