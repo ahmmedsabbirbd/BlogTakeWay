@@ -462,9 +462,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         window.openLinkModal = function() {
-            // Get selected text
+            // Get selected text and store the range
             const selection = window.getSelection();
             const selectedText = selection.toString().trim();
+            
+            // Store the range for later use
+            let savedRange = null;
+            if (selection.rangeCount > 0) {
+                savedRange = selection.getRangeAt(0).cloneRange();
+            }
+            
+            // Check if we have a valid selection within the editor
+            const editor = document.getElementById('promo-title-editor');
+            if (!editor) return;
+            
+            // Ensure the selection is within our editor
+            if (selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
+                alert('Please select some text in the editor first');
+                return;
+            }
+            
+            if (!selectedText) {
+                alert('Please select some text to create a link');
+                return;
+            }
             
             // Create a simple modal for better UX
             const modal = document.createElement('div');
@@ -497,8 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <input type="url" id="link-url" placeholder="https://example.com" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Link Text ${selectedText ? '(pre-filled with selected text)' : '(optional)'}</label>
-                    <input type="text" id="link-text" placeholder="${selectedText || 'Link text'}" value="${selectedText || ''}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Link Text (pre-filled with selected text: "${selectedText}")</label>
+                    <input type="text" id="link-text" placeholder="${selectedText}" value="${selectedText}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
                 </div>
                 <div style="text-align: right;">
                     <button id="link-cancel" style="margin-right: 10px; padding: 8px 16px; border: 1px solid #ddd; background: #f5f5f5; border-radius: 4px; cursor: pointer;">Cancel</button>
@@ -539,20 +560,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 const linkTextToUse = text || selectedText || validUrl;
-                const linkHTML = `<a href="${validUrl}" target="_blank" rel="noopener noreferrer">${linkTextToUse}</a>`;
                 
-                                 const editor = document.getElementById('promo-title-editor');
-                 if (editor) {
-                     editor.focus();
-                     document.execCommand('insertHTML', false, linkHTML);
-                     updateRichEditorValue();
-                     updatePreview();
-                     
-                     // Apply anchor colors to the newly inserted link
-                     setTimeout(() => {
-                         updateEditorAnchorColors();
-                     }, 10);
-                 }
+                const editor = document.getElementById('promo-title-editor');
+                if (editor) {
+                    editor.focus();
+                    
+                    // Use the saved range if available, otherwise try to get current selection
+                    if (savedRange) {
+                        // Clear any existing selection
+                        selection.removeAllRanges();
+                        
+                        // Set the saved range
+                        selection.addRange(savedRange);
+                        
+                        // Replace the selected text with the link
+                        savedRange.deleteContents();
+                        
+                        const linkElement = document.createElement('a');
+                        linkElement.href = validUrl;
+                        linkElement.target = '_blank';
+                        linkElement.rel = 'noopener noreferrer';
+                        linkElement.textContent = linkTextToUse;
+                        
+                        savedRange.insertNode(linkElement);
+                        
+                        // Clear selection
+                        selection.removeAllRanges();
+                    } else {
+                        // Fallback: try to get current selection
+                        const currentSelection = window.getSelection();
+                        if (currentSelection.rangeCount > 0) {
+                            const range = currentSelection.getRangeAt(0);
+                            range.deleteContents();
+                            
+                            const linkElement = document.createElement('a');
+                            linkElement.href = validUrl;
+                            linkElement.target = '_blank';
+                            linkElement.rel = 'noopener noreferrer';
+                            linkElement.textContent = linkTextToUse;
+                            
+                            range.insertNode(linkElement);
+                            currentSelection.removeAllRanges();
+                        } else {
+                            // Last resort: insert at cursor position
+                            const linkHTML = `<a href="${validUrl}" target="_blank" rel="noopener noreferrer">${linkTextToUse}</a>`;
+                            document.execCommand('insertHTML', false, linkHTML);
+                        }
+                    }
+                    
+                    updateRichEditorValue();
+                    updatePreview();
+                    
+                    // Apply anchor colors to the newly inserted link
+                    setTimeout(() => {
+                        updateEditorAnchorColors();
+                    }, 10);
+                }
                 
                 document.body.removeChild(modal);
             };
