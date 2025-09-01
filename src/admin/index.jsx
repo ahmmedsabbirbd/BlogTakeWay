@@ -1180,7 +1180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             assignmentsList.innerHTML = sortedAssignments.map((assignment, index) => {
                 const label = getAssignmentLabel(assignment);
-                const isExclusion = assignment.is_exclusion === 1;
+                const isExclusion = assignment.is_exclusion == 1 || assignment.is_exclusion === '1';
                 const backgroundColor = isExclusion ? '#fef2f2' : 'white';
                 const borderColor = isExclusion ? '#fecaca' : '#e5e7eb';
                 const textColor = isExclusion ? '#dc2626' : '#374151';
@@ -1189,6 +1189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: ${backgroundColor}; border: 1px solid ${borderColor}; border-radius: 4px; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
                             <span style="font-size: 12px; color: #6b7280; min-width: 20px;">${assignment.priority || index + 1}</span>
+                            <span style="font-size: 10px; background: ${isExclusion ? '#dc2626' : '#10b981'}; color: white; padding: 2px 6px; border-radius: 10px; font-weight: bold;" title="is_exclusion: ${assignment.is_exclusion || 0}">${isExclusion ? 'EXC' : 'INC'}</span>
                             <span style="font-size: 14px; color: ${textColor}; flex: 1;">${label}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 4px;">
@@ -1229,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function getAssignmentLabel(assignment) {
             // Check if this is an exclusion
-            if (assignment.is_exclusion === 1) {
+            if (assignment.is_exclusion == 1 || assignment.is_exclusion === '1') {
                 switch (assignment.assignment_type) {
                     case 'global':
                         return '🚫 Exclude from All Pages';
@@ -1605,7 +1606,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 a.assignment_type === type && 
                 a.target_id === (data.id || 0) && 
                 a.target_value === (data.value || data.name || '') &&
-                a.is_exclusion === 1
+                (a.is_exclusion == 1 || a.is_exclusion === '1')
             );
             
             if (existingExclusion) {
@@ -1643,7 +1644,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const exclusionsList = document.getElementById('exclusions-list');
             if (!exclusionsList) return;
             
-            const exclusions = currentAssignments.filter(a => a.is_exclusion === 1);
+            const exclusions = currentAssignments.filter(a => a.is_exclusion == 1 || a.is_exclusion === '1');
             
             if (exclusions.length === 0) {
                 exclusionsList.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 14px;">No exclusions yet</div>';
@@ -1774,7 +1775,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedOptions = Array.from(dropdown.selectedOptions);
             
             // Remove existing page exclusions
-            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'page' && a.is_exclusion === 1));
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'page' && (a.is_exclusion == 1 || a.is_exclusion === '1')));
             
             // Add new page exclusions
             selectedOptions.forEach(option => {
@@ -1789,7 +1790,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedOptions = Array.from(dropdown.selectedOptions);
             
             // Remove existing category exclusions
-            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'category' && a.is_exclusion === 1));
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'category' && (a.is_exclusion == 1 || a.is_exclusion === '1')));
             
             // Add new category exclusions
             selectedOptions.forEach(option => {
@@ -1820,7 +1821,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.selected = false;
             });
             
-            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'page' && a.is_exclusion === 1));
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'page' && (a.is_exclusion == 1 || a.is_exclusion === '1')));
             updateAssignmentsList();
             updateExclusionsList();
         };
@@ -1844,7 +1845,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.selected = false;
             });
             
-            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'category' && a.is_exclusion === 1));
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'category' && (a.is_exclusion == 1 || a.is_exclusion === '1')));
             updateAssignmentsList();
             updateExclusionsList();
         };
@@ -1860,7 +1861,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         window.clearAllExclusions = function() {
-            currentAssignments = currentAssignments.filter(a => a.is_exclusion !== 1);
+            currentAssignments = currentAssignments.filter(a => !(a.is_exclusion == 1 || a.is_exclusion === '1'));
             updateAssignmentsList();
             updateExclusionsList();
         };
@@ -1868,8 +1869,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Function to update exclusion dropdowns to show current selections
         function updateExclusionDropdownSelections() {
             // Get current exclusion assignments
-            const pageExclusions = currentAssignments.filter(a => a.assignment_type === 'page' && a.is_exclusion === 1);
-            const categoryExclusions = currentAssignments.filter(a => a.assignment_type === 'category' && a.is_exclusion === 1);
+            const pageExclusions = currentAssignments.filter(a => a.assignment_type === 'page' && (a.is_exclusion == 1 || a.is_exclusion === '1'));
+            const categoryExclusions = currentAssignments.filter(a => a.assignment_type === 'category' && (a.is_exclusion == 1 || a.is_exclusion === '1'));
             
             // Update pages dropdown
             const pagesDropdown = document.getElementById('exclusion-pages-dropdown');
