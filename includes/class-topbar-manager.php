@@ -139,9 +139,19 @@ class PromoBarX_Manager {
             return false;
         }
         
-        // Check each assignment - if any match, return true
+        // First, check for exclusions (higher priority)
         foreach ($promo_bar->assignments as $assignment) {
-            if ($this->assignment_matches($assignment, $current_url, $post_id, $post_type)) {
+            if (isset($assignment['is_exclusion']) && $assignment['is_exclusion'] && 
+                $this->assignment_matches($assignment, $current_url, $post_id, $post_type)) {
+                // If there's a matching exclusion, return false immediately
+                return false;
+            }
+        }
+        
+        // Then check for inclusions - if any match, return true
+        foreach ($promo_bar->assignments as $assignment) {
+            if ((!isset($assignment['is_exclusion']) || !$assignment['is_exclusion']) && 
+                $this->assignment_matches($assignment, $current_url, $post_id, $post_type)) {
 
                 return true;
             }
@@ -181,7 +191,11 @@ class PromoBarX_Manager {
                 break;
                 
             case 'category':
-                if (has_category($target_value, $post_id)) {
+                // Prefer matching by category ID if provided; fallback to slug/name via has_category
+                if ($target_id && has_term($target_id, 'category', $post_id)) {
+                    return true;
+                }
+                if (!$target_id && $target_value && has_category($target_value, $post_id)) {
 
                     return true;
                 }
@@ -1191,7 +1205,8 @@ class PromoBarX_Manager {
                     'assignment_type' => $assignment->assignment_type,
                     'target_id' => $assignment->target_id,
                     'target_value' => $assignment->target_value,
-                    'priority' => $assignment->priority
+                    'priority' => $assignment->priority,
+                    'is_exclusion' => $assignment->is_exclusion
                 ];
             }
             
@@ -1255,7 +1270,8 @@ class PromoBarX_Manager {
                 'assignment_type' => sanitize_text_field($assignment['assignment_type']),
                 'target_id' => isset($assignment['target_id']) ? intval($assignment['target_id']) : 0,
                 'target_value' => isset($assignment['target_value']) ? sanitize_text_field($assignment['target_value']) : '',
-                'priority' => isset($assignment['priority']) ? intval($assignment['priority']) : 0
+                'priority' => isset($assignment['priority']) ? intval($assignment['priority']) : 0,
+                'is_exclusion' => isset($assignment['is_exclusion']) ? intval($assignment['is_exclusion']) : 0
             ];
             
             $valid_assignments[] = $valid_assignment;

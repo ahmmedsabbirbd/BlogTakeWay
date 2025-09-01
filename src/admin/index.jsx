@@ -370,6 +370,73 @@ document.addEventListener('DOMContentLoaded', () => {
                                     💡 Lower priority numbers = higher priority (displayed first)
                                 </div>
                             </div>
+                            
+                            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+                            
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px; color: #111827;">Exclusions</h3>
+                            <p style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">Exclusions have higher priority than inclusions. If a page/post/category is listed in exclusions, the promo will not load there, even if it's included in the assignments above.</p>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Exclude from Pages</label>
+                                <select id="exclusion-assignment-type" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                    <option value="">Choose exclusion type...</option>
+                                    <option value="global">All Pages (Global)</option>
+                                    <option value="specific">Specific Pages</option>
+                                    <option value="post_type">All Posts/Pages</option>
+                                    <option value="category">Specific Categories</option>
+                                    <option value="custom">Custom URL Pattern</option>
+                                </select>
+                        </div>
+                            
+                            <div id="exclusion-options" style="display: none;">
+                                <div id="exclusion-specific-pages-option" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Select Pages to Exclude</label>
+                                    <div style="margin-bottom: 10px;">
+                                        <button onclick="selectAllExclusionPages()" style="padding: 8px 16px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 10px;">Select All Pages</button>
+                                        <button onclick="clearExclusionPageSelection()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Clear Selection</button>
+                                    </div>
+                                    <select id="exclusion-pages-dropdown" multiple style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; min-height: 200px;">
+                                        <option value="" disabled>Loading pages...</option>
+                                    </select>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Hold Ctrl (or Cmd on Mac) to select multiple pages</p>
+                                </div>
+                                
+                                <div id="exclusion-category-option" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Select Categories to Exclude</label>
+                                    <div style="margin-bottom: 10px;">
+                                        <button onclick="selectAllExclusionCategories()" style="padding: 8px 16px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 10px;">Select All Categories</button>
+                                        <button onclick="clearExclusionCategorySelection()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; font-size: 12px;">Clear Selection</button>
+                                    </div>
+                                    <select id="exclusion-categories-dropdown" multiple style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; min-height: 200px;">
+                                        <option value="" disabled>Loading categories...</option>
+                                    </select>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Hold Ctrl (or Cmd on Mac) to select multiple categories</p>
+                                </div>
+                                
+                                <div id="exclusion-custom-url-option" style="display: none; margin-bottom: 20px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">URL Pattern to Exclude</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <input type="text" id="exclusion-custom-url-pattern" placeholder="e.g., /shop/*, /blog/2024/*" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                                        <button onclick="addExclusionCustomUrlPattern()" style="padding: 10px 20px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer;">Add Exclusion</button>
+                                    </div>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">Use * for wildcards. Example: /shop/* will exclude all shop pages</p>
+                                </div>
+                            </div>
+                            
+                            <div id="current-exclusions" style="margin-top: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="font-size: 14px; font-weight: 600; color: #111827; margin: 0;">Current Exclusions</h4>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button onclick="clearAllExclusions()" style="background: #dc2626; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">Clear All</button>
+                                    </div>
+                                </div>
+                                <div id="exclusions-list" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px; min-height: 50px;">
+                                    <div style="text-align: center; color: #6b7280; font-size: 14px;">No exclusions yet</div>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 11px; color: #dc2626; text-align: center;">
+                                    ⚠️ Exclusions override all inclusions with higher priority
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -422,6 +489,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Update preview with default values
             updatePreview();
+            
+            // Initialize exclusions list
+            updateExclusionsList();
         }
         
         // Rich Text Editor Functions
@@ -949,11 +1019,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 assignmentType.addEventListener('change', handleAssignmentTypeChange);
             }
             
+            // Exclusion events
+            const exclusionAssignmentType = document.getElementById('exclusion-assignment-type');
+            if (exclusionAssignmentType) {
+                exclusionAssignmentType.addEventListener('change', handleExclusionTypeChange);
+            }
+            
             // Load categories on page load
             loadCategories();
             
+            // Load exclusion dropdowns on page load
+            loadAllExclusionPages();
+            loadAllExclusionCategories();
+            
             // Initial preview
             updatePreview();
+            
+            // Initialize exclusions list
+            updateExclusionsList();
             
             // Start live countdown update if countdown is enabled
             startLiveCountdown();
@@ -1097,12 +1180,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             assignmentsList.innerHTML = sortedAssignments.map((assignment, index) => {
                 const label = getAssignmentLabel(assignment);
+                const isExclusion = assignment.is_exclusion === 1;
+                const backgroundColor = isExclusion ? '#fef2f2' : 'white';
+                const borderColor = isExclusion ? '#fecaca' : '#e5e7eb';
+                const textColor = isExclusion ? '#dc2626' : '#374151';
 
                 return `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 4px; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: ${backgroundColor}; border: 1px solid ${borderColor}; border-radius: 4px; margin-bottom: 8px;">
                         <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
                             <span style="font-size: 12px; color: #6b7280; min-width: 20px;">${assignment.priority || index + 1}</span>
-                            <span style="font-size: 14px; color: #374151; flex: 1;">${label}</span>
+                            <span style="font-size: 14px; color: ${textColor}; flex: 1;">${label}</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 4px;">
                             <input 
@@ -1135,9 +1222,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             }).join('');
+            
+            // Also update the exclusions list
+            updateExclusionsList();
         }
         
         function getAssignmentLabel(assignment) {
+            // Check if this is an exclusion
+            if (assignment.is_exclusion === 1) {
+                switch (assignment.assignment_type) {
+                    case 'global':
+                        return '🚫 Exclude from All Pages';
+                    case 'page':
+                        return `🚫 Exclude from Page: ${assignment.target_value}`;
+                    case 'post_type':
+                        return `🚫 Exclude from All ${assignment.target_value}s`;
+                    case 'category':
+                        return `🚫 Exclude from Category: ${assignment.target_value}`;
+                    case 'tag':
+                        return `🚫 Exclude from Tag: ${assignment.target_value}`;
+                    case 'custom':
+                        return `🚫 Exclude from URL Pattern: ${assignment.target_value}`;
+                    default:
+                        return `🚫 Exclude: ${assignment.target_value}`;
+                }
+            } else {
+                // Regular inclusion
             switch (assignment.assignment_type) {
                 case 'global':
                     return '🌐 All Pages';
@@ -1153,6 +1263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return `🔗 Custom: ${assignment.target_value}`;
                 default:
                     return 'Unknown Assignment';
+                }
             }
         }
         
@@ -1450,6 +1561,382 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAssignmentsList();
         };
         
+        // Exclusion functions
+        function handleExclusionTypeChange() {
+            const exclusionType = document.getElementById('exclusion-assignment-type').value;
+            const exclusionOptions = document.getElementById('exclusion-options');
+            const specificPagesOption = document.getElementById('exclusion-specific-pages-option');
+            const categoryOption = document.getElementById('exclusion-category-option');
+            const customUrlOption = document.getElementById('exclusion-custom-url-option');
+            
+            // Hide all options first
+            specificPagesOption.style.display = 'none';
+            categoryOption.style.display = 'none';
+            customUrlOption.style.display = 'none';
+            exclusionOptions.style.display = 'none';
+            
+            // Handle empty value (default option)
+            if (!exclusionType || exclusionType === '') {
+                return; // Do nothing, just hide all options
+            }
+            
+            if (exclusionType === 'global') {
+                // Add global exclusion
+                addExclusion('global', { value: 'All Pages' });
+            } else if (exclusionType === 'specific') {
+                exclusionOptions.style.display = 'block';
+                specificPagesOption.style.display = 'block';
+                loadAllExclusionPages();
+            } else if (exclusionType === 'post_type') {
+                addExclusion('post_type', { value: 'post' });
+            } else if (exclusionType === 'category') {
+                exclusionOptions.style.display = 'block';
+                categoryOption.style.display = 'block';
+                loadAllExclusionCategories();
+            } else if (exclusionType === 'custom') {
+                exclusionOptions.style.display = 'block';
+                customUrlOption.style.display = 'block';
+            }
+        }
+        
+        function addExclusion(type, data) {
+            // Check if this exclusion already exists
+            const existingExclusion = currentAssignments.find(a => 
+                a.assignment_type === type && 
+                a.target_id === (data.id || 0) && 
+                a.target_value === (data.value || data.name || '') &&
+                a.is_exclusion === 1
+            );
+            
+            if (existingExclusion) {
+                return; // Don't add duplicate
+            }
+            
+            const exclusion = {
+                id: `temp_exclusion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, // Unique temporary ID for frontend
+                assignment_type: type,
+                target_id: data.id || 0,
+                target_value: data.value || data.name || '',
+                priority: currentAssignments.length + 1,
+                is_exclusion: 1
+            };
+            
+            currentAssignments.push(exclusion);
+            updateAssignmentsList();
+            updateExclusionsList();
+        }
+        
+        function removeExclusion(id) {
+            const beforeCount = currentAssignments.length;
+            currentAssignments = currentAssignments.filter(a => {
+                const matches = a.id !== id;
+                return matches;
+            });
+            
+            if (currentAssignments.length !== beforeCount) {
+                updateAssignmentsList();
+                updateExclusionsList();
+            }
+        }
+        
+        function updateExclusionsList() {
+            const exclusionsList = document.getElementById('exclusions-list');
+            if (!exclusionsList) return;
+            
+            const exclusions = currentAssignments.filter(a => a.is_exclusion === 1);
+            
+            if (exclusions.length === 0) {
+                exclusionsList.innerHTML = '<div style="text-align: center; color: #6b7280; font-size: 14px;">No exclusions yet</div>';
+                return;
+            }
+            
+            let html = '';
+            exclusions.forEach(exclusion => {
+                const label = getExclusionLabel(exclusion);
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; margin-bottom: 4px; background: #fee2e2; border: 1px solid #fecaca; border-radius: 4px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; color: #dc2626;">${label}</div>
+                            <div style="font-size: 11px; color: #dc2626;">Priority: ${exclusion.priority}</div>
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+                            <button onclick="removeExclusion('${exclusion.id}')" style="background: #dc2626; color: white; border: none; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer;">Remove</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            exclusionsList.innerHTML = html;
+        }
+        
+        function getExclusionLabel(exclusion) {
+            switch (exclusion.assignment_type) {
+                case 'global':
+                    return '🚫 Exclude from All Pages';
+                case 'page':
+                    return `🚫 Exclude from Page: ${exclusion.target_value}`;
+                case 'post_type':
+                    return `🚫 Exclude from All ${exclusion.target_value}s`;
+                case 'category':
+                    return `🚫 Exclude from Category: ${exclusion.target_value}`;
+                case 'custom':
+                    return `🚫 Exclude from URL Pattern: ${exclusion.target_value}`;
+                default:
+                    return `🚫 Exclude: ${exclusion.target_value}`;
+            }
+        }
+        
+        // Load exclusion pages
+        function loadAllExclusionPages() {
+            const dropdown = document.getElementById('exclusion-pages-dropdown');
+            if (!dropdown) return Promise.resolve();
+            
+            dropdown.innerHTML = '<option value="" disabled>Loading pages...</option>';
+            
+            return fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    action: 'promobarx_get_pages',
+                    nonce: window.promobarxAdmin.nonce
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    dropdown.innerHTML = '';
+                    data.data.forEach(page => {
+                        const option = document.createElement('option');
+                        option.value = page.id;
+                        option.textContent = page.title;
+                        dropdown.appendChild(option);
+                    });
+                    
+                    // Add change event listener
+                    dropdown.addEventListener('change', handleExclusionPageSelection);
+                }
+                return data;
+            })
+            .catch(error => {
+                console.error('Error loading exclusion pages:', error);
+                dropdown.innerHTML = '<option value="" disabled>Error loading pages</option>';
+                throw error;
+            });
+        }
+        
+        // Load exclusion categories
+        function loadAllExclusionCategories() {
+            const dropdown = document.getElementById('exclusion-categories-dropdown');
+            if (!dropdown) return Promise.resolve();
+            
+            dropdown.innerHTML = '<option value="" disabled>Loading categories...</option>';
+            
+            return fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    action: 'promobarx_get_taxonomies',
+                    taxonomy: 'category',
+                    nonce: window.promobarxAdmin.nonce
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    dropdown.innerHTML = '';
+                    data.data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        dropdown.appendChild(option);
+                    });
+                    
+                    // Add change event listener
+                    dropdown.addEventListener('change', handleExclusionCategorySelection);
+                }
+                return data;
+            })
+            .catch(error => {
+                console.error('Error loading exclusion categories:', error);
+                dropdown.innerHTML = '<option value="" disabled>Error loading categories</option>';
+                throw error;
+            });
+        }
+        
+        function handleExclusionPageSelection() {
+            const dropdown = document.getElementById('exclusion-pages-dropdown');
+            if (!dropdown) return;
+            
+            const selectedOptions = Array.from(dropdown.selectedOptions);
+            
+            // Remove existing page exclusions
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'page' && a.is_exclusion === 1));
+            
+            // Add new page exclusions
+            selectedOptions.forEach(option => {
+                addExclusion('page', { id: option.value, value: option.textContent });
+            });
+        }
+        
+        function handleExclusionCategorySelection() {
+            const dropdown = document.getElementById('exclusion-categories-dropdown');
+            if (!dropdown) return;
+            
+            const selectedOptions = Array.from(dropdown.selectedOptions);
+            
+            // Remove existing category exclusions
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'category' && a.is_exclusion === 1));
+            
+            // Add new category exclusions
+            selectedOptions.forEach(option => {
+                addExclusion('category', { id: option.value, value: option.textContent });
+            });
+        }
+        
+        // Make exclusion functions globally accessible
+        window.handleExclusionTypeChange = handleExclusionTypeChange;
+        window.addExclusion = addExclusion;
+        window.removeExclusion = removeExclusion;
+        window.selectAllExclusionPages = function() {
+            const pagesDropdown = document.getElementById('exclusion-pages-dropdown');
+            if (!pagesDropdown) return;
+            
+            Array.from(pagesDropdown.options).forEach(option => {
+                option.selected = true;
+            });
+            
+            handleExclusionPageSelection();
+        };
+        
+        window.clearExclusionPageSelection = function() {
+            const pagesDropdown = document.getElementById('exclusion-pages-dropdown');
+            if (!pagesDropdown) return;
+            
+            Array.from(pagesDropdown.options).forEach(option => {
+                option.selected = false;
+            });
+            
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'page' && a.is_exclusion === 1));
+            updateAssignmentsList();
+            updateExclusionsList();
+        };
+        
+        window.selectAllExclusionCategories = function() {
+            const categoriesDropdown = document.getElementById('exclusion-categories-dropdown');
+            if (!categoriesDropdown) return;
+            
+            Array.from(categoriesDropdown.options).forEach(option => {
+                option.selected = true;
+            });
+            
+            handleExclusionCategorySelection();
+        };
+        
+        window.clearExclusionCategorySelection = function() {
+            const categoriesDropdown = document.getElementById('exclusion-categories-dropdown');
+            if (!categoriesDropdown) return;
+            
+            Array.from(categoriesDropdown.options).forEach(option => {
+                option.selected = false;
+            });
+            
+            currentAssignments = currentAssignments.filter(a => !(a.assignment_type === 'category' && a.is_exclusion === 1));
+            updateAssignmentsList();
+            updateExclusionsList();
+        };
+        
+        window.addExclusionCustomUrlPattern = function() {
+            const pattern = document.getElementById('exclusion-custom-url-pattern').value.trim();
+            if (pattern) {
+                addExclusion('custom', { value: pattern });
+                document.getElementById('exclusion-custom-url-pattern').value = '';
+            } else {
+                alert('Please enter a URL pattern');
+            }
+        };
+        
+        window.clearAllExclusions = function() {
+            currentAssignments = currentAssignments.filter(a => a.is_exclusion !== 1);
+            updateAssignmentsList();
+            updateExclusionsList();
+        };
+        
+        // Function to update exclusion dropdowns to show current selections
+        function updateExclusionDropdownSelections() {
+            // Get current exclusion assignments
+            const pageExclusions = currentAssignments.filter(a => a.assignment_type === 'page' && a.is_exclusion === 1);
+            const categoryExclusions = currentAssignments.filter(a => a.assignment_type === 'category' && a.is_exclusion === 1);
+            
+            // Update pages dropdown
+            const pagesDropdown = document.getElementById('exclusion-pages-dropdown');
+            if (pagesDropdown && pagesDropdown.options.length > 1) { // Check if dropdown has options (not just "Loading...")
+                Array.from(pagesDropdown.options).forEach(option => {
+                    option.selected = pageExclusions.some(exclusion => exclusion.target_value == option.value);
+                });
+            }
+            
+            // Update categories dropdown
+            const categoriesDropdown = document.getElementById('exclusion-categories-dropdown');
+            if (categoriesDropdown && categoriesDropdown.options.length > 1) { // Check if dropdown has options (not just "Loading...")
+                Array.from(categoriesDropdown.options).forEach(option => {
+                    option.selected = categoryExclusions.some(exclusion => exclusion.target_value == option.value);
+                });
+            }
+        }
+        
+        // Function to load assignments for a specific promo bar
+        function loadAssignmentsForPromoBar(promoBarId) {
+            if (!window.promobarxAdmin || !window.promobarxAdmin.ajaxurl) {
+                console.error('Admin data not available for loading assignments');
+                return;
+            }
+            
+            const formData = new URLSearchParams();
+            formData.append('action', 'promobarx_get_assignments');
+            formData.append('nonce', window.promobarxAdmin.nonce);
+            formData.append('promo_bar_id', promoBarId);
+            
+            fetch(window.promobarxAdmin.ajaxurl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData.toString()
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success && result.data) {
+                    // Ensure all assignments have proper IDs and priority values
+                    currentAssignments = result.data.map((assignment, index) => ({
+                        ...assignment,
+                        id: assignment.id || `db_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        priority: assignment.priority || (index + 1) // Ensure priority exists
+                    }));
+                    
+                    updateAssignmentsList();
+                    
+                    // Update exclusion dropdowns to show current selections with a small delay
+                    // to ensure dropdowns are fully loaded
+                    setTimeout(() => {
+                        updateExclusionDropdownSelections();
+                    }, 200);
+                } else {
+                    console.log('No assignments found for promo bar:', promoBarId);
+                    currentAssignments = [];
+                    updateAssignmentsList();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading assignments:', error);
+                currentAssignments = [];
+                updateAssignmentsList();
+            });
+        }
+
         function updatePreview() {
             const preview = document.getElementById('promo-preview');
             if (!preview) return;
@@ -1974,21 +2461,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         updatePreview(); // Update preview with loaded data
                         
-                        // Load assignments if they exist
-                        if (promoBar.assignments) {
-                            try {
-                                const assignments = typeof promoBar.assignments === 'string' ? JSON.parse(promoBar.assignments) : promoBar.assignments;
-                                // Ensure all assignments have proper IDs and priority values
-                                currentAssignments = assignments.map((assignment, index) => ({
-                                    ...assignment,
-                                    id: assignment.id || `db_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                                    priority: assignment.priority || (index + 1) // Ensure priority exists
-                                }));
-                                updateAssignmentsList();
-                            } catch (e) {
-                                // Handle assignment parsing error silently
-                            }
-                        }
+                        // Load assignments using the proper assignments endpoint
+                        loadAssignmentsForPromoBar(promoBarId);
                         
 
                     } else {

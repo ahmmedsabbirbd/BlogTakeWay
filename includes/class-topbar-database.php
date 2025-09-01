@@ -109,6 +109,7 @@ class PromoBarX_Database {
             target_id bigint(20) DEFAULT 0,
             target_value varchar(255) DEFAULT '',
             priority int(11) DEFAULT 0,
+            is_exclusion tinyint(1) DEFAULT 0,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
@@ -116,6 +117,7 @@ class PromoBarX_Database {
             KEY assignment_type (assignment_type),
             KEY target_id (target_id),
             KEY priority (priority),
+            KEY is_exclusion (is_exclusion),
             FOREIGN KEY (promo_bar_id) REFERENCES {$this->table_prefix}promo_bars(id) ON DELETE CASCADE
         ) $charset_collate;";
 
@@ -863,14 +865,15 @@ class PromoBarX_Database {
             $values[] = $target_id;
             $values[] = $target_value;
             $values[] = isset($assignment['priority']) ? intval($assignment['priority']) : 0;
+            $values[] = isset($assignment['is_exclusion']) ? intval($assignment['is_exclusion']) : 0;
             $values[] = current_time('mysql');
             $values[] = current_time('mysql');
 
-            $placeholders[] = "(%d, %s, %d, %s, %d, %s, %s)";
+            $placeholders[] = "(%d, %s, %d, %s, %d, %d, %s, %s)";
         }
 
         $sql = "INSERT INTO {$this->table_prefix}promo_bar_assignments 
-                (promo_bar_id, assignment_type, target_id, target_value, priority, created_at, updated_at) 
+                (promo_bar_id, assignment_type, target_id, target_value, priority, is_exclusion, created_at, updated_at) 
                 VALUES " . implode(', ', $placeholders);
 
 
@@ -922,6 +925,7 @@ class PromoBarX_Database {
                     'target_id' => $target_id,
                     'target_value' => $target_value,
                     'priority' => isset($assignment['priority']) ? intval($assignment['priority']) : 0,
+                    'is_exclusion' => isset($assignment['is_exclusion']) ? intval($assignment['is_exclusion']) : 0,
                     'created_at' => current_time('mysql'),
                     'updated_at' => current_time('mysql')
                 ];
