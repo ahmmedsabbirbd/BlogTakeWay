@@ -429,12 +429,52 @@ document.addEventListener('DOMContentLoaded', () => {
             const editor = document.getElementById('promo-title-editor');
             if (editor) {
                 editor.focus();
-                document.execCommand(command, false, null);
+                
+                // Special handling for unlink command to preserve formatting
+                if (command === 'unlink') {
+                    removeLinkPreservingFormatting();
+                } else {
+                    document.execCommand(command, false, null);
+                }
+                
                 updateRichEditorValue();
                 updatePreview();
                 updateButtonStates();
             }
         };
+
+        function removeLinkPreservingFormatting() {
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0) return;
+            
+            const range = selection.getRangeAt(0);
+            const linkElement = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE 
+                ? range.commonAncestorContainer.closest('a') 
+                : range.commonAncestorContainer.parentElement?.closest('a');
+            
+            if (linkElement) {
+                // Get the text content of the link
+                const linkText = linkElement.textContent;
+                
+                // Create a text node with the link's content
+                const textNode = document.createTextNode(linkText);
+                
+                // Replace the link element with the text node
+                linkElement.parentNode.replaceChild(textNode, linkElement);
+                
+                // Select the text that was just unlinked
+                const newRange = document.createRange();
+                newRange.setStart(textNode, 0);
+                newRange.setEnd(textNode, linkText.length);
+                
+                // Clear any existing selection and set the new one
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            } else {
+                // Fallback to the original method if no link is found
+                document.execCommand('unlink', false, null);
+            }
+        }
 
         function updateButtonStates() {
             const boldBtn = document.getElementById('bold-btn');

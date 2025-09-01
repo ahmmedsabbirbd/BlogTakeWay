@@ -128,7 +128,39 @@ const RichTextEditor = ({ value, onChange, placeholder = "Enter text...", classN
     };
 
     const removeLink = () => {
-        execCommand('unlink');
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) return;
+        
+        const range = selection.getRangeAt(0);
+        const linkElement = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE 
+            ? range.commonAncestorContainer.closest('a') 
+            : range.commonAncestorContainer.parentElement?.closest('a');
+        
+        if (linkElement) {
+            // Get the text content of the link
+            const linkText = linkElement.textContent;
+            
+            // Create a text node with the link's content
+            const textNode = document.createTextNode(linkText);
+            
+            // Replace the link element with the text node
+            linkElement.parentNode.replaceChild(textNode, linkElement);
+            
+            // Select the text that was just unlinked
+            const newRange = document.createRange();
+            newRange.setStart(textNode, 0);
+            newRange.setEnd(textNode, linkText.length);
+            
+            // Clear any existing selection and set the new one
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+            
+            // Update the editor value
+            updateValue();
+        } else {
+            // Fallback to the original method if no link is found
+            execCommand('unlink');
+        }
     };
 
     const handleModalKeyDown = (e) => {
