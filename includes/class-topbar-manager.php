@@ -1206,7 +1206,10 @@ class PromoBarX_Manager {
                     'target_id' => $assignment->target_id,
                     'target_value' => $assignment->target_value,
                     'priority' => $assignment->priority,
-                    'is_exclusion' => $assignment->is_exclusion
+                    // Backward compatibility: some installations may have a misspelled column 'is_exclution'
+                    'is_exclusion' => isset($assignment->is_exclusion)
+                        ? $assignment->is_exclusion
+                        : (isset($assignment->is_exclution) ? $assignment->is_exclution : 0)
                 ];
             }
             

@@ -376,7 +376,11 @@ class PromoBarX_Database {
                     'assignment_type' => $assignment->assignment_type,
                     'target_id' => $assignment->target_id,
                     'target_value' => $assignment->target_value,
-                    'priority' => $assignment->priority
+                    'priority' => $assignment->priority,
+                    // Backward compatibility: some installations may have a misspelled column 'is_exclution'
+                    'is_exclusion' => isset($assignment->is_exclusion)
+                        ? intval($assignment->is_exclusion)
+                        : (isset($assignment->is_exclution) ? intval($assignment->is_exclution) : 0)
                 ];
             }
             
@@ -828,6 +832,18 @@ class PromoBarX_Database {
             return true;
         }
 
+        // Determine actual exclusion column name (handle legacy typo 'is_exclution')
+        $exclusion_column = 'is_exclusion';
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $has_is_exclusion = $this->wpdb->get_var("SHOW COLUMNS FROM {$this->table_prefix}promo_bar_assignments LIKE 'is_exclusion'");
+        if (!$has_is_exclusion) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $has_is_exclution = $this->wpdb->get_var("SHOW COLUMNS FROM {$this->table_prefix}promo_bar_assignments LIKE 'is_exclution'");
+            if ($has_is_exclution) {
+                $exclusion_column = 'is_exclution';
+            }
+        }
+
         // Insert new assignments
         $values = [];
         $placeholders = [];
@@ -873,7 +889,7 @@ class PromoBarX_Database {
         }
 
         $sql = "INSERT INTO {$this->table_prefix}promo_bar_assignments 
-                (promo_bar_id, assignment_type, target_id, target_value, priority, is_exclusion, created_at, updated_at) 
+                (promo_bar_id, assignment_type, target_id, target_value, priority, {$exclusion_column}, created_at, updated_at) 
                 VALUES " . implode(', ', $placeholders);
 
 
@@ -925,10 +941,10 @@ class PromoBarX_Database {
                     'target_id' => $target_id,
                     'target_value' => $target_value,
                     'priority' => isset($assignment['priority']) ? intval($assignment['priority']) : 0,
-                    'is_exclusion' => isset($assignment['is_exclusion']) ? intval($assignment['is_exclusion']) : 0,
-                    'created_at' => current_time('mysql'),
-                    'updated_at' => current_time('mysql')
                 ];
+                $insert_data[$exclusion_column] = isset($assignment['is_exclusion']) ? intval($assignment['is_exclusion']) : 0;
+                $insert_data['created_at'] = current_time('mysql');
+                $insert_data['updated_at'] = current_time('mysql');
                 
                 $individual_result = $this->wpdb->insert(
                     $this->table_prefix . 'promo_bar_assignments',
@@ -1106,13 +1122,15 @@ class PromoBarX_Database {
             target_id bigint(20) DEFAULT 0,
             target_value varchar(255) DEFAULT '',
             priority int(11) DEFAULT 0,
+            is_exclusion tinyint(1) DEFAULT 0,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY promo_bar_id (promo_bar_id),
             KEY assignment_type (assignment_type),
             KEY target_id (target_id),
-            KEY priority (priority)
+            KEY priority (priority),
+            KEY is_exclusion (is_exclusion)
         ) $charset_collate;";
         
         // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table creation query with dynamic table names
