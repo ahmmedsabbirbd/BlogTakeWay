@@ -78,10 +78,10 @@ const Topbar = React.forwardRef((props, ref) => {
                     const originalColor = link.style.color || getComputedStyle(link).color;
                     
                     // console.log(`🔍 Link ${index + 1}:`, {
-                        hoverColor,
-                        originalColor,
-                        hasDataHoverColor: !!hoverColor
-                    });
+                    //     hoverColor,
+                    //     originalColor,
+                    //     hasDataHoverColor: !!hoverColor
+                    // });
                     
                     if (hoverColor) {
                         // Remove any existing event listeners
@@ -189,12 +189,12 @@ const Topbar = React.forwardRef((props, ref) => {
     
     // Debug styling data
     // console.log('🎨 Styling data received:', {
-        styling,
-        anchor_color: styling.anchor_color,
-        anchor_hover_color: styling.anchor_hover_color,
-        computed_anchor_color: anchorColor,
-        computed_anchor_hover_color: anchorHoverColor
-    });
+    //     styling,
+    //     anchor_color: styling.anchor_color,
+    //     anchor_hover_color: styling.anchor_hover_color,
+    //     computed_anchor_color: anchorColor,
+    //     computed_anchor_hover_color: anchorHoverColor
+    // });
     
     // Check if CTA is enabled
     const ctaEnabled = styling.cta_enabled !== undefined ? 
