@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const TopBarEditor = module.default;
                 ReactDOM.render(React.createElement(TopBarEditor), editorContainer);
             }).catch(error => {
-                console.error('Error loading editor:', error);
+                // Error loading editor
                 // Fallback to simple editor
                 renderSimpleEditor(editorContainer);
             });
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ensure anchor colors are properly initialized after setup
             setTimeout(() => {
                 updateEditorAnchorColors();
-                console.log('🔧 Admin: Anchor colors initialized after setup');
+
             }, 200);
             
             // Load promo bar data if ID is provided, otherwise set defaults
@@ -807,12 +807,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Create new event handlers with better color management
                     link._mouseenterHandler = function() {
-                        console.log('🎨 Admin: Mouse enter - changing to hover color:', anchorHoverColor);
+                        // Mouse enter - changing to hover color
                         this.style.setProperty('color', anchorHoverColor, 'important');
                     };
                     
                     link._mouseleaveHandler = function() {
-                        console.log('🎨 Admin: Mouse leave - changing back to original color:', anchorColor);
+                        // Mouse leave - changing back to original color
                         this.style.setProperty('color', anchorColor, 'important');
                     };
                     
@@ -820,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     link.addEventListener('mouseenter', link._mouseenterHandler);
                     link.addEventListener('mouseleave', link._mouseleaveHandler);
                     
-                    console.log('✅ Admin: Event listeners added for link with colors:', { anchorColor, anchorHoverColor });
+                    // Event listeners added for link with colors
                 });
             }
         }
@@ -956,16 +956,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     // Add debugging for anchor color controls
                     if (id === 'anchor-color' || id === 'anchor-hover-color') {
-                        console.log(`Anchor color control ${id} found and event listener added`);
+                        // Anchor color control found and event listener added
                         input.addEventListener('change', () => {
-                            console.log(`${id} changed to:`, input.value);
+                            // Color value changed
                             updateEditorAnchorColors();
                         });
                     }
                 } else {
                     // Log missing elements for debugging
                     if (id === 'anchor-color' || id === 'anchor-hover-color') {
-                        console.warn(`Anchor color control ${id} not found in DOM`);
+                        // Anchor color control not found in DOM
                     }
                 }
             });
@@ -1276,7 +1276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const assignment = currentAssignments.find(a => a.id === assignmentId);
             if (!assignment) {
-                console.error('Assignment not found:', assignmentId);
+                // Assignment not found
                 return;
             }
             
@@ -1292,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const assignment = currentAssignments.find(a => a.id === assignmentId);
             if (!assignment) {
-                console.error('Assignment not found:', assignmentId);
+                // Assignment not found
                 return;
             }
             
@@ -1928,7 +1928,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         updateExclusionDropdownSelections();
                     }, 200);
                 } else {
-                    console.log('No assignments found for promo bar:', promoBarId);
+                    // No assignments found for promo bar
                     currentAssignments = [];
                     updateAssignmentsList();
                 }
@@ -2069,12 +2069,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         // Create new event handlers with better color management
                         link._mouseenterHandler = function() {
-                            console.log('🎨 Preview: Mouse enter - changing to hover color:', hoverColor);
+                            // Preview: Mouse enter - changing to hover color
                             this.style.setProperty('color', hoverColor, 'important');
                         };
                         
                         link._mouseleaveHandler = function() {
-                            console.log('🎨 Preview: Mouse leave - changing back to original color:', originalColor);
+                            // Preview: Mouse leave - changing back to original color
                             this.style.setProperty('color', originalColor, 'important');
                         };
                         
@@ -2082,7 +2082,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         link.addEventListener('mouseenter', link._mouseenterHandler);
                         link.addEventListener('mouseleave', link._mouseleaveHandler);
                         
-                        console.log('✅ Preview: Event listeners added for link with colors:', { originalColor, hoverColor });
+                        // Preview: Event listeners added for link with colors
                     }
                 });
             }, 0);
@@ -2090,19 +2090,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Debug function to test anchor hover functionality
         window.testAnchorHover = function() {
-            console.log('🧪 Testing anchor hover functionality...');
+                            // Testing anchor hover functionality
             const links = document.querySelectorAll('.promobarx-title-link');
-            console.log('Found links:', links.length);
+            // Found links count
             
             links.forEach((link, index) => {
                 const hoverColor = link.getAttribute('data-hover-color');
                 const originalColor = link.getAttribute('data-original-color');
-                console.log(`Link ${index + 1}:`, {
-                    hoverColor,
-                    originalColor,
-                    currentColor: link.style.color,
-                    hasEventListeners: !!link._mouseenterHandler
-                });
+                // Link details logged
             });
         };
         

@@ -72,12 +72,12 @@ const Topbar = React.forwardRef((props, ref) => {
                 
                 // Handle anchor hover effects for title links
                 const titleLinks = document.querySelectorAll('.promobarx-title-link');
-                console.log('🔍 Found title links:', titleLinks.length);
+                // console.log('🔍 Found title links:', titleLinks.length);
                 titleLinks.forEach((link, index) => {
                     const hoverColor = link.getAttribute('data-hover-color');
                     const originalColor = link.style.color || getComputedStyle(link).color;
                     
-                    console.log(`🔍 Link ${index + 1}:`, {
+                    // console.log(`🔍 Link ${index + 1}:`, {
                         hoverColor,
                         originalColor,
                         hasDataHoverColor: !!hoverColor
@@ -90,12 +90,12 @@ const Topbar = React.forwardRef((props, ref) => {
                         
                         // Create new event handlers
                         link._mouseenterHandler = function() {
-                            console.log(`🎨 Mouse enter: changing color to ${hoverColor}`);
+                            // console.log(`🎨 Mouse enter: changing color to ${hoverColor}`);
                             this.style.color = hoverColor + ' !important';
                         };
                         
                         link._mouseleaveHandler = function() {
-                            console.log(`🎨 Mouse leave: changing color back to ${originalColor}`);
+                            // console.log(`🎨 Mouse leave: changing color back to ${originalColor}`);
                             this.style.color = originalColor;
                         };
                         
@@ -103,9 +103,9 @@ const Topbar = React.forwardRef((props, ref) => {
                         link.addEventListener('mouseenter', link._mouseenterHandler);
                         link.addEventListener('mouseleave', link._mouseleaveHandler);
                         
-                        console.log(`✅ Event listeners added to link ${index + 1}`);
+                        // console.log(`✅ Event listeners added to link ${index + 1}`);
                     } else {
-                        console.log(`❌ No hover color found for link ${index + 1}`);
+                        // console.log(`❌ No hover color found for link ${index + 1}`);
                     }
                 });
             }, 0);
@@ -175,7 +175,7 @@ const Topbar = React.forwardRef((props, ref) => {
     const countdownStyle = promoBar.countdown_style ? JSON.parse(promoBar.countdown_style) : {};
     const closeStyle = promoBar.close_button_style ? JSON.parse(promoBar.close_button_style) : {};
     
-console.log(styling.anchor_color);
+// console.log(styling.anchor_color);
     
     // Extract individual element styling
     const titleColor = styling.title_color || styling.color || '#ffffff';
@@ -188,7 +188,7 @@ console.log(styling.anchor_color);
     const anchorHoverColor = styling.anchor_hover_color || '#1d4ed8';
     
     // Debug styling data
-    console.log('🎨 Styling data received:', {
+    // console.log('🎨 Styling data received:', {
         styling,
         anchor_color: styling.anchor_color,
         anchor_hover_color: styling.anchor_hover_color,
@@ -214,20 +214,20 @@ console.log(styling.anchor_color);
 
     // Process title content to apply anchor colors to links
     const processTitleContent = (title) => {
-        console.log('🔍 processTitleContent called with:', title);
-        console.log('🔍 anchorColor:', anchorColor);
-        console.log('🔍 anchorHoverColor:', anchorHoverColor);
+        // console.log('🔍 processTitleContent called with:', title);
+        // console.log('🔍 anchorColor:', anchorColor);
+        // console.log('🔍 anchorHoverColor:', anchorHoverColor);
         
         if (!title || !title.includes('<a ')) {
-            console.log('🔍 No links found in title, returning original');
+            // console.log('🔍 No links found in title, returning original');
             return title;
         }
 
-        console.log('🔍 Links found, processing...');
+        // console.log('🔍 Links found, processing...');
         
         // Test regex pattern
         const linkMatches = title.match(/<a\s+([^>]*?)>/gi);
-        console.log('🔍 Link matches found:', linkMatches);
+        // console.log('🔍 Link matches found:', linkMatches);
         
         // Apply inline styles to anchor tags with proper CSS-in-JS approach
         const processed = title.replace(
@@ -235,16 +235,16 @@ console.log(styling.anchor_color);
             `<a $1 style="color: ${anchorColor} !important; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="${anchorHoverColor}">`
         );
         
-        console.log('🔍 Processed result:', processed);
+        // console.log('🔍 Processed result:', processed);
         return processed;
     };
 
     // Fallback function to ensure anchor colors are applied even if data is missing
     const ensureAnchorColors = (title) => {
-        console.log('🛡️ ensureAnchorColors called with:', title);
+        // console.log('🛡️ ensureAnchorColors called with:', title);
         
         if (!title || !title.includes('<a ')) {
-            console.log('🛡️ No links found in title, returning original');
+            // console.log('🛡️ No links found in title, returning original');
             return title;
         }
 
@@ -252,14 +252,14 @@ console.log(styling.anchor_color);
         const fallbackAnchorColor = anchorColor || '#3b82f6';
         const fallbackHoverColor = anchorHoverColor || '#1d4ed8';
         
-        console.log('🛡️ Using fallback colors:', fallbackAnchorColor, fallbackHoverColor);
+        // console.log('🛡️ Using fallback colors:', fallbackAnchorColor, fallbackHoverColor);
 
         // Apply anchor colors to all links with proper CSS-in-JS approach
         const result = title.replace(
             /<a\s+([^>]*?)>/gi,
             `<a $1 style="color: ${fallbackAnchorColor} !important; text-decoration: underline; transition: color 0.2s ease;" class="promobarx-title-link" data-hover-color="${fallbackHoverColor}">`
         );
-        console.log('🛡️ Fallback result:', result);
+        // console.log('🛡️ Fallback result:', result);
         return result;
     };
 
@@ -280,13 +280,13 @@ console.log(styling.anchor_color);
                         }}
                         dangerouslySetInnerHTML={{ __html: (() => {
                             try {
-                                console.log('🎯 Processing title for promo bar:', promoBar.id);
-                                console.log('🎯 Raw title:', promoBar.title);
-                                console.log('🎯 Raw styling:', promoBar.styling);
+                                // console.log('🎯 Processing title for promo bar:', promoBar.id);
+                                // console.log('🎯 Raw title:', promoBar.title);
+                                // console.log('🎯 Raw styling:', promoBar.styling);
                                 
                                 const processed = processTitleContent(promoBar.title);
                                 const final = ensureAnchorColors(processed);
-                                console.log('📝 Final title HTML:', final);
+                                // console.log('📝 Final title HTML:', final);
                                 return final;
                             } catch (error) {
                                 console.error('❌ Error processing title:', error);

@@ -8,11 +8,11 @@ const SimpleTopBarManager = ({ containerId }) => {
     const [toggleLoading, setToggleLoading] = useState(null);
 
     useEffect(() => {
-        console.log('SimpleTopBarManager: Component mounted');
-        console.log('SimpleTopBarManager: window.promobarxAdmin:', window.promobarxAdmin);
+        // console.log('SimpleTopBarManager: Component mounted');
+        // console.log('SimpleTopBarManager: window.promobarxAdmin:', window.promobarxAdmin);
         
         if (window.promobarxAdmin && window.promobarxAdmin.ajaxurl && window.promobarxAdmin.nonce) {
-            console.log('SimpleTopBarManager: Admin data available, loading promo bars');
+            // console.log('SimpleTopBarManager: Admin data available, loading promo bars');
             loadPromoBars();
             loadAnalyticsData();
         } else {
@@ -24,8 +24,8 @@ const SimpleTopBarManager = ({ containerId }) => {
 
     const loadPromoBars = async () => {
         try {
-            console.log('Loading promo bars...');
-            console.log('Admin data:', window.promobarxAdmin);
+            // console.log('Loading promo bars...');
+            // console.log('Admin data:', window.promobarxAdmin);
             
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
                 method: 'POST',
@@ -35,13 +35,13 @@ const SimpleTopBarManager = ({ containerId }) => {
                 body: 'action=promobarx_get_promo_bars&nonce=' + window.promobarxAdmin.nonce
             });
             
-            console.log('Response status:', response.status);
+            // console.log('Response status:', response.status);
             const data = await response.json();
-            console.log('Response data:', data);
+            // console.log('Response data:', data);
             
             if (data.success) {
                 setPromoBars(data.data);
-                console.log('Promo bars loaded:', data.data);
+                // console.log('Promo bars loaded:', data.data);
             } else {
                 console.error('Failed to load promo bars:', data);
             }
@@ -54,7 +54,7 @@ const SimpleTopBarManager = ({ containerId }) => {
 
     const loadAnalyticsData = async () => {
         try {
-            console.log('Loading analytics data...');
+            // console.log('Loading analytics data...');
             
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
                 method: 'POST',
@@ -65,11 +65,11 @@ const SimpleTopBarManager = ({ containerId }) => {
             });
             
             const data = await response.json();
-            console.log('Analytics response:', data);
+            // console.log('Analytics response:', data);
             
             if (data.success) {
                 setAnalyticsData(data.data);
-                console.log('Analytics data loaded:', data.data);
+                // console.log('Analytics data loaded:', data.data);
             } else {
                 console.error('Failed to load analytics data:', data);
             }
@@ -126,7 +126,7 @@ const SimpleTopBarManager = ({ containerId }) => {
             const data = await response.json();
             if (data.success) {
                 // Show success message
-                console.log(`Promo bar "${promoBar.name}" has been ${action}d successfully.`);
+                // console.log(`Promo bar "${promoBar.name}" has been ${action}d successfully.`);
                 
                 // Show a brief success notification
                 const notification = document.createElement('div');

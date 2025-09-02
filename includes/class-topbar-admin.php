@@ -119,7 +119,7 @@ class TOP_Admin {
      * @return void
      */
     public function enqueue_admin_scripts($hook) {
-        // Debug: Log the current hook
+
 
         
         // Check if we're on any of our plugin pages
@@ -311,7 +311,6 @@ class TOP_Admin {
     public function render_topbar_manager_page() {
         echo '<div id="promo-bar-x-topbar-manager"></div>';
         echo '<script>
-            console.log("TopBar Manager Page Loaded");
             // Ensure promobarxAdmin is available immediately
             window.promobarxAdmin = window.promobarxAdmin || {
                 ajaxurl: "' . esc_url(admin_url('admin-ajax.php')) . '",
@@ -325,7 +324,6 @@ class TOP_Admin {
                     confirmClose: "Are you sure you want to close without saving?"
                 }
             };
-            console.log("PromoBarX Admin Data Set:", window.promobarxAdmin);
         </script>';
     }
 
@@ -344,7 +342,6 @@ class TOP_Admin {
         
         echo '<div id="promo-bar-x-editor"></div>';
         echo '<script>
-            console.log("TopBar Editor Page Loaded");
             // Ensure promobarxAdmin is available immediately
             window.promobarxAdmin = window.promobarxAdmin || {
                 ajaxurl: "' . esc_url(admin_url('admin-ajax.php')) . '",
@@ -359,7 +356,6 @@ class TOP_Admin {
                     confirmClose: "Are you sure you want to close without saving?"
                 }
             };
-            console.log("PromoBarX Editor Data Set:", window.promobarxAdmin);
         </script>';
     }
 

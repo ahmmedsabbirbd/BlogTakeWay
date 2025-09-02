@@ -781,16 +781,9 @@ class PromoBarX_Manager {
             
             // Handle anchor hover effects for title links
             const titleLinks = document.querySelectorAll('.promobarx-title-link');
-            console.log('🔍 PHP: Found title links:', titleLinks.length);
             titleLinks.forEach((link, index) => {
                 const hoverColor = link.getAttribute('data-hover-color');
                 const originalColor = link.style.color || getComputedStyle(link).color;
-                
-                console.log(`🔍 PHP: Link ${index + 1}:`, {
-                    hoverColor,
-                    originalColor,
-                    hasDataHoverColor: !!hoverColor
-                });
                 
                 if (hoverColor) {
                     // Remove any existing event listeners
@@ -799,22 +792,16 @@ class PromoBarX_Manager {
                     
                     // Create new event handlers
                     link._mouseenterHandler = function() {
-                        console.log(`🎨 PHP: Mouse enter: changing color to ${hoverColor}`);
                         this.style.color = hoverColor + ' !important';
                     };
                     
                     link._mouseleaveHandler = function() {
-                        console.log(`🎨 PHP: Mouse leave: changing color back to ${originalColor}`);
                         this.style.color = originalColor;
                     };
                     
                     // Add event listeners
                     link.addEventListener('mouseenter', link._mouseenterHandler);
                     link.addEventListener('mouseleave', link._mouseleaveHandler);
-                    
-                    console.log(`✅ PHP: Event listeners added to link ${index + 1}`);
-                } else {
-                    console.log(`❌ PHP: No hover color found for link ${index + 1}`);
                 }
             });
         });

@@ -445,7 +445,6 @@ class Insights {
 
         echo "<script type='text/javascript'>jQuery('." . esc_attr( $this->client->slug ) . "-insights-data-we-collect').on('click', function(e) {
                 e.preventDefault();
-                console.log('clicked');
                 jQuery(this).parents('.updated').find('p.description').slideToggle('fast').removeClass('hidden');
             });
             jQuery('.description.hidden').hide();

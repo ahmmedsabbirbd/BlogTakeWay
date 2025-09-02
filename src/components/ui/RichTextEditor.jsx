@@ -111,9 +111,7 @@ const RichTextEditor = ({ value, onChange, placeholder = "Enter text...", classN
                     execCommand('insertHTML', linkHTML);
                 }
                 
-                // Debug: Log the inserted HTML
-                console.log('Link inserted:', linkHTML);
-                console.log('Editor content after insertion:', editorRef.current.innerHTML);
+
             } catch (error) {
                 console.error('Error inserting link:', error);
                 alert('Error inserting link. Please try again.');

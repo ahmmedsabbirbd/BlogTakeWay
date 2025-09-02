@@ -48,7 +48,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
 
     useEffect(() => {
         if (promoBar && typeof promoBar === 'object') {
-            console.log('PromoBar data received in editor:', promoBar);
+            // console.log('PromoBar data received in editor:', promoBar);
             
             // Handle template styling data
             let templateStyling = {};
@@ -137,7 +137,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 close_button_style: { ...formData.close_button_style, ...closeButtonStyle }
             };
             
-            console.log('Updated form data:', updatedFormData);
+            // console.log('Updated form data:', updatedFormData);
             setFormData(updatedFormData);
             
             // Load existing assignments if promo bar has an ID
@@ -145,7 +145,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 loadAssignments(promoBar.id);
             }
         } else {
-            console.log('No promo bar data provided or invalid data:', promoBar);
+            // console.log('No promo bar data provided or invalid data:', promoBar);
         }
     }, [promoBar]);
 
@@ -166,7 +166,7 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
             const data = await response.json();
             if (data.success) {
                 setAssignments(data.data || []);
-                console.log('Loaded assignments:', data.data);
+                // console.log('Loaded assignments:', data.data);
             } else {
                 console.error('Failed to load assignments:', data);
             }
@@ -213,8 +213,8 @@ const TopBarEditor = ({ promoBar, onClose, onSave }) => {
                 saveData.id = promoBar.id;
             }
 
-            console.log('Saving promo bar with assignments:', assignments);
-            console.log('Save data:', saveData);
+            // console.log('Saving promo bar with assignments:', assignments);
+            // console.log('Save data:', saveData);
 
             const response = await fetch(window.promobarxAdmin.ajaxurl, {
                 method: 'POST',
