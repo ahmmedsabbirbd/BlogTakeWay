@@ -938,7 +938,7 @@ class PromoBarX_Manager {
         }
         
         // Validate title field separately to allow HTML content
-        if (!isset($_POST['title']) || empty(trim(wp_unslash($_POST['title'])))) {
+        if (!isset($_POST['title']) || empty(trim(wp_kses_post(wp_unslash($_POST['title']))))) {
             $missing_fields[] = 'title';
         }
         
