@@ -133,15 +133,7 @@ class Blog_Summary_Admin {
             [ $this, 'render_bulk_generator_page' ]
         );
 
-        // Add Logs submenu
-        add_submenu_page(
-            $this->plugin_slug,
-            esc_html__( 'Generation Logs', 'blog-takeway' ),
-            esc_html__( 'Logs', 'blog-takeway' ),
-            'manage_options',
-            $this->plugin_slug . '-logs',
-            [ $this, 'render_logs_page' ]
-        );
+        // Logs menu removed
     }
 
     /**
@@ -303,15 +295,7 @@ class Blog_Summary_Admin {
         include BLOG_TAKEWAY_PLUGIN_DIR . 'templates/admin/bulk-generator.php';
     }
 
-    /**
-     * Render logs page
-     */
-    public function render_logs_page() {
-        $database = new Blog_Summary_Database();
-        $logs = $database->get_generation_logs(['limit' => 100]);
-        
-        include BLOG_TAKEWAY_PLUGIN_DIR . 'templates/admin/logs.php';
-    }
+    // Logs page removed
 
     /**
      * Render AI settings section

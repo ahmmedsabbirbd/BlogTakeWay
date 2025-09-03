@@ -102,8 +102,7 @@ class BLOG_TAKEWAY {
         // Add cron job for bulk processing
         add_action('blog_takeway_bulk_generate_cron', [ $this, 'process_bulk_generation' ]);
         
-        // Add admin notice for posts without summaries
-        add_action('admin_notices', [ $this, 'show_posts_without_summaries_notice' ]);
+        // Admin notice hook removed
     }
 
     /**
@@ -465,41 +464,7 @@ class BLOG_TAKEWAY {
         }
     }
 
-    /**
-     * Show admin notice for posts without summaries
-     *
-     * @return void
-     */
-    public function show_posts_without_summaries_notice() {
-        $args = [
-            'post_type' => 'post',
-            'posts_per_page' => -1,
-            'meta_key' => '_blog_takeway_summary',
-            'meta_value' => '',
-            'meta_compare' => '=',
-        ];
-        $posts_without_summary = get_posts($args);
-
-        if (empty($posts_without_summary)) {
-            return;
-        }
-
-        $notice_html = '<div class="notice notice-warning is-dismissible">';
-        $notice_html .= '<p>';
-        $notice_html .= sprintf(
-            __('Some of your blog posts do not have a summary or key takeaways. You can generate them using the "Generate AI Summary" button in the post editor or bulk generate them from the "Bulk Generate" option in the plugin settings.', 'blog-takeway'),
-            count($posts_without_summary)
-        );
-        $notice_html .= '</p>';
-        $notice_html .= '<p>';
-        $notice_html .= '<a href="' . admin_url('edit.php?post_type=post') . '" class="button button-primary">View Posts</a>';
-        $notice_html .= '<a href="' . admin_url('admin.php?page=blog-takeway-settings') . '" class="button button-secondary">Settings</a>';
-        $notice_html .= '</p>';
-        $notice_html .= '<button type="button" class="notice-dismiss"><span class="screen-reader-text">' . __('Dismiss this notice.', 'blog-takeway') . '</span></button>';
-        $notice_html .= '</div>';
-
-        echo $notice_html;
-    }
+    // Admin notice removed
 }
 
 // Initialize the plugin
