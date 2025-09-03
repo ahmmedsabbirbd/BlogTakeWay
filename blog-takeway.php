@@ -33,6 +33,7 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 /**
  * Main plugin class for Blog TakeWay
  *
+ * 
  * Handles initialization, dependencies loading, and core functionality
  * of the Blog TakeWay plugin for WordPress.
  *

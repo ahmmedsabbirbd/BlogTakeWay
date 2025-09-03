@@ -35,9 +35,8 @@ class Blog_Summary_Database {
         $sql_summaries = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}blog_summaries (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             post_id bigint(20) NOT NULL,
-            summary text,
             takeaways JSON,
-            ai_model varchar(100),
+            min_read_list JSON,
             generation_date datetime DEFAULT CURRENT_TIMESTAMP,
             last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             cache_expiry datetime,
@@ -48,26 +47,19 @@ class Blog_Summary_Database {
             KEY cache_expiry (cache_expiry)
         ) $charset_collate;";
 
-        // Summary generation logs table
-        $sql_logs = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}summary_generation_logs (
+        // API tokens and settings table
+        $sql_settings = "CREATE TABLE IF NOT EXISTS {$this->table_prefix}api_tokens (
             id bigint(20) NOT NULL AUTO_INCREMENT,
-            post_id bigint(20) NOT NULL,
-            operation_type enum('generate', 'update', 'bulk_generate') NOT NULL,
-            status enum('success', 'failed', 'pending') NOT NULL,
-            ai_model varchar(100),
-            tokens_used int(11),
-            processing_time decimal(10,3),
-            error_message text,
+            api_key varchar(255) NOT NULL,
+            selected_model varchar(100) NOT NULL,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            KEY post_id (post_id),
-            KEY status (status),
-            KEY created_at (created_at)
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
         ) $charset_collate;";
 
         // Execute table creation
         $this->wpdb->query($sql_summaries);
-        $this->wpdb->query($sql_logs);
+        $this->wpdb->query($sql_settings);
     }
 
     /**
@@ -445,7 +437,7 @@ class Blog_Summary_Database {
     public function get_table_info() {
         $tables = [
             'blog_summaries' => $this->table_prefix . 'blog_summaries',
-            'summary_generation_logs' => $this->table_prefix . 'summary_generation_logs',
+            'api_tokens' => $this->table_prefix . 'api_tokens',
         ];
 
         $info = [];
@@ -457,5 +449,93 @@ class Blog_Summary_Database {
         }
 
         return $info;
+    }
+
+    /**
+     * Save API token and selected model
+     */
+    public function save_api_settings($api_key, $selected_model) {
+        $table_name = $this->table_prefix . 'api_tokens';
+        
+        $existing = $this->wpdb->get_row("SELECT id FROM {$table_name} LIMIT 1");
+        
+        $data = [
+            'api_key' => $api_key,
+            'selected_model' => $selected_model,
+            'updated_at' => current_time('mysql'),
+        ];
+        
+        if ($existing) {
+            $result = $this->wpdb->update(
+                $table_name,
+                $data,
+                ['id' => $existing->id],
+                ['%s', '%s', '%s'],
+                ['%d']
+            );
+        } else {
+            $data['created_at'] = current_time('mysql');
+            $result = $this->wpdb->insert(
+                $table_name,
+                $data,
+                ['%s', '%s', '%s', '%s']
+            );
+        }
+        
+        return $result !== false;
+    }
+
+    /**
+     * Get API settings
+     */
+    public function get_api_settings() {
+        $table_name = $this->table_prefix . 'api_tokens';
+        return $this->wpdb->get_row("SELECT * FROM {$table_name} ORDER BY id DESC LIMIT 1", ARRAY_A);
+    }
+
+    /**
+     * Save blog summary with proper JSON structure
+     */
+    public function save_blog_summary($post_id, $takeaways = [], $min_read_list = []) {
+        if (!$post_id) {
+            return new WP_Error('invalid_data', 'Invalid post ID');
+        }
+
+        $table_name = $this->table_prefix . 'blog_summaries';
+        
+        $existing = $this->wpdb->get_row(
+            $this->wpdb->prepare(
+                "SELECT id FROM {$table_name} WHERE post_id = %d",
+                $post_id
+            )
+        );
+
+        $data = [
+            'post_id' => $post_id,
+            'takeaways' => json_encode($takeaways),
+            'min_read_list' => json_encode($min_read_list),
+            'last_updated' => current_time('mysql'),
+        ];
+
+        if ($existing) {
+            $result = $this->wpdb->update(
+                $table_name,
+                $data,
+                ['post_id' => $post_id],
+                ['%d', '%s', '%s', '%s'],
+                ['%d']
+            );
+        } else {
+            $data['generation_date'] = current_time('mysql');
+            $data['status'] = 'published';
+            
+            $result = $this->wpdb->insert(
+                $table_name,
+                $data,
+                ['%d', '%s', '%s', '%s', '%s', '%s']
+            );
+        }
+
+        return $result !== false ? true : new WP_Error('database_error', 'Failed to save summary');
     }
 }

@@ -236,14 +236,16 @@ class Blog_Summary_Admin {
     public function sanitize_settings($input) {
         $sanitized = [];
         
-        if (isset($input['ai_api_key'])) {
-            $sanitized['ai_api_key'] = sanitize_text_field($input['ai_api_key']);
+        // Save API settings to database
+        if (isset($input['ai_api_key']) && isset($input['ai_model'])) {
+            $database = new Blog_Summary_Database();
+            $database->save_api_settings(
+                sanitize_text_field($input['ai_api_key']),
+                sanitize_text_field($input['ai_model'])
+            );
         }
         
-        if (isset($input['ai_model'])) {
-            $sanitized['ai_model'] = sanitize_text_field($input['ai_model']);
-        }
-        
+        // Other settings still go to wp_options
         if (isset($input['summary_length'])) {
             $sanitized['summary_length'] = sanitize_text_field($input['summary_length']);
         }
@@ -322,8 +324,9 @@ class Blog_Summary_Admin {
      * Render API key field
      */
     public function render_api_key_field() {
-        $settings = get_option('blog_takeway_settings', []);
-        $api_key = isset($settings['ai_api_key']) ? $settings['ai_api_key'] : '';
+        $database = new Blog_Summary_Database();
+        $api_settings = $database->get_api_settings();
+        $api_key = $api_settings ? $api_settings['api_key'] : '';
         
         echo '<input type="password" id="ai_api_key" name="blog_takeway_settings[ai_api_key]" value="' . esc_attr($api_key) . '" class="regular-text" />';
         echo '<p class="description">Enter your OpenAI API key. <a href="https://platform.openai.com/api-keys" target="_blank">Get your API key here</a>.</p>';
@@ -335,11 +338,15 @@ class Blog_Summary_Admin {
      * Render model field
      */
     public function render_model_field() {
-        $settings = get_option('blog_takeway_settings', []);
-        $model = isset($settings['ai_model']) ? $settings['ai_model'] : 'gpt-3.5-turbo';
+        $database = new Blog_Summary_Database();
+        $api_settings = $database->get_api_settings();
+        $model = $api_settings ? $api_settings['selected_model'] : 'gpt-3.5-turbo';
         
-        $ai_handler = new AI_API_Handler();
-        $models = $ai_handler->get_available_models();
+        $models = [
+            'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Fast & Cost-effective)',
+            'gpt-4' => 'GPT-4 (Most Capable)',
+            'gpt-4-turbo' => 'GPT-4 Turbo (Latest Version)'
+        ];
         
         echo '<select id="ai_model" name="blog_takeway_settings[ai_model]">';
         foreach ($models as $value => $label) {
@@ -533,6 +540,15 @@ class Blog_Summary_Admin {
             wp_die('Insufficient permissions');
         }
         
+        // Get API key from POST if testing new key
+        $api_key = isset($_POST['api_key']) ? sanitize_text_field($_POST['api_key']) : '';
+        
+        if ($api_key) {
+            // Testing new key
+            $database = new Blog_Summary_Database();
+            $database->save_api_settings($api_key, 'gpt-3.5-turbo');
+        }
+        
         $ai_handler = new AI_API_Handler();
         $result = $ai_handler->test_api_connection();
         
@@ -540,6 +556,9 @@ class Blog_Summary_Admin {
             wp_send_json_error($result->get_error_message());
         }
         
-        wp_send_json_success($result);
+        wp_send_json_success([
+            'message' => 'API connection successful!',
+            'model' => $ai_handler->get_current_model()
+        ]);
     }
 }
