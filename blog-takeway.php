@@ -90,9 +90,6 @@ class BLOG_TAKEWAY {
         // Enqueue scripts
         add_action('wp_enqueue_scripts', [ $this, 'enqueue_scripts' ]);
         add_action('admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ]);
-
-        // Add summary display to single posts
-        add_action('the_content', [ $this, 'display_blog_summary' ], 20);
         
         // Add meta box for manual summary editing
         add_action('add_meta_boxes', [ $this, 'add_summary_meta_box' ]);
@@ -239,42 +236,6 @@ class BLOG_TAKEWAY {
                 'rest_url' => rest_url('blog-takeway/v1/'),
             ]);
         }
-    }
-
-    /**
-     * Display blog summary on single posts
-     *
-     * @param string $content The post content
-     * @return string Modified content with summary
-     */
-    public function display_blog_summary($content) {
-        if (!is_single() || get_post_type() !== 'post') {
-            return $content;
-        }
-        
-        $post_id = get_the_ID();
-        $summary = get_post_meta($post_id, '_blog_takeway_summary', true);
-        $takeaways = get_post_meta($post_id, '_blog_takeway_takeaways', true);
-        
-        if (empty($summary) && empty($takeaways)) {
-            return $content;
-        }
-        
-        $summary_html = $this->render_summary_html($summary, $takeaways);
-        
-        // Insert summary based on settings
-        $settings = get_option('blog_takeway_settings', []);
-        $position = isset($settings['display_position']) ? $settings['display_position'] : 'after_title';
-        
-        if ($position === 'after_title') {
-            $content = $summary_html . $content;
-        } elseif ($position === 'before_content') {
-            $content = $summary_html . $content;
-        } elseif ($position === 'after_content') {
-            $content = $content . $summary_html;
-        }
-        
-        return $content;
     }
 
     /**
