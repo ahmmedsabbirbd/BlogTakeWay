@@ -390,7 +390,14 @@ jQuery(document).ready(function($) {
             return;
         }
         
-        if (confirm('Generate summaries for ' + selectedIds.length + ' selected posts? This may take some time and incur API costs.')) {
+        var confirmMsg = 'Are you sure you want to generate summaries for ' + selectedIds.length + ' selected posts?\n\n';
+        confirmMsg += '⚠️ Important Notes:\n';
+        confirmMsg += '1. This will use your OpenAI API credits\n';
+        confirmMsg += '2. Each post will cost tokens based on its length\n';
+        confirmMsg += '3. The process cannot be interrupted once started\n\n';
+        confirmMsg += 'Do you want to continue?';
+        
+        if (confirm(confirmMsg)) {
             startBulkGeneration(selectedIds);
         }
     });

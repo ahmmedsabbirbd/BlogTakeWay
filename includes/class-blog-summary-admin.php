@@ -475,9 +475,17 @@ class Blog_Summary_Admin {
             wp_send_json_error($result->get_error_message());
         }
         
-        // Save the generated summary
-        update_post_meta($post_id, '_blog_takeway_summary', $result['summary']);
-        update_post_meta($post_id, '_blog_takeway_takeaways', $result['takeaways']);
+        // Save to blog_summaries table
+        $database = new Blog_Summary_Database();
+        $save_result = $database->save_blog_summary(
+            $post_id,
+            $result['takeaways'],
+            $result['min_read_list']
+        );
+
+        if (is_wp_error($save_result)) {
+            wp_send_json_error('Failed to save summary to database');
+        }
         
         wp_send_json_success($result);
     }
@@ -515,8 +523,19 @@ class Blog_Summary_Admin {
                 continue;
             }
 
-            update_post_meta($pid, '_blog_takeway_summary', $result['summary']);
-            update_post_meta($pid, '_blog_takeway_takeaways', $result['takeaways']);
+            // Save to blog_summaries table
+            $database = new Blog_Summary_Database();
+            $save_result = $database->save_blog_summary(
+                $pid,
+                $result['takeaways'],
+                $result['min_read_list']
+            );
+
+            if (is_wp_error($save_result)) {
+                $error_ids[] = $pid;
+                continue;
+            }
+
             $success_ids[] = $pid;
         }
 

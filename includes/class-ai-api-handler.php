@@ -107,10 +107,10 @@ class AI_API_Handler {
     private function generate_content_analysis($content, $sections) {
         $prompt = $this->build_analysis_prompt($content, $sections);
         $response = $this->make_api_request($prompt);
-        
-        if (is_wp_error($response)) {
-            return $response;
-        }
+
+            if (is_wp_error($response)) {
+                return $response;
+            }
 
         // Parse the response
         $parsed = json_decode($response['choices'][0]['message']['content'], true);
@@ -189,7 +189,7 @@ class AI_API_Handler {
                 'Content-Type' => 'application/json',
             ],
             'body' => json_encode([
-                'model' => $this->model,
+            'model' => $this->model,
                 'messages' => $messages,
                 'temperature' => 0.7,
                 'max_tokens' => 1000,

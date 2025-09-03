@@ -64,6 +64,45 @@ class Blog_Summary_Manager {
         if (!wp_next_scheduled('blog_takeway_cache_cleanup')) {
             wp_schedule_event(time(), 'daily', 'blog_takeway_cache_cleanup');
         }
+
+        // Display summary in blog posts
+        add_filter('the_content', [$this, 'display_summary']);
+    }
+
+    /**
+     * Display summary in blog posts
+     */
+    public function display_summary($content) {
+        // Only show on single posts
+        if (!is_single() || !in_the_loop()) {
+            return $content;
+        }
+
+        $post_id = get_the_ID();
+        $summary_data = $this->database->get_summary($post_id);
+
+        if (!$summary_data) {
+            return $content;
+        }
+
+        ob_start();
+        include BLOG_TAKEWAY_PLUGIN_DIR . 'templates/frontend/summary-display.php';
+        $summary_html = ob_get_clean();
+
+        // Add summary based on position setting
+        $settings = get_option('blog_takeway_settings', []);
+        $position = isset($settings['display_position']) ? $settings['display_position'] : 'after_title';
+
+        switch ($position) {
+            case 'after_title':
+                return $summary_html . $content;
+            case 'before_content':
+                return $summary_html . $content;
+            case 'after_content':
+                return $content . $summary_html;
+            default:
+                return $content . $summary_html;
+        }
     }
 
     /**
