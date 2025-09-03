@@ -71,6 +71,7 @@ class Blog_Summary_Admin {
             
             wp_localize_script('blog-takeway-admin', 'blogTakewayAjax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
+                'admin_url' => admin_url(),
                 'nonce' => wp_create_nonce('blog_takeway_nonce'),
                 'rest_url' => rest_url('blog-takeway/v1/'),
                 'strings' => [

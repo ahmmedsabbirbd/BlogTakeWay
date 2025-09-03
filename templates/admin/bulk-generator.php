@@ -13,17 +13,36 @@ if (!defined('ABSPATH')) exit;
             
             <?php if (!empty($posts)): ?>
                 <div class="posts-controls">
-                    <button type="button" class="button" id="select-all">Select All</button>
-                    <button type="button" class="button" id="deselect-all">Deselect All</button>
-                    <button type="button" class="button button-primary" id="generate-selected">
-                        🚀 Generate Summaries for Selected Posts
-                    </button>
+                    <div class="controls-left">
+                        <button type="button" class="button" id="select-all">Select All</button>
+                        <button type="button" class="button" id="deselect-all">Deselect All</button>
+                        <button type="button" class="button button-primary" id="generate-selected">
+                            🚀 Generate Summaries
+                        </button>
+                    </div>
+                    <div class="controls-right">
+                        <select id="filter-summary" class="filter-select">
+                            <option value="all">All Posts</option>
+                            <option value="with-summary">With Summary</option>
+                            <option value="without-summary">Without Summary</option>
+                        </select>
+                        <select id="sort-posts" class="filter-select">
+                            <option value="title-asc">Title (A-Z)</option>
+                            <option value="title-desc">Title (Z-A)</option>
+                            <option value="date-desc">Newest First</option>
+                            <option value="date-asc">Oldest First</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="posts-list">
                     <?php foreach ($posts as $post): ?>
                         <?php 
-                            $has_summary = (bool) get_post_meta($post->ID, '_blog_takeway_summary', true);
+                            global $wpdb;
+                            $has_summary = $wpdb->get_var($wpdb->prepare(
+                                "SELECT COUNT(*) FROM {$wpdb->prefix}blog_summaries WHERE post_id = %d AND status = 'published'",
+                                $post->ID
+                            ));
                             $status_class = $has_summary ? 'has-summary' : 'missing-summary';
                             $status_text  = $has_summary ? 'Has Summary' : 'Missing Summary';
                         ?>
@@ -37,16 +56,8 @@ if (!defined('ABSPATH')) exit;
                                     <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank">
                                         <?php echo esc_html($post->post_title); ?>
                                     </a>
-                                </h3>
-                                <div class="post-meta">
-                                    <span class="post-date"><?php echo get_the_date('', $post->ID); ?></span>
-                                    <span class="post-status"><?php echo esc_html($post->post_status); ?></span>
-                                    <span class="word-count"><?php echo str_word_count(strip_tags($post->post_content)); ?> words</span>
                                     <span class="summary-status <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_text); ?></span>
-                                </div>
-                                <div class="post-excerpt">
-                                    <?php echo esc_html(wp_trim_words($post->post_content, 30)); ?>
-                                </div>
+                                </h3>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -89,7 +100,7 @@ if (!defined('ABSPATH')) exit;
                     <span class="result-icon">✅</span>
                     <span class="result-text">Successfully generated: <span id="success-count">0</span></span>
                 </div>
-                <div class="result-item error">
+                <div class="result-item error" style="display: none;">
                     <span class="result-icon">❌</span>
                     <span class="result-text">Failed: <span id="error-count">0</span></span>
                 </div>
@@ -140,28 +151,52 @@ if (!defined('ABSPATH')) exit;
 
 .posts-controls {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
+    gap: 20px;
+}
+
+.controls-left {
+    display: flex;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
+.controls-right {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-select {
+    min-width: 150px;
+    height: 30px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    padding: 0 8px;
+    font-size: 13px;
+    background-color: #fff;
+}
+
 .posts-list {
-    max-height: 500px;
+    max-height: 600px;
     overflow-y: auto;
     border: 1px solid #e5e5e5;
-    border-radius: 5px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .post-item {
     display: flex;
-    align-items: flex-start;
-    padding: 15px;
+    align-items: center;
+    padding: 12px 15px;
     border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .post-item:hover {
-    background-color: #f9f9f9;
+    background-color: #f8f9fa;
 }
 
 .post-item:last-child {
@@ -171,61 +206,59 @@ if (!defined('ABSPATH')) exit;
 .post-checkbox {
     display: flex;
     align-items: center;
-    margin-right: 15px;
-    margin-top: 5px;
+    margin-right: 12px;
 }
 
 .post-checkbox input[type="checkbox"] {
     margin: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border-color: #ddd;
 }
 
 .post-info {
     flex: 1;
+    display: flex;
+    align-items: center;
 }
 
 .post-title {
-    margin: 0 0 8px 0;
-    font-size: 1.1em;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
 }
 
 .post-title a {
     text-decoration: none;
-    color: #0073aa;
+    color: #1e1e1e;
+    flex: 1;
 }
 
 .post-title a:hover {
-    text-decoration: underline;
-}
-
-.post-meta {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 8px;
-    font-size: 0.9em;
-    color: #666;
+    color: #2271b1;
 }
 
 .summary-status {
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-weight: 600;
-    font-size: 0.8em;
-}
-.summary-status.has-summary {
-    background: #e6f4ea;
-    color: #1e7e34;
-    border: 1px solid #c7ebd1;
-}
-.summary-status.missing-summary {
-    background: #fff4e5;
-    color: #9a5d00;
-    border: 1px solid #ffe1b8;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 12px;
+    white-space: nowrap;
 }
 
-.post-excerpt {
-    color: #666;
-    font-size: 0.9em;
-    line-height: 1.4;
+.summary-status.has-summary {
+    background: #e8f5e9;
+    color: #1b5e20;
+}
+
+.summary-status.missing-summary {
+    background: #fff3e0;
+    color: #e65100;
 }
 
 .bulk-actions {
@@ -298,6 +331,31 @@ if (!defined('ABSPATH')) exit;
     font-size: 1.2em;
 }
 
+.results-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.results-info p {
+    margin: 8px 0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.results-info .success-info {
+    background: #e8f5e9;
+    color: #1b5e20;
+}
+
+.results-info .error-info {
+    background: #ffebee;
+    color: #c62828;
+}
+
 .tips-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -348,6 +406,47 @@ if (!defined('ABSPATH')) exit;
         grid-template-columns: 1fr;
     }
 }
+
+/* API Status Messages */
+.api-status-success,
+.api-status-warning,
+.api-status-error {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.api-status-success {
+    background: #e8f5e9;
+    border-color: #4caf50;
+    color: #1b5e20;
+}
+
+.api-status-warning {
+    background: #fff3e0;
+    border-color: #ff9800;
+    color: #e65100;
+}
+
+.api-status-error {
+    background: #ffebee;
+    border-color: #f44336;
+    color: #c62828;
+}
+
+.api-status-warning a {
+    color: #e65100;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.api-status-warning a:hover {
+    color: #bf360c;
+}
 </style>
 
 <script>
@@ -363,9 +462,55 @@ jQuery(document).ready(function($) {
         $('#generate-bulk').prop('disabled', count === 0);
     }
     
+    // Filter posts
+    function filterPosts() {
+        var summaryFilter = $('#filter-summary').val();
+        
+        $('.post-item').each(function() {
+            var $item = $(this);
+            var hasSummary = $item.find('.summary-status').hasClass('has-summary');
+            
+            if (summaryFilter === 'all' ||
+                (summaryFilter === 'with-summary' && hasSummary) ||
+                (summaryFilter === 'without-summary' && !hasSummary)) {
+                $item.show();
+            } else {
+                $item.hide();
+            }
+        });
+    }
+    
+    // Sort posts
+    function sortPosts() {
+        var sortValue = $('#sort-posts').val();
+        var $postsList = $('.posts-list');
+        var $posts = $('.post-item').get();
+        
+        $posts.sort(function(a, b) {
+            var $titleA = $(a).find('.post-title a').text().toLowerCase();
+            var $titleB = $(b).find('.post-title a').text().toLowerCase();
+            
+            if (sortValue === 'title-asc') {
+                return $titleA.localeCompare($titleB);
+            } else if (sortValue === 'title-desc') {
+                return $titleB.localeCompare($titleA);
+            }
+            // Add date sorting if needed
+            return 0;
+        });
+        
+        $.each($posts, function(idx, item) {
+            $postsList.append(item);
+        });
+    }
+    
+    // Event handlers
+    $('#filter-summary').on('change', filterPosts);
+    $('#sort-posts').on('change', sortPosts);
+    
     // Select all posts
     $('#select-all').on('click', function() {
-        $('.post-selector').prop('checked', true);
+        $('.post-selector:visible').prop('checked', true);
         updateSelectionCount();
     });
     
@@ -390,6 +535,30 @@ jQuery(document).ready(function($) {
             return;
         }
         
+        // Check if API key is configured first
+        $.ajax({
+            url: blogTakewayAjax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'test_api_connection',
+                nonce: blogTakewayAjax.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    // API is configured, proceed with bulk generation
+                    proceedWithBulkGeneration(selectedIds);
+                } else {
+                    alert('❌ API Key Not Configured!\n\nPlease configure your OpenAI API key in the Blog TakeWay settings before generating summaries.');
+                }
+            },
+            error: function() {
+                alert('❌ Cannot verify API configuration!\n\nPlease check your Blog TakeWay settings and ensure the API key is properly configured.');
+            }
+        });
+    });
+    
+    // Proceed with bulk generation after API check
+    function proceedWithBulkGeneration(selectedIds) {
         var confirmMsg = 'Are you sure you want to generate summaries for ' + selectedIds.length + ' selected posts?\n\n';
         confirmMsg += '⚠️ Important Notes:\n';
         confirmMsg += '1. This will use your OpenAI API credits\n';
@@ -400,7 +569,7 @@ jQuery(document).ready(function($) {
         if (confirm(confirmMsg)) {
             startBulkGeneration(selectedIds);
         }
-    });
+    }
     
     // Start bulk generation
     function startBulkGeneration(postIds) {
@@ -431,10 +600,20 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     var data = response.data || {};
-                    $('#progress-status').text('Completed. Success: ' + (data.success || 0) + ', Failed: ' + (data.failed || 0));
+                    var successCount = parseInt(data.success) || 0;
+                    var failedCount = parseInt(data.failed) || 0;
+                    var totalProcessed = successCount + failedCount;
+                    
+                    // Update progress status - only show failed count if there are failures
+                    if (failedCount > 0) {
+                        $('#progress-status').text('Completed. Success: ' + successCount + ', Failed: ' + failedCount);
+                    } else {
+                        $('#progress-status').text('Completed. Success: ' + successCount);
+                    }
                     $('.progress-fill').css('width', '100%');
-                    $('#progress-current').text(postIds.length);
-                    showResults(postIds.length, data.success || 0, data.failed || 0);
+                    $('#progress-current').text(totalProcessed);
+                    showResults(postIds.length, successCount, failedCount);
+                    
                     // Update status pills for immediate feedback
                     if (Array.isArray(data.success_ids)) {
                         data.success_ids.forEach(function(id){
@@ -442,30 +621,79 @@ jQuery(document).ready(function($) {
                             meta.removeClass('missing-summary').addClass('has-summary').text('Has Summary');
                         });
                     }
+                    
+                    // Update status pills for failed items if available
+                    if (Array.isArray(data.failed_ids)) {
+                        data.failed_ids.forEach(function(id){
+                            var meta = $('.post-selector[value="' + id + '"]').closest('.post-item').find('.summary-status');
+                            meta.removeClass('has-summary').addClass('missing-summary').text('Generation Failed');
+                        });
+                    }
                 } else {
-                    $('#progress-status').text('Error: ' + response.data);
+                    var errorMsg = response.data || 'Unknown error occurred';
+                    $('#progress-status').text('Error: ' + errorMsg);
+                    showResults(postIds.length, 0, postIds.length);
                     button.prop('disabled', false);
                 }
             },
-            error: function() {
-                $('#progress-status').text('Failed to schedule bulk generation.');
+            error: function(xhr, status, error) {
+                var errorMsg = 'Failed to schedule bulk generation. ' + (error || 'Server error occurred.');
+                $('#progress-status').text(errorMsg);
+                showResults(postIds.length, 0, postIds.length);
                 button.prop('disabled', false);
             }
         });
     }
     
     // Show results
-    function showResults(total, success, errors) {
+    function showResults(total, success, failed) {
         $('.generation-progress').hide();
-        $('.generation-results').show();
-        $('#generate-bulk').prop('disabled', false);
+        
+        // Ensure we have valid numbers
+        success = parseInt(success) || 0;
+        failed = parseInt(failed) || 0;
         
         $('#success-count').text(success);
-        $('#error-count').text(errors);
+        $('#error-count').text(failed);
         
-        var details = '<p>Bulk generation has been scheduled. You can monitor progress in the <a href="' + 
-                     blogTakewayAjax.rest_url.replace('/wp-json/', '/wp-admin/admin.php?page=blog-takeway-logs') + '">Generation Logs</a> page.</p>';
+        // Show/hide error result item based on failed count
+        if (failed > 0) {
+            $('.result-item.error').show();
+        } else {
+            $('.result-item.error').hide();
+        }
+        
+        // Update the results details with more information
+        var details = '<div class="results-info">';
+        if (success > 0) {
+            details += '<p class="success-info">✅ Successfully generated summaries for ' + success + ' posts.</p>';
+        }
+        if (failed > 0) {
+            details += '<p class="error-info">❌ Failed to generate summaries for ' + failed + ' posts.</p>';
+        }
+        details += '</div>';
+        
         $('#results-details').html(details);
+        
+        // Show generation results only if there are errors or if we want to show success info
+        if (failed > 0 || success > 0) {
+            $('.generation-results').show();
+        } else {
+            $('.generation-results').hide();
+        }
+        
+        $('#generate-bulk').prop('disabled', false);
+        
+        // Update the UI to reflect the final state
+        $('.progress-fill').css('width', '100%');
+        $('#progress-current').text(total);
+        
+        // Update progress status - only show failed count if there are failures
+        if (failed > 0) {
+            $('#progress-status').text('Completed. Success: ' + success + ', Failed: ' + failed);
+        } else {
+            $('#progress-status').text('Completed. Success: ' + success);
+        }
     }
     
     // Initialize
