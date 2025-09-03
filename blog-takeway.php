@@ -91,9 +91,7 @@ class BLOG_TAKEWAY {
         add_action('wp_enqueue_scripts', [ $this, 'enqueue_scripts' ]);
         add_action('admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ]);
         
-        // Add meta box for manual summary editing
-        add_action('add_meta_boxes', [ $this, 'add_summary_meta_box' ]);
-        add_action('save_post', [ $this, 'save_summary_meta' ]);
+        // Meta box removed
         
         // Auto-generate summary when post is created/updated
         add_action('wp_insert_post', [ $this, 'auto_generate_summary_on_save' ], 10, 3);
@@ -334,89 +332,7 @@ class BLOG_TAKEWAY {
         return $html;
     }
 
-    /**
-     * Add meta box for summary editing
-     *
-     * @return void
-     */
-    public function add_summary_meta_box() {
-        add_meta_box(
-            'blog-takeway-summary',
-            'Blog Summary & Takeaways',
-            [$this, 'render_summary_meta_box'],
-            'post',
-            'normal',
-            'high'
-        );
-    }
-
-    /**
-     * Render summary meta box
-     *
-     * @param WP_Post $post The post object
-     * @return void
-     */
-    public function render_summary_meta_box($post) {
-        wp_nonce_field('blog_takeway_save_summary', 'blog_takeway_nonce');
-        
-        $summary = get_post_meta($post->ID, '_blog_takeway_summary', true);
-        $takeaways = get_post_meta($post->ID, '_blog_takeway_takeaways', true);
-        
-        if (is_string($takeaways)) {
-            $takeaways = explode("\n", $takeaways);
-        }
-        
-        if (!is_array($takeaways)) {
-            $takeaways = [];
-        }
-        
-        echo '<div class="blog-takeway-meta-box">';
-        echo '<p><label for="blog_takeway_summary"><strong>Summary:</strong></label></p>';
-        echo '<textarea id="blog_takeway_summary" name="blog_takeway_summary" rows="4" style="width: 100%;">' . esc_textarea($summary) . '</textarea>';
-        
-        echo '<p><label><strong>Key Takeaways:</strong></label></p>';
-        echo '<div id="takeaways-container">';
-        foreach ($takeaways as $index => $takeaway) {
-            echo '<div class="takeaway-item">';
-            echo '<input type="text" name="blog_takeway_takeaways[]" value="' . esc_attr($takeaway) . '" style="width: 80%;" />';
-            echo '<button type="button" class="button remove-takeaway" data-index="' . $index . '">Remove</button>';
-            echo '</div>';
-        }
-        echo '</div>';
-        echo '<button type="button" class="button add-takeaway">Add Takeaway</button>';
-        
-        echo '<p><button type="button" class="button button-primary generate-ai-summary" data-post-id="' . $post->ID . '">Generate AI Summary</button></p>';
-        echo '</div>';
-    }
-
-    /**
-     * Save summary meta data
-     *
-     * @param int $post_id The post ID
-     * @return void
-     */
-    public function save_summary_meta($post_id) {
-        if (!isset($_POST['blog_takeway_nonce']) || !wp_verify_nonce($_POST['blog_takeway_nonce'], 'blog_takeway_save_summary')) {
-            return;
-        }
-        
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-            return;
-        }
-        
-        if (!current_user_can('edit_post', $post_id)) {
-            return;
-        }
-        
-        if (isset($_POST['blog_takeway_summary'])) {
-            update_post_meta($post_id, '_blog_takeway_summary', sanitize_textarea_field($_POST['blog_takeway_summary']));
-        }
-        
-        if (isset($_POST['blog_takeway_takeaways']) && is_array($_POST['blog_takeway_takeaways'])) {
-            $takeaways = array_filter(array_map('sanitize_text_field', $_POST['blog_takeway_takeaways']));
-            update_post_meta($post_id, '_blog_takeway_takeaways', $takeaways);
-        }
-    }
+    // Meta box functions removed
 
     /**
      * Auto-generate summary when post is created/updated
@@ -427,29 +343,31 @@ class BLOG_TAKEWAY {
      * @return void
      */
     public function auto_generate_summary_on_save($post_id, $post, $update) {
-        // Only auto-generate if the post is a 'post' type and not an autosave
+        // Skip if not a post or is autosave/revision
         if ($post->post_type !== 'post' || wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) {
             return;
         }
 
-        // Only auto-generate if the post already has a summary
-        if (get_post_meta($post_id, '_blog_takeway_summary', true)) {
+        // Skip if post is not published
+        if ($post->post_status !== 'publish') {
             return;
         }
 
-        // Only auto-generate if the post already has takeaways
-        if (get_post_meta($post_id, '_blog_takeway_takeaways', true)) {
+        // Generate summary and takeaways
+        $ai_handler = new AI_API_Handler();
+        $result = $ai_handler->generate_summary($post->post_content);
+        
+        if (is_wp_error($result)) {
             return;
         }
 
-        // Only auto-generate if auto-generation is enabled
-        $settings = get_option('blog_takeway_settings', []);
-        if (isset($settings['auto_generate']) && $settings['auto_generate'] === false) {
-            return;
-        }
-
-        // Schedule the generation
-        wp_schedule_single_event(time(), 'blog_takeway_bulk_generate_cron', [$post_id]);
+        // Save to blog_summaries table
+        $database = new Blog_Summary_Database();
+        $database->save_blog_summary(
+            $post_id,
+            $result['takeaways'],
+            $result['min_read_list']
+        );
     }
 
     /**
@@ -530,14 +448,18 @@ class BLOG_TAKEWAY {
      */
     public function process_bulk_generation($post_ids) {
         $ai_handler = new AI_API_Handler();
+        $database = new Blog_Summary_Database();
         
         foreach ($post_ids as $post_id) {
             $post = get_post($post_id);
-            if ($post && $post->post_type === 'post') {
+            if ($post && $post->post_type === 'post' && $post->post_status === 'publish') {
                 $result = $ai_handler->generate_summary($post->post_content);
                 if (!is_wp_error($result)) {
-                    update_post_meta($post_id, '_blog_takeway_summary', $result['summary']);
-                    update_post_meta($post_id, '_blog_takeway_takeaways', $result['takeaways']);
+                    $database->save_blog_summary(
+                        $post_id,
+                        $result['takeaways'],
+                        $result['min_read_list']
+                    );
                 }
             }
         }

@@ -7,21 +7,29 @@ $summary_data = $database->get_summary(get_the_ID());
 
 if (!$summary_data) return;
 
-// Data is already decoded in get_summary()
-$takeaways = $summary_data['takeaways'];
+// Get min_read from database
 $min_read_list = json_decode($summary_data['min_read_list'], true);
+$min_read = $min_read_list['min_read'] ?? '5';
+
+// Get current post content
+$post = get_post();
+$content = $post->post_content;
+
+// Extract all headings from content
+preg_match_all('/<h[1-6][^>]*>(.*?)<\/h[1-6]>/i', $content, $matches);
+$headings = $matches[1] ?? [];
 ?>
 
 <div class="blog-takeway-wrapper">
     <!-- Left Side - Min Read & TOC -->
     <div class="min-read-section">
-        <h2 class="min-read-title"><?php echo esc_html($min_read_list['min_read']); ?> Min Read</h2>
+        <h2 class="min-read-title"><?php echo esc_html($min_read); ?> Min Read</h2>
         
-        <?php if (!empty($min_read_list['list_with_connection_with_section'])): ?>
+        <?php if (!empty($headings)): ?>
             <div class="toc-list">
-                <?php foreach ($min_read_list['list_with_connection_with_section'] as $section): ?>
-                    <a href="#<?php echo sanitize_title($section); ?>" class="toc-item">
-                        <?php echo esc_html($section); ?>
+                <?php foreach ($headings as $heading): ?>
+                    <a href="#<?php echo sanitize_title(strip_tags($heading)); ?>" class="toc-item">
+                        <?php echo esc_html(strip_tags($heading)); ?>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -30,33 +38,20 @@ $min_read_list = json_decode($summary_data['min_read_list'], true);
 
     <!-- Right Side - Key Takeaways -->
     <div class="key-takeaways-section">
-        <div class="key-takeaways-header">
-            <span class="star-icon">✨</span>
-            <h2>Key Takeaways</h2>
+        <div class="key-takeaways-header" id="toggleTakeaways">
+            <span class="plus-icon">+</span>
+            <span class="key-takeaways-title">Key Takeaways</span>
+            <span class="arrow-icon">▼</span>
         </div>
 
-        <?php if (!empty($takeaways)): ?>
-            <ul class="takeaways-list">
-                <?php foreach ($takeaways as $takeaway): ?>
-                    <li><?php echo esc_html($takeaway); ?></li>
-                <?php endforeach; ?>
-            </ul>
-        <?php endif; ?>
-
-        <!-- Share Section -->
-        <div class="share-section">
-            <span>Share</span>
-            <div class="share-buttons">
-                <button class="share-btn linkedin">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                </button>
-                <button class="share-btn twitter">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
-                </button>
-                <button class="share-btn facebook">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                </button>
-            </div>
+        <div class="takeaways-content" style="display: none;">
+            <?php if (!empty($summary_data['takeaways'])): ?>
+                <ul class="takeaways-list">
+                    <?php foreach ($summary_data['takeaways'] as $takeaway): ?>
+                        <li><?php echo esc_html($takeaway); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -64,8 +59,8 @@ $min_read_list = json_decode($summary_data['min_read_list'], true);
 <style>
 .blog-takeway-wrapper {
     display: flex;
-    gap: 40px;
-    margin: 40px 0;
+    gap: 2rem;
+    margin: 2rem 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -75,26 +70,27 @@ $min_read_list = json_decode($summary_data['min_read_list'], true);
 }
 
 .min-read-title {
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 600;
-    color: #111827;
-    margin: 0 0 20px 0;
-    padding-bottom: 10px;
+    color: #1a1a1a;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
     border-bottom: 2px solid #6366f1;
 }
 
 .toc-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 .toc-item {
-    color: #4B5563;
+    color: #4b5563;
     text-decoration: none;
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 0.95rem;
     transition: color 0.2s;
+    padding: 0.25rem 0;
+    line-height: 1.4;
 }
 
 .toc-item:hover {
@@ -105,25 +101,44 @@ $min_read_list = json_decode($summary_data['min_read_list'], true);
 .key-takeaways-section {
     flex: 1;
     background: #F0F7FF;
-    border-radius: 12px;
-    padding: 32px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .key-takeaways-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    gap: 1rem;
 }
 
-.star-icon {
-    font-size: 24px;
+.plus-icon {
+    color: #4B5563;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
-.key-takeaways-header h2 {
-    margin: 0;
-    font-size: 24px;
-    color: #111827;
+.key-takeaways-title {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.arrow-icon {
+    color: #4B5563;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+.arrow-icon.open {
+    transform: rotate(180deg);
+}
+
+.takeaways-content {
+    padding: 0 1.5rem 1.5rem;
 }
 
 .takeaways-list {
@@ -132,74 +147,29 @@ $min_read_list = json_decode($summary_data['min_read_list'], true);
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0.75rem;
 }
 
 .takeaways-list li {
     position: relative;
-    padding-left: 24px;
+    padding-left: 1.25rem;
     color: #374151;
     line-height: 1.6;
-    font-size: 15px;
+    font-size: 0.95rem;
 }
 
 .takeaways-list li::before {
     content: "•";
     position: absolute;
-    left: 8px;
+    left: 0;
     color: #6366f1;
     font-weight: bold;
 }
 
-/* Share Section */
-.share-section {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid #E5E7EB;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.share-section span {
-    font-size: 15px;
-    color: #4B5563;
-    font-weight: 500;
-}
-
-.share-buttons {
-    display: flex;
-    gap: 12px;
-}
-
-.share-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: #F3F4F6;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-}
-
-.share-btn:hover {
-    background: #E5E7EB;
-}
-
-.share-btn svg {
-    width: 20px;
-    height: 20px;
-    color: #4B5563;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
     .blog-takeway-wrapper {
         flex-direction: column;
-        gap: 24px;
+        gap: 1.5rem;
     }
 
     .min-read-section {
@@ -207,33 +177,31 @@ $min_read_list = json_decode($summary_data['min_read_list'], true);
     }
 
     .key-takeaways-section {
-        padding: 24px;
-    }
-
-    .share-section {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        padding: 1rem;
     }
 }
 </style>
 
 <script>
 jQuery(document).ready(function($) {
-    // Share functionality
-    $('.share-btn.linkedin').click(function() {
-        window.open('https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(window.location.href), '_blank');
-    });
-    
-    $('.share-btn.twitter').click(function() {
-        window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(window.location.href), '_blank');
-    });
-    
-    $('.share-btn.facebook').click(function() {
-        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.href), '_blank');
+    // Add IDs to all headings in the content
+    $('h1, h2, h3, h4, h5, h6').each(function() {
+        var id = sanitizeTitle($(this).text());
+        $(this).attr('id', id);
     });
 
-    // Smooth scroll for TOC
+    // Toggle takeaways section
+    $('#toggleTakeaways').click(function() {
+        var content = $('.takeaways-content');
+        var arrow = $('.arrow-icon');
+        var plus = $('.plus-icon');
+        
+        content.slideToggle(300);
+        arrow.toggleClass('open');
+        plus.text(plus.text() === '+' ? '-' : '+');
+    });
+
+    // Smooth scroll for TOC links
     $('.toc-item').click(function(e) {
         e.preventDefault();
         var target = $(this).attr('href');
@@ -241,5 +209,12 @@ jQuery(document).ready(function($) {
             scrollTop: $(target).offset().top - 100
         }, 500);
     });
+
+    // Helper function to sanitize titles for IDs
+    function sanitizeTitle(text) {
+        return text.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+    }
 });
 </script>
