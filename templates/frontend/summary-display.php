@@ -54,10 +54,7 @@ $headings = $matches[1] ?? [];
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
 }
-
-.min-read-container + div {
-    margin-left: 60px;
-}
+ 
 
 /* Sticky Sidebar State - Relative to Article Container */
 .min-read-container.sticky-sidebar {
@@ -85,6 +82,33 @@ article.category-uncategorized,
 article.ast-article-single,
 article.blogtakeway-enhanced {
     position: relative;
+}
+
+/* BlogTakeWay Wrapper */
+.blogtakeway-wrapper {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    position: relative;
+}
+
+/* Min Read Container - Sidebar */
+.min-read-container {
+    flex: 0 0 400px;
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+}
+
+/* Article Content Wrapper */
+.article-content-wrapper {
+    flex: 1;
+    min-width: 0;
+    padding: 2rem 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: all 0.3s ease;
 }
 
 /* Second Div: Article Content Container */
@@ -222,49 +246,39 @@ article.blogtakeway-enhanced {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+    .blogtakeway-wrapper {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
     .min-read-container {
+        flex: none;
+        position: relative;
+        top: auto;
+        width: 100%;
+        max-height: none;
         margin: 1.5rem 0;
         padding: 1.5rem;
     }
     
-    .min-read-container.sticky-sidebar {
-        width: 240px;
-        left: 1.5rem;
-    }
-    
-    .article-content-container.sidebar-active {
-        margin-left: 280px;
-        max-width: calc(100% - 280px);
-    }
-    
-    .article-content-container {
+    .article-content-wrapper {
+        flex: none;
+        width: 100%;
         padding: 1.5rem 0;
     }
 }
 
 @media (max-width: 768px) {
+    .blogtakeway-wrapper {
+        gap: 1rem;
+    }
+    
     .min-read-container {
         margin: 1rem 0;
         padding: 1rem;
     }
     
-    /* Disable sticky behavior on mobile */
-    .min-read-container.sticky-sidebar {
-        position: relative;
-        top: auto;
-        left: auto;
-        width: 100%;
-        height: auto;
-        max-height: none;
-        margin: 1rem 0;
-    }
-    
-    .article-content-container.sidebar-active {
-        margin-left: 0;
-        max-width: 100%;
-    }
-    
-    .article-content-container {
+    .article-content-wrapper {
         padding: 1rem 0;
     }
     
@@ -284,7 +298,7 @@ article.blogtakeway-enhanced {
         padding: 1rem;
     }
     
-    .article-content-container {
+    .article-content-wrapper {
         padding: 0.5rem 0;
     }
     
@@ -297,24 +311,56 @@ article.blogtakeway-enhanced {
     }
 }
 
-.blogtakeway-enhanced {
-    display: flex;
-}
-
-.min-read-container {
-    margin-left: -460px;
-}
-
 </style>
 
 <script>
 jQuery(document).ready(function($) {
     // Find the article element
-    var articleElement = $('article.post-38, article.post, article.type-post, article.status-publish, article.format-standard, article.hentry, article.category-uncategorized, article.ast-article-single');
+    var articleElement = $('main');
+    
+    // If main element not found, check for .main-container
+    if (articleElement.length === 0) {
+        articleElement = $('.main-container');
+    }
     
     if (articleElement.length > 0) {
+        // Check if already processed to prevent infinite loops
+        if (articleElement.hasClass('blogtakeway-enhanced') || articleElement.find('.blogtakeway-wrapper').length > 0) {
+            return; // Already processed, exit
+        }
+        
         // Add BlogTakeWay plugin class to the article element
         articleElement.addClass('blogtakeway-enhanced');
+        
+        // Get all existing content
+        var allContent = articleElement.html();
+        
+        // Find comments section and separate it properly
+        var commentsSection = '';
+        var articleContent = allContent;
+        
+        // Look for common comment selectors
+        var commentSelectors = [
+            '#comments', '.comments', '#respond', '.comment-respond',
+            '.comments-area', '#commentform', '.comment-form'
+        ];
+        
+        var tempDiv = $('<div>').html(allContent);
+        var commentsFound = false;
+        
+        commentSelectors.forEach(function(selector) {
+            var commentElement = tempDiv.find(selector);
+            if (commentElement.length > 0 && !commentsFound) {
+                // Get the entire comments section
+                commentsSection = commentElement.prop('outerHTML');
+                // Remove comments from article content using the exact HTML
+                articleContent = allContent.replace(commentsSection, '');
+                commentsFound = true;
+            }
+        });
+        
+        // Clean up any extra whitespace
+        articleContent = articleContent.trim();
         
         // Create min-read-container HTML
         var minReadHTML = `
@@ -341,8 +387,19 @@ jQuery(document).ready(function($) {
             </div>
         `;
         
-        // Append min-read-container to the article element
-        articleElement.prepend(minReadHTML);
+        // Create wrapper div containing only min-read and article content (no comments)
+        var wrapperHTML = `
+            <div class="blogtakeway-wrapper">
+                ${minReadHTML}
+                <div class="article-content-wrapper">
+                    ${articleContent}
+                </div>
+            </div>
+            ${commentsSection}
+        `;
+        
+        // Replace the content with the new wrapper structure
+        articleElement.html(wrapperHTML);
     }
 
     // Add IDs to all headings in the content
@@ -378,11 +435,11 @@ jQuery(document).ready(function($) {
             isSticky = true;
         }
         // Check if we should make it normal again (when scrolled back to top of article)
-        else if (relativeScrollTop <= (minReadOffset - articleOffset) && isSticky) {
-            minReadContainer.removeClass('sticky-sidebar');
-            articleContent.removeClass('sidebar-active');
-            isSticky = false;
-        }
+        // else if (relativeScrollTop <= (minReadOffset - articleOffset) && isSticky) {
+        //     minReadContainer.removeClass('sticky-sidebar');
+        //     articleContent.removeClass('sidebar-active');
+        //     isSticky = false;
+        // }
     }
 
     // Handle scroll events
@@ -394,10 +451,10 @@ jQuery(document).ready(function($) {
 
     // Handle window resize
     $(window).on('resize', function() {
-        if (!isSticky && minReadContainer.length > 0) {
-            minReadOffset = minReadContainer.offset().top;
-            articleOffset = articleContainer.offset().top;
-        }
+        // if (!isSticky && minReadContainer.length > 0) {
+        //     minReadOffset = minReadContainer.offset().top;
+        //     articleOffset = articleContainer.offset().top;
+        // }
     });
 
     // Smooth scroll for TOC links
