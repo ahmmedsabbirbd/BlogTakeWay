@@ -3,7 +3,7 @@ Contributors: blogtakeway
 Tags: ai, openai, summary, takeaways, blog, content, automation, gpt
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -118,6 +118,9 @@ All OpenAI models including GPT-4, GPT-3.5-turbo, and others. You can choose you
 
 == Changelog ==
 
+= 1.1.0 =
+* Most theme support the "Min Read", "Takeaways"
+
 = 1.0.0 =
 * Initial release with OpenAI API integration
 * Automatic summary generation on post publish
@@ -129,8 +132,17 @@ All OpenAI models including GPT-4, GPT-3.5-turbo, and others. You can choose you
 
 == Upgrade Notice ==
 
+= 1.1.0 =
+* Most theme support the "Min Read", "Takeaways"
+
 = 1.0.0 =
-Initial release of Blog TakeWay with full AI-powered summary generation capabilities.
+* Initial release with OpenAI API integration
+* Automatic summary generation on post publish
+* Bulk summary generation for existing posts
+* Comprehensive admin dashboard
+* Frontend display with shortcodes and widgets
+* REST API endpoints
+* Caching system and performance optimization
 
 == Support ==
 
