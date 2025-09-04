@@ -272,6 +272,7 @@ class Blog_Summary_Database {
             'archived_summaries' => 0,
             'recent_generations' => 0,
             'cache_expired' => 0,
+            'orphaned_summaries' => 0,
         ];
 
         // Total summaries
@@ -298,6 +299,13 @@ class Blog_Summary_Database {
         // Expired cache
         $stats['cache_expired'] = $this->wpdb->get_var(
             "SELECT COUNT(*) FROM {$table_name} WHERE cache_expiry < NOW()"
+        );
+
+        // Orphaned summaries (for posts that no longer exist)
+        $stats['orphaned_summaries'] = $this->wpdb->get_var(
+            "SELECT COUNT(*) FROM {$table_name} bs 
+             LEFT JOIN {$this->wpdb->posts} p ON bs.post_id = p.ID 
+             WHERE p.ID IS NULL"
         );
 
         return $stats;
@@ -450,5 +458,25 @@ class Blog_Summary_Database {
         }
 
         return $result !== false ? true : new WP_Error('database_error', 'Failed to save summary');
+    }
+
+    /**
+     * Clean up orphaned blog summaries (for posts that no longer exist)
+     *
+     * @return int Number of orphaned records cleaned up
+     */
+    public function cleanup_orphaned_summaries() {
+        $table_name = $this->table_prefix . 'blog_summaries';
+        
+        // Find and delete summaries for posts that no longer exist
+        $query = "
+            DELETE bs FROM {$table_name} bs 
+            LEFT JOIN {$this->wpdb->posts} p ON bs.post_id = p.ID 
+            WHERE p.ID IS NULL
+        ";
+        
+        $result = $this->wpdb->query($query);
+        
+        return $result !== false ? $result : 0;
     }
 }

@@ -62,8 +62,7 @@ class AI_API_Handler {
         return [
             'takeaways' => $response['takeaways'],
             'min_read_list' => [
-                'min_read' => $response['min_read'],
-                'list_with_connection_with_section' => $response['sections']
+                'min_read' => $response['min_read']
             ]
         ];
     }

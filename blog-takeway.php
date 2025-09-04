@@ -96,11 +96,23 @@ class BLOG_TAKEWAY {
         // Auto-generate summary when post is created/updated
         add_action('wp_insert_post', [ $this, 'auto_generate_summary_on_save' ], 10, 3);
         
+        // Clean up blog summaries when posts are deleted
+        add_action('before_delete_post', [ $this, 'cleanup_summary_on_post_delete' ]);
+        add_action('wp_trash_post', [ $this, 'cleanup_summary_on_post_delete' ]);
+        
         // Add REST API endpoints
         add_action('rest_api_init', [ $this, 'register_rest_endpoints' ]);
         
         // Add cron job for bulk processing
         add_action('blog_takeway_bulk_generate_cron', [ $this, 'process_bulk_generation' ]);
+        
+        // Add cron job for cleaning up orphaned summaries
+        add_action('blog_takeway_cleanup_orphaned_cron', [ $this, 'cleanup_orphaned_summaries' ]);
+        
+        // Schedule orphaned cleanup if not already scheduled
+        if (!wp_next_scheduled('blog_takeway_cleanup_orphaned_cron')) {
+            wp_schedule_event(time(), 'weekly', 'blog_takeway_cleanup_orphaned_cron');
+        }
         
         // Admin notice hook removed
     }
@@ -153,8 +165,9 @@ class BLOG_TAKEWAY {
      * @return void
      */
     public function deactivate() {
-        // Clear scheduled cron job
+        // Clear scheduled cron jobs
         wp_clear_scheduled_hook('blog_takeway_bulk_generate_cron');
+        wp_clear_scheduled_hook('blog_takeway_cleanup_orphaned_cron');
         
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -462,6 +475,37 @@ class BLOG_TAKEWAY {
                 }
             }
         }
+    }
+
+    /**
+     * Clean up blog summary when post is deleted or trashed
+     *
+     * @param int $post_id The post ID being deleted
+     * @return void
+     */
+    public function cleanup_summary_on_post_delete($post_id) {
+        // Only process for published posts
+        $post = get_post($post_id);
+        if (!$post || $post->post_type !== 'post') {
+            return;
+        }
+
+        // Delete the summary from database
+        $database = new Blog_Summary_Database();
+        $database->delete_summary($post_id);
+        
+        // Log the cleanup
+        error_log("Blog TakeWay: Cleaned up summary for deleted post ID: {$post_id}");
+    }
+
+    /**
+     * Clean up orphaned blog summaries (for posts that no longer exist)
+     *
+     * @return int Number of orphaned records cleaned up
+     */
+    public function cleanup_orphaned_summaries() {
+        $database = new Blog_Summary_Database();
+        return $database->cleanup_orphaned_summaries();
     }
 
     // Admin notice removed
