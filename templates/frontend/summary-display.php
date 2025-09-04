@@ -20,31 +20,15 @@ preg_match_all('/<h[1-6][^>]*>(.*?)<\/h[1-6]>/i', $content, $matches);
 $headings = $matches[1] ?? [];
 ?>
 
-<div class="blog-takeway-wrapper">
-    <!-- Left Side - Min Read & TOC -->
-    <div class="min-read-section">
-        <h2 class="min-read-title"><?php echo esc_html($min_read); ?> Min Read</h2>
-        
-        <?php if (!empty($headings)): ?>
-            <div class="toc-list">
-                <?php foreach ($headings as $heading): ?>
-                    <a href="#<?php echo sanitize_title(strip_tags($heading)); ?>" class="toc-item">
-                        <?php echo esc_html(strip_tags($heading)); ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
-
-    <!-- Right Side - Key Takeaways -->
+<!-- Article Content with Key Takeaways -->
+<div class="article-content-container ast-post-format- ast-no-thumb single-layout-1">
+    <!-- Key Takeaways Section -->
     <div class="key-takeaways-section">
-        <div class="key-takeaways-header" id="toggleTakeaways">
-            <span class="plus-icon">+</span>
+        <div class="key-takeaways-header">
             <span class="key-takeaways-title">Key Takeaways</span>
-            <span class="arrow-icon">▼</span>
         </div>
 
-        <div class="takeaways-content" style="display: none;">
+        <div class="takeaways-content">
             <?php if (!empty($summary_data['takeaways'])): ?>
                 <ul class="takeaways-list">
                     <?php foreach ($summary_data['takeaways'] as $takeaway): ?>
@@ -57,88 +41,158 @@ $headings = $matches[1] ?? [];
 </div>
 
 <style>
-.blog-takeway-wrapper {
-    display: flex;
-    gap: 2rem;
-    margin: 2rem 0;
+/* First Div: Min Read Container - Main Article */
+.min-read-container {
+    width: 400px;
+    min-width: 400px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 }
 
-/* Left Side Styles */
+.min-read-container + div {
+    margin-left: 60px;
+}
+
+/* Sticky Sidebar State - Relative to Article Container */
+.min-read-container.sticky-sidebar {
+    position: sticky;
+    top: 2rem;
+    left: 2rem;
+    width: 400px;
+    min-width: 400px;
+    height: fit-content;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    z-index: 100; 
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Article Container - Make it relative for absolute positioning */
+article.post-38, 
+article.post, 
+article.type-post, 
+article.status-publish, 
+article.format-standard, 
+article.hentry, 
+article.category-uncategorized, 
+article.ast-article-single,
+article.blogtakeway-enhanced {
+    position: relative;
+}
+
+/* Second Div: Article Content Container */
+.article-content-container {
+    width: 100%;
+    padding: 2rem 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: all 0.3s ease;
+}
+
+/* Min Read Section */
 .min-read-section {
-    flex: 0 0 250px;
+    margin-bottom: 2rem;
 }
 
 .min-read-title {
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #1a1a1a;
     margin: 0 0 1rem 0;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #6366f1;
+}
+
+.reading-progress {
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #6366f1;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+/* Table of Contents */
+.toc-section {
+    margin-top: 1.5rem;
 }
 
 .toc-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .toc-item {
     color: #4b5563;
     text-decoration: none;
-    font-size: 0.95rem;
-    transition: color 0.2s;
-    padding: 0.25rem 0;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
     line-height: 1.4;
+    border-left: 3px solid transparent;
+    display: block;
 }
 
 .toc-item:hover {
     color: #6366f1;
+    background: #f8fafc;
+    border-left-color: #6366f1;
 }
 
-/* Right Side Styles */
-.key-takeaways-section {
+.toc-item.active {
+    color: #6366f1;
+    background: #f0f4ff;
+    border-left-color: #6366f1;
+    font-weight: 500;
+}
+
+/* Main Content Area */
+.blog-content-wrapper {
     flex: 1;
+    min-width: 0;
+}
+
+/* Key Takeaways Section */
+.key-takeaways-section {
     background: #F0F7FF;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
+    margin-bottom: 2rem;
 }
 
 .key-takeaways-header {
     display: flex;
     align-items: center;
-    padding: 1rem 1.5rem;
-    cursor: pointer;
-    user-select: none;
-    gap: 1rem;
-}
-
-.plus-icon {
-    color: #4B5563;
-    font-size: 1.2rem;
-    font-weight: bold;
+    padding: 1.5rem 2rem;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .key-takeaways-title {
-    flex: 1;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #1F2937;
 }
 
-.arrow-icon {
-    color: #4B5563;
-    font-size: 0.8rem;
-    transition: transform 0.3s ease;
-}
-
-.arrow-icon.open {
-    transform: rotate(180deg);
-}
-
 .takeaways-content {
-    padding: 0 1.5rem 1.5rem;
+    padding: 0 2rem 2rem;
 }
 
 .takeaways-list {
@@ -152,7 +206,7 @@ $headings = $matches[1] ?? [];
 
 .takeaways-list li {
     position: relative;
-    padding-left: 1.25rem;
+    padding-left: 1.5rem;
     color: #374151;
     line-height: 1.6;
     font-size: 0.95rem;
@@ -166,39 +220,184 @@ $headings = $matches[1] ?? [];
     font-weight: bold;
 }
 
-@media (max-width: 768px) {
-    .blog-takeway-wrapper {
-        flex-direction: column;
-        gap: 1.5rem;
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .min-read-container {
+        margin: 1.5rem 0;
+        padding: 1.5rem;
     }
-
-    .min-read-section {
-        flex: none;
+    
+    .min-read-container.sticky-sidebar {
+        width: 240px;
+        left: 1.5rem;
     }
-
-    .key-takeaways-section {
-        padding: 1rem;
+    
+    .article-content-container.sidebar-active {
+        margin-left: 280px;
+        max-width: calc(100% - 280px);
+    }
+    
+    .article-content-container {
+        padding: 1.5rem 0;
     }
 }
+
+@media (max-width: 768px) {
+    .min-read-container {
+        margin: 1rem 0;
+        padding: 1rem;
+    }
+    
+    /* Disable sticky behavior on mobile */
+    .min-read-container.sticky-sidebar {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        margin: 1rem 0;
+    }
+    
+    .article-content-container.sidebar-active {
+        margin-left: 0;
+        max-width: 100%;
+    }
+    
+    .article-content-container {
+        padding: 1rem 0;
+    }
+    
+    .min-read-title {
+        font-size: 1.25rem;
+    }
+    
+    .toc-item {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .min-read-container {
+        margin: 0.5rem 0;
+        padding: 1rem;
+    }
+    
+    .article-content-container {
+        padding: 0.5rem 0;
+    }
+    
+    .key-takeaways-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .takeaways-content {
+        padding: 0 1.5rem 1.5rem;
+    }
+}
+
+.blogtakeway-enhanced {
+    display: flex;
+}
+
+.min-read-container {
+    margin-left: -460px;
+}
+
 </style>
 
 <script>
 jQuery(document).ready(function($) {
+    // Find the article element
+    var articleElement = $('article.post-38, article.post, article.type-post, article.status-publish, article.format-standard, article.hentry, article.category-uncategorized, article.ast-article-single');
+    
+    if (articleElement.length > 0) {
+        // Add BlogTakeWay plugin class to the article element
+        articleElement.addClass('blogtakeway-enhanced');
+        
+        // Create min-read-container HTML
+        var minReadHTML = `
+            <div class="min-read-container">
+                <div class="min-read-section">
+                    <h2 class="min-read-title"><?php echo esc_html($min_read); ?> Min Read</h2>
+                    <div class="reading-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <?php if (!empty($headings)): ?>
+                    <div class="toc-section">
+                        <div class="toc-list">
+                            <?php foreach ($headings as $heading): ?>
+                                <a href="#<?php echo sanitize_title(strip_tags($heading)); ?>" class="toc-item">
+                                    <?php echo esc_html(strip_tags($heading)); ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        `;
+        
+        // Append min-read-container to the article element
+        articleElement.prepend(minReadHTML);
+    }
+
     // Add IDs to all headings in the content
     $('h1, h2, h3, h4, h5, h6').each(function() {
         var id = sanitizeTitle($(this).text());
         $(this).attr('id', id);
     });
 
-    // Toggle takeaways section
-    $('#toggleTakeaways').click(function() {
-        var content = $('.takeaways-content');
-        var arrow = $('.arrow-icon');
-        var plus = $('.plus-icon');
+    // Key Takeaways section is now always visible - no toggle needed
+
+    // Sticky sidebar functionality - relative to article container
+    var minReadContainer = $('.min-read-container');
+    var articleContent = $('.article-content-container');
+    var articleContainer = articleElement; // Use the already found article element
+    var minReadOffset = 0;
+    var articleOffset = 0;
+    var isSticky = false;
+    
+    // Initialize offsets after min-read-container is created
+    if (minReadContainer.length > 0) {
+        minReadOffset = minReadContainer.offset().top;
+        articleOffset = articleContainer.offset().top;
+    }
+
+    function handleStickySidebar() {
+        var scrollTop = $(window).scrollTop();
+        var relativeScrollTop = scrollTop - articleOffset;
         
-        content.slideToggle(300);
-        arrow.toggleClass('open');
-        plus.text(plus.text() === '+' ? '-' : '+');
+        // Check if we should make it sticky (when scrolled past the min-read section within the article)
+        if (relativeScrollTop > (minReadOffset - articleOffset) && !isSticky) {
+            minReadContainer.addClass('sticky-sidebar');
+            articleContent.addClass('sidebar-active');
+            isSticky = true;
+        }
+        // Check if we should make it normal again (when scrolled back to top of article)
+        else if (relativeScrollTop <= (minReadOffset - articleOffset) && isSticky) {
+            minReadContainer.removeClass('sticky-sidebar');
+            articleContent.removeClass('sidebar-active');
+            isSticky = false;
+        }
+    }
+
+    // Handle scroll events
+    $(window).on('scroll', function() {
+        handleStickySidebar();
+        updateReadingProgress();
+        updateActiveTOC();
+    });
+
+    // Handle window resize
+    $(window).on('resize', function() {
+        if (!isSticky && minReadContainer.length > 0) {
+            minReadOffset = minReadContainer.offset().top;
+            articleOffset = articleContainer.offset().top;
+        }
     });
 
     // Smooth scroll for TOC links
@@ -209,6 +408,47 @@ jQuery(document).ready(function($) {
             scrollTop: $(target).offset().top - 100
         }, 500);
     });
+
+    // Reading progress functionality
+    function updateReadingProgress() {
+        var winHeight = $(window).height();
+        var docHeight = $(document).height();
+        var scrollTop = $(window).scrollTop();
+        var scrollPercent = (scrollTop / (docHeight - winHeight)) * 100;
+        
+        $('.progress-fill').css('width', scrollPercent + '%');
+    }
+
+    // Active TOC highlighting
+    function updateActiveTOC() {
+        var scrollPos = $(window).scrollTop() + 150;
+        
+        $('.toc-item').each(function() {
+            var target = $(this).attr('href');
+            if (target) {
+                var targetElement = $(target);
+                if (targetElement.length) {
+                    var targetTop = targetElement.offset().top;
+                    var targetBottom = targetTop + targetElement.outerHeight();
+                    
+                    if (scrollPos >= targetTop && scrollPos < targetBottom) {
+                        $('.toc-item').removeClass('active');
+                        $(this).addClass('active');
+                    }
+                }
+            }
+        });
+    }
+
+    // Update progress and active TOC on scroll
+    $(window).on('scroll', function() {
+        updateReadingProgress();
+        updateActiveTOC();
+    });
+
+    // Initial call
+    updateReadingProgress();
+    updateActiveTOC();
 
     // Helper function to sanitize titles for IDs
     function sanitizeTitle(text) {
