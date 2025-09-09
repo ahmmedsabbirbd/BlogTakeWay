@@ -16,45 +16,45 @@ if (!defined('ABSPATH')) exit;
         
         <!-- API Test Section -->
         <div class="api-test-section">
-            <h2>Test API Connection</h2>
-            <p>Test your OpenAI API connection to ensure everything is working properly.</p>
+            <h2><?php esc_html_e('Test API Connection', 'blog-takeway'); ?></h2>
+            <p><?php esc_html_e('Test your OpenAI API connection to ensure everything is working properly.', 'blog-takeway'); ?></p>
             <button type="button" class="button button-secondary" id="test-api-connection">
-                🧪 Test API Connection
+                🧪 <?php esc_html_e('Test API Connection', 'blog-takeway'); ?>
             </button>
             <div id="api-test-result"></div>
         </div>
         
         <!-- Usage Information -->
         <div class="usage-info">
-            <h2>Usage Information</h2>
+            <h2><?php esc_html_e('Usage Information', 'blog-takeway'); ?></h2>
             <div class="info-grid">
                 <div class="info-card">
-                    <h3>📊 Token Usage</h3>
-                    <p>Monitor your OpenAI API token usage to manage costs effectively.</p>
+                    <h3>📊 <?php esc_html_e('Token Usage', 'blog-takeway'); ?></h3>
+                    <p><?php esc_html_e('Monitor your OpenAI API token usage to manage costs effectively.', 'blog-takeway'); ?></p>
                     <ul>
-                        <li><strong>Short summaries:</strong> ~50-75 words (200 tokens)</li>
-                        <li><strong>Medium summaries:</strong> ~100-125 words (300 tokens)</li>
-                        <li><strong>Long summaries:</strong> ~150-200 words (500 tokens)</li>
+                        <li><strong><?php esc_html_e('Short summaries:', 'blog-takeway'); ?></strong> <?php esc_html_e('~50-75 words (200 tokens)', 'blog-takeway'); ?></li>
+                        <li><strong><?php esc_html_e('Medium summaries:', 'blog-takeway'); ?></strong> <?php esc_html_e('~100-125 words (300 tokens)', 'blog-takeway'); ?></li>
+                        <li><strong><?php esc_html_e('Long summaries:', 'blog-takeway'); ?></strong> <?php esc_html_e('~150-200 words (500 tokens)', 'blog-takeway'); ?></li>
                     </ul>
                 </div>
                 
                 <div class="info-card">
-                    <h3>⚡ Performance Tips</h3>
+                    <h3>⚡ <?php esc_html_e('Performance Tips', 'blog-takeway'); ?></h3>
                     <ul>
-                        <li>Use GPT-3.5-turbo for cost-effective summaries</li>
-                        <li>Enable caching to reduce API calls</li>
-                        <li>Use bulk generation during off-peak hours</li>
-                        <li>Monitor generation logs for errors</li>
+                        <li><?php esc_html_e('Use GPT-3.5-turbo for cost-effective summaries', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Enable caching to reduce API calls', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Use bulk generation during off-peak hours', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Monitor generation logs for errors', 'blog-takeway'); ?></li>
                     </ul>
                 </div>
                 
                 <div class="info-card">
-                    <h3>🔧 Troubleshooting</h3>
+                    <h3>🔧 <?php esc_html_e('Troubleshooting', 'blog-takeway'); ?></h3>
                     <ul>
-                        <li>Ensure your API key is valid and has sufficient credits</li>
-                        <li>Check that your content meets minimum length requirements</li>
-                        <li>Verify your WordPress cron jobs are running</li>
-                        <li>Review generation logs for specific error messages</li>
+                        <li><?php esc_html_e('Ensure your API key is valid and has sufficient credits', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Check that your content meets minimum length requirements', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Verify your WordPress cron jobs are running', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Review generation logs for specific error messages', 'blog-takeway'); ?></li>
                     </ul>
                 </div>
             </div>

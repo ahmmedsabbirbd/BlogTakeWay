@@ -365,6 +365,11 @@ class BLOG_TAKEWAY {
             return;
         }
 
+        // Check if user has permission to edit posts
+        if (!current_user_can('edit_posts')) {
+            return;
+        }
+
         // Generate summary and takeaways
         $ai_handler = new AI_API_Handler();
         $result = $ai_handler->generate_summary($post->post_content);
@@ -391,18 +396,57 @@ class BLOG_TAKEWAY {
         register_rest_route('blog-takeway/v1', '/generate-summary', [
             'methods' => 'POST',
             'callback' => [$this, 'generate_summary_endpoint'],
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
+            'permission_callback' => function($request) {
+                return current_user_can('edit_posts') && $this->verify_rest_nonce($request);
             },
+            'args' => [
+                'post_id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ],
+                'content' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                ],
+            ],
         ]);
         
         register_rest_route('blog-takeway/v1', '/bulk-generate', [
             'methods' => 'POST',
             'callback' => [$this, 'bulk_generate_endpoint'],
-            'permission_callback' => function() {
-                return current_user_can('manage_options');
+            'permission_callback' => function($request) {
+                return current_user_can('manage_options') && $this->verify_rest_nonce($request);
             },
+            'args' => [
+                'post_ids' => [
+                    'required' => true,
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'integer',
+                    ],
+                    'sanitize_callback' => function($post_ids) {
+                        return array_map('absint', $post_ids);
+                    },
+                ],
+            ],
         ]);
+    }
+
+    /**
+     * Verify REST API nonce
+     *
+     * @param WP_REST_Request $request The request object
+     * @return bool Whether nonce is valid
+     */
+    private function verify_rest_nonce($request) {
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (!$nonce) {
+            $nonce = $request->get_param('_wpnonce');
+        }
+        
+        return wp_verify_nonce($nonce, 'wp_rest');
     }
 
     /**
@@ -419,6 +463,12 @@ class BLOG_TAKEWAY {
             return new WP_REST_Response(['error' => 'Missing required parameters'], 400);
         }
         
+        // Verify post exists and user can edit it
+        $post = get_post($post_id);
+        if (!$post || !current_user_can('edit_post', $post_id)) {
+            return new WP_REST_Response(['error' => 'Invalid post or insufficient permissions'], 403);
+        }
+        
         $ai_handler = new AI_API_Handler();
         $result = $ai_handler->generate_summary($content);
         
@@ -427,8 +477,8 @@ class BLOG_TAKEWAY {
         }
         
         // Save the generated summary
-        update_post_meta($post_id, '_blog_takeway_summary', $result['summary']);
-        update_post_meta($post_id, '_blog_takeway_takeaways', $result['takeaways']);
+        update_post_meta($post_id, '_blog_takeway_summary', sanitize_textarea_field($result['summary']));
+        update_post_meta($post_id, '_blog_takeway_takeaways', array_map('sanitize_text_field', $result['takeaways']));
         
         return new WP_REST_Response($result);
     }
@@ -444,6 +494,14 @@ class BLOG_TAKEWAY {
         
         if (!$post_ids || !is_array($post_ids)) {
             return new WP_REST_Response(['error' => 'Missing post IDs'], 400);
+        }
+        
+        // Verify all posts exist and user can edit them
+        foreach ($post_ids as $post_id) {
+            $post = get_post($post_id);
+            if (!$post || !current_user_can('edit_post', $post_id)) {
+                return new WP_REST_Response(['error' => 'Invalid post ID or insufficient permissions: ' . $post_id], 403);
+            }
         }
         
         // Schedule bulk generation

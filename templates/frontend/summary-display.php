@@ -25,7 +25,7 @@ $headings = $matches[1] ?? [];
     <!-- Key Takeaways Section -->
     <div class="key-takeaways-section">
         <div class="key-takeaways-header">
-            <span class="key-takeaways-title">Key Takeaways</span>
+            <span class="key-takeaways-title"><?php esc_html_e('Key Takeaways', 'blog-takeway'); ?></span>
         </div>
 
         <div class="takeaways-content">

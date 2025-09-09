@@ -46,6 +46,9 @@ class AI_API_Handler {
             return new WP_Error('no_content', 'No content provided for summary generation');
         }
 
+        // Sanitize input content
+        $content = wp_kses_post($content);
+        
         // Clean and prepare content
         $cleaned_content = $this->clean_content($content);
         
@@ -59,10 +62,14 @@ class AI_API_Handler {
             return $response;
         }
 
+        // Sanitize response data
+        $takeaways = is_array($response['takeaways']) ? array_map('sanitize_text_field', $response['takeaways']) : [];
+        $min_read = sanitize_text_field($response['min_read'] ?? '5');
+
         return [
-            'takeaways' => $response['takeaways'],
+            'takeaways' => $takeaways,
             'min_read_list' => [
-                'min_read' => $response['min_read']
+                'min_read' => $min_read
             ]
         ];
     }

@@ -72,6 +72,18 @@ class Blog_Summary_Database {
      * @return bool|WP_Error Success status or error
      */
     public function save_summary($post_id, $summary, $takeaways = [], $ai_model = '') {
+        // Sanitize and validate input
+        $post_id = absint($post_id);
+        $summary = sanitize_textarea_field($summary);
+        $ai_model = sanitize_text_field($ai_model);
+        
+        // Sanitize takeaways array
+        if (is_array($takeaways)) {
+            $takeaways = array_map('sanitize_text_field', $takeaways);
+        } else {
+            $takeaways = [];
+        }
+        
         if (!$post_id || !$summary) {
             return new WP_Error('invalid_data', 'Invalid post ID or summary');
         }
@@ -134,6 +146,9 @@ class Blog_Summary_Database {
      * @return array|false Summary data or false if not found
      */
     public function get_summary($post_id, $check_cache = true) {
+        // Sanitize input
+        $post_id = absint($post_id);
+        
         if (!$post_id) {
             return false;
         }
@@ -216,6 +231,9 @@ class Blog_Summary_Database {
      * @return bool Success status
      */
     public function delete_summary($post_id) {
+        // Sanitize input
+        $post_id = absint($post_id);
+        
         if (!$post_id) {
             return false;
         }
@@ -376,6 +394,10 @@ class Blog_Summary_Database {
      * Save API token and selected model
      */
     public function save_api_settings($api_key, $selected_model) {
+        // Sanitize input
+        $api_key = sanitize_text_field($api_key);
+        $selected_model = sanitize_text_field($selected_model);
+        
         $table_name = $this->table_prefix . 'api_tokens';
         
         $existing = $this->wpdb->get_row("SELECT id FROM {$table_name} LIMIT 1");
@@ -418,8 +440,25 @@ class Blog_Summary_Database {
      * Save blog summary with proper JSON structure
      */
     public function save_blog_summary($post_id, $takeaways = [], $min_read_list = []) {
+        // Sanitize input
+        $post_id = absint($post_id);
+        
         if (!$post_id) {
             return new WP_Error('invalid_data', 'Invalid post ID');
+        }
+
+        // Sanitize takeaways array
+        if (is_array($takeaways)) {
+            $takeaways = array_map('sanitize_text_field', $takeaways);
+        } else {
+            $takeaways = [];
+        }
+        
+        // Sanitize min_read_list array
+        if (is_array($min_read_list)) {
+            $min_read_list = array_map('sanitize_text_field', $min_read_list);
+        } else {
+            $min_read_list = [];
         }
 
         $table_name = $this->table_prefix . 'blog_summaries';

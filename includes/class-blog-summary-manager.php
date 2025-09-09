@@ -289,6 +289,11 @@ class Blog_Summary_Manager {
             return new WP_Error('invalid_data', 'Invalid post ID or summary');
         }
 
+        // Check user capabilities
+        if (!current_user_can('edit_post', $post_id)) {
+            return new WP_Error('insufficient_permissions', 'You do not have permission to edit this post');
+        }
+
         // Update database
         $db_result = $this->database->save_summary($post_id, $summary, $takeaways);
         
@@ -310,6 +315,11 @@ class Blog_Summary_Manager {
      * @return bool Success status
      */
     public function delete_summary($post_id) {
+        // Check user capabilities
+        if (!current_user_can('delete_post', $post_id)) {
+            return false;
+        }
+
         // Delete from database
         $db_result = $this->database->delete_summary($post_id);
         
@@ -409,23 +419,74 @@ class Blog_Summary_Manager {
             'methods' => 'GET',
             'callback' => [$this, 'get_summary_rest'],
             'permission_callback' => '__return_true',
+            'args' => [
+                'id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ],
+            ],
         ]);
         
         register_rest_route('blog-takeway/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'PUT',
             'callback' => [$this, 'update_summary_rest'],
-            'permission_callback' => function() {
-                return current_user_can('edit_posts');
+            'permission_callback' => function($request) {
+                return current_user_can('edit_posts') && $this->verify_rest_nonce($request);
             },
+            'args' => [
+                'id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ],
+                'summary' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'sanitize_textarea_field',
+                ],
+                'takeaways' => [
+                    'required' => false,
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'string',
+                    ],
+                    'sanitize_callback' => function($takeaways) {
+                        return array_map('sanitize_text_field', $takeaways);
+                    },
+                ],
+            ],
         ]);
         
         register_rest_route('blog-takeway/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'DELETE',
             'callback' => [$this, 'delete_summary_rest'],
-            'permission_callback' => function() {
-                return current_user_can('delete_posts');
+            'permission_callback' => function($request) {
+                return current_user_can('delete_posts') && $this->verify_rest_nonce($request);
             },
+            'args' => [
+                'id' => [
+                    'required' => true,
+                    'type' => 'integer',
+                    'sanitize_callback' => 'absint',
+                ],
+            ],
         ]);
+    }
+
+    /**
+     * Verify REST API nonce
+     *
+     * @param WP_REST_Request $request The request object
+     * @return bool Whether nonce is valid
+     */
+    private function verify_rest_nonce($request) {
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (!$nonce) {
+            $nonce = $request->get_param('_wpnonce');
+        }
+        
+        return wp_verify_nonce($nonce, 'wp_rest');
     }
 
     /**
@@ -454,6 +515,12 @@ class Blog_Summary_Manager {
             return new WP_REST_Response(['error' => 'Summary is required'], 400);
         }
         
+        // Verify post exists and user can edit it
+        $post = get_post($post_id);
+        if (!$post || !current_user_can('edit_post', $post_id)) {
+            return new WP_REST_Response(['error' => 'Invalid post or insufficient permissions'], 403);
+        }
+        
         $result = $this->update_summary($post_id, $summary, $takeaways);
         
         if (is_wp_error($result)) {
@@ -468,6 +535,13 @@ class Blog_Summary_Manager {
      */
     public function delete_summary_rest($request) {
         $post_id = $request->get_param('id');
+        
+        // Verify post exists and user can delete it
+        $post = get_post($post_id);
+        if (!$post || !current_user_can('delete_post', $post_id)) {
+            return new WP_REST_Response(['error' => 'Invalid post or insufficient permissions'], 403);
+        }
+        
         $result = $this->delete_summary($post_id);
         
         if (!$result) {

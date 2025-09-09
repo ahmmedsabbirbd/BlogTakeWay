@@ -266,6 +266,11 @@ class Blog_Summary_Admin {
      * Render dashboard page
      */
     public function render_dashboard_page() {
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'blog-takeway'));
+        }
+        
         $database = new Blog_Summary_Database();
         $stats = $database->get_statistics();
         $table_info = $database->get_table_info();
@@ -277,6 +282,11 @@ class Blog_Summary_Admin {
      * Render settings page
      */
     public function render_settings_page() {
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'blog-takeway'));
+        }
+        
         include BLOG_TAKEWAY_PLUGIN_DIR . 'templates/admin/settings.php';
     }
 
@@ -284,6 +294,11 @@ class Blog_Summary_Admin {
      * Render bulk generator page
      */
     public function render_bulk_generator_page() {
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'blog-takeway'));
+        }
+        
         // Show all published posts so users can (re)generate for any post
         $posts = get_posts([
             'post_type' => 'post',
@@ -440,17 +455,28 @@ class Blog_Summary_Admin {
      * AJAX handler for generating summary
      */
     public function ajax_generate_summary() {
-        check_ajax_referer('blog_takeway_nonce', 'nonce');
-        
-        if (!current_user_can('edit_posts')) {
-            wp_die('Insufficient permissions');
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'blog_takeway_nonce')) {
+            wp_send_json_error('Invalid nonce');
         }
         
-        $post_id = intval($_POST['post_id']);
-        $content = sanitize_textarea_field($_POST['content']);
+        // Check user capabilities
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        // Sanitize and validate input
+        $post_id = absint($_POST['post_id'] ?? 0);
+        $content = sanitize_textarea_field($_POST['content'] ?? '');
         
         if (!$post_id || !$content) {
             wp_send_json_error('Invalid parameters');
+        }
+        
+        // Verify post exists and user can edit it
+        $post = get_post($post_id);
+        if (!$post || !current_user_can('edit_post', $post_id)) {
+            wp_send_json_error('Invalid post or insufficient permissions');
         }
         
         $ai_handler = new AI_API_Handler();
@@ -479,15 +505,28 @@ class Blog_Summary_Admin {
      * AJAX handler for bulk generating summaries
      */
     public function ajax_bulk_generate_summaries() {
-        check_ajax_referer('blog_takeway_nonce', 'nonce');
-        
-        if (!current_user_can('manage_options')) {
-            wp_die('Insufficient permissions');
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'blog_takeway_nonce')) {
+            wp_send_json_error('Invalid nonce');
         }
         
-        $post_ids = array_map('intval', $_POST['post_ids']);
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        // Sanitize and validate input
+        $post_ids = array_map('absint', $_POST['post_ids'] ?? []);
         if (empty($post_ids)) {
             wp_send_json_error('No post IDs provided');
+        }
+
+        // Verify all posts exist and user can edit them
+        foreach ($post_ids as $post_id) {
+            $post = get_post($post_id);
+            if (!$post || $post->post_type !== 'post' || !current_user_can('edit_post', $post_id)) {
+                wp_send_json_error('Invalid post or insufficient permissions: ' . $post_id);
+            }
         }
 
         // Process immediately to give instant feedback in admin
@@ -538,14 +577,18 @@ class Blog_Summary_Admin {
      * AJAX handler for testing API connection
      */
     public function ajax_test_api_connection() {
-        check_ajax_referer('blog_takeway_nonce', 'nonce');
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'blog_takeway_nonce')) {
+            wp_send_json_error('Invalid nonce');
+        }
         
+        // Check user capabilities
         if (!current_user_can('manage_options')) {
-            wp_die('Insufficient permissions');
+            wp_send_json_error('Insufficient permissions');
         }
         
         // Get API key from POST if testing new key
-        $api_key = isset($_POST['api_key']) ? sanitize_text_field($_POST['api_key']) : '';
+        $api_key = sanitize_text_field($_POST['api_key'] ?? '');
         
         if ($api_key) {
             // Testing new key

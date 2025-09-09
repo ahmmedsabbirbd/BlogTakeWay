@@ -8,29 +8,29 @@ if (!defined('ABSPATH')) exit;
     <div class="blog-takeway-bulk-generator">
         <!-- Posts list -->
         <div class="posts-section">
-            <h2>All Posts</h2>
-            <p>Select any posts to (re)generate AI summaries and takeaways. Status shows whether a summary already exists.</p>
+            <h2><?php esc_html_e('All Posts', 'blog-takeway'); ?></h2>
+            <p><?php esc_html_e('Select any posts to (re)generate AI summaries and takeaways. Status shows whether a summary already exists.', 'blog-takeway'); ?></p>
             
             <?php if (!empty($posts)): ?>
                 <div class="posts-controls">
                     <div class="controls-left">
-                        <button type="button" class="button" id="select-all">Select All</button>
-                        <button type="button" class="button" id="deselect-all">Deselect All</button>
+                        <button type="button" class="button" id="select-all"><?php esc_html_e('Select All', 'blog-takeway'); ?></button>
+                        <button type="button" class="button" id="deselect-all"><?php esc_html_e('Deselect All', 'blog-takeway'); ?></button>
                         <button type="button" class="button button-primary" id="generate-selected">
-                            🚀 Generate Summaries
+                            🚀 <?php esc_html_e('Generate Summaries', 'blog-takeway'); ?>
                         </button>
                     </div>
                     <div class="controls-right">
                         <select id="filter-summary" class="filter-select">
-                            <option value="all">All Posts</option>
-                            <option value="with-summary">With Summary</option>
-                            <option value="without-summary">Without Summary</option>
+                            <option value="all"><?php esc_html_e('All Posts', 'blog-takeway'); ?></option>
+                            <option value="with-summary"><?php esc_html_e('With Summary', 'blog-takeway'); ?></option>
+                            <option value="without-summary"><?php esc_html_e('Without Summary', 'blog-takeway'); ?></option>
                         </select>
                         <select id="sort-posts" class="filter-select">
-                            <option value="title-asc">Title (A-Z)</option>
-                            <option value="title-desc">Title (Z-A)</option>
-                            <option value="date-desc">Newest First</option>
-                            <option value="date-asc">Oldest First</option>
+                            <option value="title-asc"><?php esc_html_e('Title (A-Z)', 'blog-takeway'); ?></option>
+                            <option value="title-desc"><?php esc_html_e('Title (Z-A)', 'blog-takeway'); ?></option>
+                            <option value="date-desc"><?php esc_html_e('Newest First', 'blog-takeway'); ?></option>
+                            <option value="date-asc"><?php esc_html_e('Oldest First', 'blog-takeway'); ?></option>
                         </select>
                     </div>
                 </div>
@@ -53,7 +53,7 @@ if (!defined('ABSPATH')) exit;
                             </label>
                             <div class="post-info">
                                 <h3 class="post-title">
-                                    <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank">
+                                    <a href="<?php echo esc_url(get_edit_post_link($post->ID)); ?>" target="_blank">
                                         <?php echo esc_html($post->post_title); ?>
                                     </a>
                                     <span class="summary-status <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_text); ?></span>

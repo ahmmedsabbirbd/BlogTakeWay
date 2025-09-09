@@ -11,45 +11,45 @@ if (!defined('ABSPATH')) exit;
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
-                    <h3><?php echo esc_html($stats['total_summaries']); ?></h3>
-                    <p>Total Summaries</p>
+                    <h3><?php echo esc_html($stats['total_summaries'] ?? 0); ?></h3>
+                    <p><?php esc_html_e('Total Summaries', 'blog-takeway'); ?></p>
                 </div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-icon">✅</div>
                 <div class="stat-content">
-                    <h3><?php echo esc_html($stats['published_summaries']); ?></h3>
-                    <p>Published</p>
+                    <h3><?php echo esc_html($stats['published_summaries'] ?? 0); ?></h3>
+                    <p><?php esc_html_e('Published', 'blog-takeway'); ?></p>
                 </div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-icon">🔄</div>
                 <div class="stat-content">
-                    <h3><?php echo esc_html($stats['recent_generations']); ?></h3>
-                    <p>Recent (7 days)</p>
+                    <h3><?php echo esc_html($stats['recent_generations'] ?? 0); ?></h3>
+                    <p><?php esc_html_e('Recent (7 days)', 'blog-takeway'); ?></p>
                 </div>
             </div>
             
             <div class="stat-card">
                 <div class="stat-icon">⏰</div>
                 <div class="stat-content">
-                    <h3><?php echo esc_html($stats['cache_expired']); ?></h3>
-                    <p>Cache Expired</p>
+                    <h3><?php echo esc_html($stats['cache_expired'] ?? 0); ?></h3>
+                    <p><?php esc_html_e('Cache Expired', 'blog-takeway'); ?></p>
                 </div>
             </div>
         </div>
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <h2>Quick Actions</h2>
+            <h2><?php esc_html_e('Quick Actions', 'blog-takeway'); ?></h2>
             <div class="action-buttons">
-                <a href="<?php echo admin_url('admin.php?page=blog-takeway-bulk-generator'); ?>" class="button button-primary">
-                    🚀 Bulk Generate Summaries
+                <a href="<?php echo esc_url(admin_url('admin.php?page=blog-takeway-bulk-generator')); ?>" class="button button-primary">
+                    🚀 <?php esc_html_e('Bulk Generate Summaries', 'blog-takeway'); ?>
                 </a>
-                <a href="<?php echo admin_url('admin.php?page=blog-takeway-settings'); ?>" class="button button-secondary">
-                    ⚙️ Configure Settings
+                <a href="<?php echo esc_url(admin_url('admin.php?page=blog-takeway-settings')); ?>" class="button button-secondary">
+                    ⚙️ <?php esc_html_e('Configure Settings', 'blog-takeway'); ?>
                 </a>
             </div>
         </div>
