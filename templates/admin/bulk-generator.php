@@ -1,5 +1,7 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined('ABSPATH') ) {
+	exit;
+}
 ?>
 
 <div class="wrap">
@@ -11,7 +13,7 @@ if (!defined('ABSPATH')) exit;
             <h2><?php esc_html_e('All Posts', 'post-takeaways'); ?></h2>
             <p><?php esc_html_e('Select any posts to (re)generate AI summaries and takeaways. Status shows whether a summary already exists.', 'post-takeaways'); ?></p>
             
-            <?php if (!empty($posts)): ?>
+            <?php if ( ! empty($posts) ) : ?>
                 <div class="posts-controls">
                     <div class="controls-left">
                         <button type="button" class="button" id="select-all"><?php esc_html_e('Select All', 'post-takeaways'); ?></button>
@@ -36,13 +38,11 @@ if (!defined('ABSPATH')) exit;
                 </div>
                 
                 <div class="posts-list">
-                    <?php foreach ($posts as $post): ?>
-                        <?php 
-                            global $wpdb;
-                            $has_summary = $wpdb->get_var($wpdb->prepare(
-                                "SELECT COUNT(*) FROM {$wpdb->prefix}blog_summaries WHERE post_id = %d AND status = 'published'",
-                                $post->ID
-                            ));
+                    <?php foreach ( $posts as $post ) { ?>
+                        <?php
+                            $database = new Blog_Summary_Database();
+                            $summary = $database->get_summary($post->ID);
+                            $has_summary = !empty($summary) && $summary['status'] === 'published';
                             $status_class = $has_summary ? 'has-summary' : 'missing-summary';
                             $status_text  = $has_summary ? 'Has Summary' : 'Missing Summary';
                         ?>
@@ -60,7 +60,7 @@ if (!defined('ABSPATH')) exit;
                                 </h3>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                    <?php } ?>
                 </div>
                 
                 <div class="bulk-actions">
@@ -72,7 +72,7 @@ if (!defined('ABSPATH')) exit;
                     </button>
                 </div>
                 
-            <?php else: ?>
+            <?php else : ?>
                 <div class="no-posts">
                     <p>🎉 All published posts already have summaries!</p>
                     <p>You can manually edit existing summaries or regenerate them from individual post edit pages.</p>

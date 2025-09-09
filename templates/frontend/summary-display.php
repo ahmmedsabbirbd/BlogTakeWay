@@ -1,11 +1,15 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined('ABSPATH') ) {
+	exit;
+}
 
 // Get data from database
 $database = new Blog_Summary_Database();
 $summary_data = $database->get_summary(get_the_ID());
 
-if (!$summary_data) return;
+if ( ! $summary_data ) {
+	return;
+}
 
 // Get min_read from database
 $min_read_list = json_decode($summary_data['min_read_list'], true);
@@ -29,11 +33,11 @@ $headings = $matches[1] ?? [];
         </div>
 
         <div class="takeaways-content">
-            <?php if (!empty($summary_data['takeaways'])): ?>
+            <?php if ( ! empty($summary_data['takeaways']) ) : ?>
                 <ul class="takeaways-list">
-                    <?php foreach ($summary_data['takeaways'] as $takeaway): ?>
+                    <?php foreach ( $summary_data['takeaways'] as $takeaway ) { ?>
                         <li><?php echo esc_html($takeaway); ?></li>
-                    <?php endforeach; ?>
+                    <?php } ?>
                 </ul>
             <?php endif; ?>
         </div>
@@ -373,14 +377,14 @@ jQuery(document).ready(function($) {
                         </div>
                     </div>
                 </div>
-                <?php if (!empty($headings)): ?>
+                <?php if ( ! empty($headings) ) : ?>
                     <div class="toc-section">
                         <div class="toc-list">
-                            <?php foreach ($headings as $heading): ?>
-                                <a href="#<?php echo sanitize_title(strip_tags($heading)); ?>" class="toc-item">
-                                    <?php echo esc_html(strip_tags($heading)); ?>
+                            <?php foreach ( $headings as $heading ) { ?>
+                                <a href="#<?php echo esc_attr(sanitize_title(wp_strip_all_tags($heading))); ?>" class="toc-item">
+                                    <?php echo esc_html(wp_strip_all_tags($heading)); ?>
                                 </a>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </div>
                     </div>
                 <?php endif; ?>

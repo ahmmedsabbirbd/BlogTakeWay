@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Blog Summary Manager Class
@@ -36,7 +38,7 @@ class Blog_Summary_Manager {
     public function __construct() {
         $this->database = new Blog_Summary_Database();
         $this->ai_handler = new AI_API_Handler();
-        
+
         $this->init_hooks();
     }
 
@@ -45,43 +47,43 @@ class Blog_Summary_Manager {
      */
     private function init_hooks() {
         // Auto-generate summaries on post publish
-        add_action('wp_insert_post', [$this, 'auto_generate_summary'], 10, 3);
-        
+        add_action('wp_insert_post', [ $this, 'auto_generate_summary' ], 10, 3);
+
         // Add shortcode support
-        add_shortcode('blog_summary', [$this, 'summary_shortcode']);
-        add_shortcode('blog_takeaways', [$this, 'takeaways_shortcode']);
-        
+        add_shortcode('blog_summary', [ $this, 'summary_shortcode' ]);
+        add_shortcode('blog_takeaways', [ $this, 'takeaways_shortcode' ]);
+
         // Add widget support
-        add_action('widgets_init', [$this, 'register_widgets']);
-        
+        add_action('widgets_init', [ $this, 'register_widgets' ]);
+
         // Add REST API support
-        add_action('rest_api_init', [$this, 'register_rest_routes']);
-        
+        add_action('rest_api_init', [ $this, 'register_rest_routes' ]);
+
         // Add cron job for cache cleanup
-        add_action('post_takeaways_cache_cleanup', [$this, 'cleanup_expired_cache']);
-        
+        add_action('post_takeaways_cache_cleanup', [ $this, 'cleanup_expired_cache' ]);
+
         // Schedule cache cleanup if not already scheduled
-        if (!wp_next_scheduled('post_takeaways_cache_cleanup')) {
+        if ( ! wp_next_scheduled('post_takeaways_cache_cleanup') ) {
             wp_schedule_event(time(), 'daily', 'post_takeaways_cache_cleanup');
         }
 
         // Display summary in blog posts
-        add_filter('the_content', [$this, 'display_summary']);
+        add_filter('the_content', [ $this, 'display_summary' ]);
     }
 
     /**
      * Display summary in blog posts
      */
-    public function display_summary($content) {
+    public function display_summary( $content ) {
         // Only show on single posts
-        if (!is_single() || !in_the_loop()) {
+        if ( ! is_single() || ! in_the_loop() ) {
             return $content;
         }
 
         $post_id = get_the_ID();
         $summary_data = $this->database->get_summary($post_id);
 
-        if (!$summary_data) {
+        if ( ! $summary_data ) {
             return $content;
         }
 
@@ -93,7 +95,7 @@ class Blog_Summary_Manager {
         $settings = get_option('post_takeaways_settings', []);
         $position = isset($settings['display_position']) ? $settings['display_position'] : 'after_title';
 
-        switch ($position) {
+        switch ( $position ) {
             case 'after_title':
                 return $summary_html . $content;
             case 'before_content':
@@ -112,38 +114,38 @@ class Blog_Summary_Manager {
      * @param WP_Post $post The post object
      * @param bool $update Whether this is an update
      */
-    public function auto_generate_summary($post_id, $post, $update) {
+    public function auto_generate_summary( $post_id, $post, $update ) {
         // Only process posts, not pages or other post types
-        if ($post->post_type !== 'post') {
+        if ( $post->post_type !== 'post' ) {
             return;
         }
 
         // Check if auto-generation is enabled
         $settings = get_option('post_takeaways_settings', []);
-        if (!isset($settings['auto_generate']) || !$settings['auto_generate']) {
+        if ( ! isset($settings['auto_generate']) || ! $settings['auto_generate'] ) {
             return;
         }
 
         // Skip if this is an update and summary already exists
-        if ($update) {
+        if ( $update ) {
             $existing_summary = get_post_meta($post_id, '_post_takeaways_summary', true);
-            if (!empty($existing_summary)) {
+            if ( ! empty($existing_summary) ) {
                 return;
             }
         }
 
         // Skip if post is not published
-        if ($post->post_status !== 'publish') {
+        if ( $post->post_status !== 'publish' ) {
             return;
         }
 
         // Skip if content is too short
-        if (strlen(wp_strip_all_tags($post->post_content)) < 100) {
+        if ( strlen(wp_strip_all_tags($post->post_content)) < 100 ) {
             return;
         }
 
         // Generate summary asynchronously to avoid blocking the publish process
-        wp_schedule_single_event(time() + 30, 'post_takeaways_generate_summary_cron', [$post_id]);
+        wp_schedule_single_event(time() + 30, 'post_takeaways_generate_summary_cron', [ $post_id ]);
     }
 
     /**
@@ -152,15 +154,15 @@ class Blog_Summary_Manager {
      * @param int $post_id The post ID
      * @return array|WP_Error Generated summary or error
      */
-    public function generate_summary_for_post($post_id) {
+    public function generate_summary_for_post( $post_id ) {
         $post = get_post($post_id);
-        if (!$post || $post->post_type !== 'post') {
+        if ( ! $post || $post->post_type !== 'post' ) {
             return new WP_Error('invalid_post', 'Invalid post ID or post type');
         }
 
         // Check if summary already exists
         $existing_summary = get_post_meta($post_id, '_post_takeaways_summary', true);
-        if (!empty($existing_summary)) {
+        if ( ! empty($existing_summary) ) {
             return [
                 'summary' => $existing_summary,
                 'takeaways' => get_post_meta($post_id, '_post_takeaways_takeaways', true),
@@ -170,8 +172,8 @@ class Blog_Summary_Manager {
 
         // Generate new summary
         $result = $this->ai_handler->generate_summary($post->post_content);
-        
-        if (is_wp_error($result)) {
+
+        if ( is_wp_error($result) ) {
             // Log the error
             $this->database->log_generation(
                 $post_id,
@@ -193,7 +195,7 @@ class Blog_Summary_Manager {
             $result['model']
         );
 
-        if (is_wp_error($db_result)) {
+        if ( is_wp_error($db_result) ) {
             return $db_result;
         }
 
@@ -211,22 +213,22 @@ class Blog_Summary_Manager {
      * @param array $options Generation options
      * @return array Results for each post
      */
-    public function bulk_generate_summaries($post_ids, $options = []) {
+    public function bulk_generate_summaries( $post_ids, $options = [] ) {
         $results = [];
         $success_count = 0;
         $error_count = 0;
 
-        foreach ($post_ids as $post_id) {
+        foreach ( $post_ids as $post_id ) {
             $result = $this->generate_summary_for_post($post_id);
-            
-            if (is_wp_error($result)) {
-                $results[$post_id] = [
+
+            if ( is_wp_error($result) ) {
+                $results[ $post_id ] = [
                     'success' => false,
                     'error' => $result->get_error_message(),
                 ];
                 $error_count++;
             } else {
-                $results[$post_id] = [
+                $results[ $post_id ] = [
                     'success' => true,
                     'summary' => $result['summary'],
                     'takeaways' => $result['takeaways'],
@@ -253,19 +255,19 @@ class Blog_Summary_Manager {
      * @param bool $force_refresh Force refresh from database
      * @return array|false Summary data or false if not found
      */
-    public function get_summary($post_id, $force_refresh = false) {
+    public function get_summary( $post_id, $force_refresh = false ) {
         // Try to get from database first
-        $db_summary = $this->database->get_summary($post_id, !$force_refresh);
-        
-        if ($db_summary) {
+        $db_summary = $this->database->get_summary($post_id, ! $force_refresh);
+
+        if ( $db_summary ) {
             return $db_summary;
         }
 
         // Fallback to post meta
         $summary = get_post_meta($post_id, '_post_takeaways_summary', true);
         $takeaways = get_post_meta($post_id, '_post_takeaways_takeaways', true);
-        
-        if (!empty($summary)) {
+
+        if ( ! empty($summary) ) {
             return [
                 'summary' => $summary,
                 'takeaways' => $takeaways,
@@ -284,20 +286,20 @@ class Blog_Summary_Manager {
      * @param array $takeaways The takeaways array
      * @return bool|WP_Error Success status or error
      */
-    public function update_summary($post_id, $summary, $takeaways = []) {
-        if (!$post_id || !$summary) {
+    public function update_summary( $post_id, $summary, $takeaways = [] ) {
+        if ( ! $post_id || ! $summary ) {
             return new WP_Error('invalid_data', 'Invalid post ID or summary');
         }
 
         // Check user capabilities
-        if (!current_user_can('edit_post', $post_id)) {
+        if ( ! current_user_can('edit_post', $post_id) ) {
             return new WP_Error('insufficient_permissions', 'You do not have permission to edit this post');
         }
 
         // Update database
         $db_result = $this->database->save_summary($post_id, $summary, $takeaways);
-        
-        if (is_wp_error($db_result)) {
+
+        if ( is_wp_error($db_result) ) {
             return $db_result;
         }
 
@@ -314,15 +316,15 @@ class Blog_Summary_Manager {
      * @param int $post_id The post ID
      * @return bool Success status
      */
-    public function delete_summary($post_id) {
+    public function delete_summary( $post_id ) {
         // Check user capabilities
-        if (!current_user_can('delete_post', $post_id)) {
+        if ( ! current_user_can('delete_post', $post_id) ) {
             return false;
         }
 
         // Delete from database
         $db_result = $this->database->delete_summary($post_id);
-        
+
         // Delete from post meta
         delete_post_meta($post_id, '_post_takeaways_summary');
         delete_post_meta($post_id, '_post_takeaways_takeaways');
@@ -336,7 +338,7 @@ class Blog_Summary_Manager {
      * @param array $atts Shortcode attributes
      * @return string Shortcode output
      */
-    public function summary_shortcode($atts) {
+    public function summary_shortcode( $atts ) {
         $atts = shortcode_atts([
             'post_id' => get_the_ID(),
             'show_title' => 'true',
@@ -345,23 +347,23 @@ class Blog_Summary_Manager {
 
         $post_id = intval($atts['post_id']);
         $summary_data = $this->get_summary($post_id);
-        
-        if (!$summary_data || empty($summary_data['summary'])) {
+
+        if ( ! $summary_data || empty($summary_data['summary']) ) {
             return '';
         }
 
-        $class = !empty($atts['class']) ? ' ' . esc_attr($atts['class']) : '';
+        $class = ! empty($atts['class']) ? ' ' . esc_attr($atts['class']) : '';
         $show_title = filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN);
-        
+
         $output = '<div class="post-takeaways-summary-shortcode' . $class . '">';
-        
-        if ($show_title) {
+
+        if ( $show_title ) {
             $output .= '<h3 class="summary-title">📝 Summary</h3>';
         }
-        
+
         $output .= '<div class="summary-content">' . wpautop($summary_data['summary']) . '</div>';
         $output .= '</div>';
-        
+
         return $output;
     }
 
@@ -371,7 +373,7 @@ class Blog_Summary_Manager {
      * @param array $atts Shortcode attributes
      * @return string Shortcode output
      */
-    public function takeaways_shortcode($atts) {
+    public function takeaways_shortcode( $atts ) {
         $atts = shortcode_atts([
             'post_id' => get_the_ID(),
             'show_title' => 'true',
@@ -380,27 +382,27 @@ class Blog_Summary_Manager {
 
         $post_id = intval($atts['post_id']);
         $summary_data = $this->get_summary($post_id);
-        
-        if (!$summary_data || empty($summary_data['takeaways'])) {
+
+        if ( ! $summary_data || empty($summary_data['takeaways']) ) {
             return '';
         }
 
-        $class = !empty($atts['class']) ? ' ' . esc_attr($atts['class']) : '';
+        $class = ! empty($atts['class']) ? ' ' . esc_attr($atts['class']) : '';
         $show_title = filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN);
-        
+
         $output = '<div class="post-takeaways-takeaways-shortcode' . $class . '">';
-        
-        if ($show_title) {
+
+        if ( $show_title ) {
             $output .= '<h3 class="takeaways-title">🎯 Key Takeaways</h3>';
         }
-        
+
         $output .= '<ul class="takeaways-list">';
-        foreach ($summary_data['takeaways'] as $takeaway) {
+        foreach ( $summary_data['takeaways'] as $takeaway ) {
             $output .= '<li>' . esc_html($takeaway) . '</li>';
         }
         $output .= '</ul>';
         $output .= '</div>';
-        
+
         return $output;
     }
 
@@ -417,7 +419,7 @@ class Blog_Summary_Manager {
     public function register_rest_routes() {
         register_rest_route('post-takeaways/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'GET',
-            'callback' => [$this, 'get_summary_rest'],
+            'callback' => [ $this, 'get_summary_rest' ],
             'permission_callback' => '__return_true',
             'args' => [
                 'id' => [
@@ -427,11 +429,11 @@ class Blog_Summary_Manager {
                 ],
             ],
         ]);
-        
+
         register_rest_route('post-takeaways/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'PUT',
-            'callback' => [$this, 'update_summary_rest'],
-            'permission_callback' => function($request) {
+            'callback' => [ $this, 'update_summary_rest' ],
+            'permission_callback' => function ( $request ) {
                 return current_user_can('edit_posts') && $this->verify_rest_nonce($request);
             },
             'args' => [
@@ -451,17 +453,17 @@ class Blog_Summary_Manager {
                     'items' => [
                         'type' => 'string',
                     ],
-                    'sanitize_callback' => function($takeaways) {
+                    'sanitize_callback' => function ( $takeaways ) {
                         return array_map('sanitize_text_field', $takeaways);
                     },
                 ],
             ],
         ]);
-        
+
         register_rest_route('post-takeaways/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'DELETE',
-            'callback' => [$this, 'delete_summary_rest'],
-            'permission_callback' => function($request) {
+            'callback' => [ $this, 'delete_summary_rest' ],
+            'permission_callback' => function ( $request ) {
                 return current_user_can('delete_posts') && $this->verify_rest_nonce($request);
             },
             'args' => [
@@ -480,75 +482,75 @@ class Blog_Summary_Manager {
      * @param WP_REST_Request $request The request object
      * @return bool Whether nonce is valid
      */
-    private function verify_rest_nonce($request) {
+    private function verify_rest_nonce( $request ) {
         $nonce = $request->get_header('X-WP-Nonce');
-        if (!$nonce) {
+        if ( ! $nonce ) {
             $nonce = $request->get_param('_wpnonce');
         }
-        
+
         return wp_verify_nonce($nonce, 'wp_rest');
     }
 
     /**
      * Get summary REST endpoint
      */
-    public function get_summary_rest($request) {
+    public function get_summary_rest( $request ) {
         $post_id = $request->get_param('id');
         $summary = $this->get_summary($post_id);
-        
-        if (!$summary) {
-            return new WP_REST_Response(['error' => 'Summary not found'], 404);
+
+        if ( ! $summary ) {
+            return new WP_REST_Response([ 'error' => 'Summary not found' ], 404);
         }
-        
+
         return new WP_REST_Response($summary);
     }
 
     /**
      * Update summary REST endpoint
      */
-    public function update_summary_rest($request) {
+    public function update_summary_rest( $request ) {
         $post_id = $request->get_param('id');
         $summary = $request->get_param('summary');
         $takeaways = $request->get_param('takeaways');
-        
-        if (!$summary) {
-            return new WP_REST_Response(['error' => 'Summary is required'], 400);
+
+        if ( ! $summary ) {
+            return new WP_REST_Response([ 'error' => 'Summary is required' ], 400);
         }
-        
+
         // Verify post exists and user can edit it
         $post = get_post($post_id);
-        if (!$post || !current_user_can('edit_post', $post_id)) {
-            return new WP_REST_Response(['error' => 'Invalid post or insufficient permissions'], 403);
+        if ( ! $post || ! current_user_can('edit_post', $post_id) ) {
+            return new WP_REST_Response([ 'error' => 'Invalid post or insufficient permissions' ], 403);
         }
-        
+
         $result = $this->update_summary($post_id, $summary, $takeaways);
-        
-        if (is_wp_error($result)) {
-            return new WP_REST_Response(['error' => $result->get_error_message()], 500);
+
+        if ( is_wp_error($result) ) {
+            return new WP_REST_Response([ 'error' => $result->get_error_message() ], 500);
         }
-        
-        return new WP_REST_Response(['message' => 'Summary updated successfully']);
+
+        return new WP_REST_Response([ 'message' => 'Summary updated successfully' ]);
     }
 
     /**
      * Delete summary REST endpoint
      */
-    public function delete_summary_rest($request) {
+    public function delete_summary_rest( $request ) {
         $post_id = $request->get_param('id');
-        
+
         // Verify post exists and user can delete it
         $post = get_post($post_id);
-        if (!$post || !current_user_can('delete_post', $post_id)) {
-            return new WP_REST_Response(['error' => 'Invalid post or insufficient permissions'], 403);
+        if ( ! $post || ! current_user_can('delete_post', $post_id) ) {
+            return new WP_REST_Response([ 'error' => 'Invalid post or insufficient permissions' ], 403);
         }
-        
+
         $result = $this->delete_summary($post_id);
-        
-        if (!$result) {
-            return new WP_REST_Response(['error' => 'Failed to delete summary'], 500);
+
+        if ( ! $result ) {
+            return new WP_REST_Response([ 'error' => 'Failed to delete summary' ], 500);
         }
-        
-        return new WP_REST_Response(['message' => 'Summary deleted successfully']);
+
+        return new WP_REST_Response([ 'message' => 'Summary deleted successfully' ]);
     }
 
     /**
@@ -556,9 +558,9 @@ class Blog_Summary_Manager {
      */
     public function cleanup_expired_cache() {
         $cleaned = $this->database->clean_expired_cache();
-        
-        if ($cleaned > 0) {
-            error_log("Post Takeaways: Cleaned up {$cleaned} expired cache entries");
+
+        if ( $cleaned > 0 ) {
+            // error_log("Post Takeaways: Cleaned up {$cleaned} expired cache entries");
         }
     }
 
@@ -572,7 +574,7 @@ class Blog_Summary_Manager {
     /**
      * Get generation logs
      */
-    public function get_generation_logs($args = []) {
+    public function get_generation_logs( $args = [] ) {
         return $this->database->get_generation_logs($args);
     }
 
@@ -600,82 +602,82 @@ class Blog_Summary_Widget extends WP_Widget {
         parent::__construct(
             'blog_summary_widget',
             'Blog Summary Widget',
-            ['description' => 'Display blog summary and takeaways in a widget']
+            [ 'description' => 'Display blog summary and takeaways in a widget' ]
         );
     }
 
-    public function widget($args, $instance) {
-        $title = !empty($instance['title']) ? $instance['title'] : 'Blog Summary';
-        $show_summary = !empty($instance['show_summary']);
-        $show_takeaways = !empty($instance['show_takeaways']);
-        $post_id = !empty($instance['post_id']) ? intval($instance['post_id']) : get_the_ID();
+    public function widget( $args, $instance ) {
+        $title = ! empty($instance['title']) ? $instance['title'] : 'Blog Summary';
+        $show_summary = ! empty($instance['show_summary']);
+        $show_takeaways = ! empty($instance['show_takeaways']);
+        $post_id = ! empty($instance['post_id']) ? intval($instance['post_id']) : get_the_ID();
 
-        if (!$post_id) {
+        if ( ! $post_id ) {
             return;
         }
 
         $manager = Blog_Summary_Manager::get_instance();
         $summary_data = $manager->get_summary($post_id);
 
-        if (!$summary_data) {
+        if ( ! $summary_data ) {
             return;
         }
 
-        echo $args['before_widget'];
-        echo $args['before_title'] . esc_html($title) . $args['after_title'];
+        echo wp_kses_post($args['before_widget']);
+        echo wp_kses_post($args['before_title']) . esc_html($title) . wp_kses_post($args['after_title']);
 
-        if ($show_summary && !empty($summary_data['summary'])) {
+        if ( $show_summary && ! empty($summary_data['summary']) ) {
             echo '<div class="widget-summary">';
             echo '<h4>📝 Summary</h4>';
             echo '<p>' . esc_html($summary_data['summary']) . '</p>';
             echo '</div>';
         }
 
-        if ($show_takeaways && !empty($summary_data['takeaways'])) {
+        if ( $show_takeaways && ! empty($summary_data['takeaways']) ) {
             echo '<div class="widget-takeaways">';
             echo '<h4>🎯 Key Takeaways</h4>';
             echo '<ul>';
-            foreach ($summary_data['takeaways'] as $takeaway) {
+            foreach ( $summary_data['takeaways'] as $takeaway ) {
                 echo '<li>' . esc_html($takeaway) . '</li>';
             }
             echo '</ul>';
             echo '</div>';
         }
 
-        echo $args['after_widget'];
+        echo wp_kses_post($args['after_widget']);
     }
 
-    public function form($instance) {
-        $title = !empty($instance['title']) ? $instance['title'] : 'Blog Summary';
-        $show_summary = !empty($instance['show_summary']);
-        $show_takeaways = !empty($instance['show_takeaways']);
-        $post_id = !empty($instance['post_id']) ? $instance['post_id'] : '';
+    public function form( $instance ) {
+        $title = ! empty($instance['title']) ? $instance['title'] : 'Blog Summary';
+        $show_summary = ! empty($instance['show_summary']);
+        $show_takeaways = ! empty($instance['show_takeaways']);
+        $post_id = ! empty($instance['post_id']) ? $instance['post_id'] : '';
         ?>
         <p>
-            <label for="<?php echo $this->get_field_id('title'); ?>">Title:</label>
-            <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>">
+            <label for="<?php echo esc_attr($this->get_field_id('title')); ?>">Title:</label>
+            <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($title); ?>">
         </p>
         <p>
-            <label for="<?php echo $this->get_field_id('post_id'); ?>">Post ID (leave empty for current post):</label>
-            <input class="widefat" id="<?php echo $this->get_field_id('post_id'); ?>" name="<?php echo $this->get_field_name('post_id'); ?>" type="number" value="<?php echo esc_attr($post_id); ?>">
+            <label for="<?php echo esc_attr($this->get_field_id('post_id')); ?>">Post ID (leave empty for current post):</label>
+            <input class="widefat" id="<?php echo esc_attr($this->get_field_id('post_id')); ?>" name="<?php echo esc_attr($this->get_field_name('post_id')); ?>" type="number" value="<?php echo esc_attr($post_id); ?>">
         </p>
         <p>
-            <input class="checkbox" type="checkbox" <?php checked($show_summary); ?> id="<?php echo $this->get_field_id('show_summary'); ?>" name="<?php echo $this->get_field_name('show_summary'); ?>" />
-            <label for="<?php echo $this->get_field_id('show_summary'); ?>">Show Summary</label>
+            <input class="checkbox" type="checkbox" <?php checked($show_summary); ?> id="<?php echo esc_attr($this->get_field_id('show_summary')); ?>" name="<?php echo esc_attr($this->get_field_name('show_summary')); ?>" />
+            <label for="<?php echo esc_attr($this->get_field_id('show_summary')); ?>">Show Summary</label>
         </p>
         <p>
-            <input class="checkbox" type="checkbox" <?php checked($show_takeaways); ?> id="<?php echo $this->get_field_id('show_takeaways'); ?>" name="<?php echo $this->get_field_name('show_takeaways'); ?>" />
-            <label for="<?php echo $this->get_field_id('show_takeaways'); ?>">Show Takeaways</label>
+            <input class="checkbox" type="checkbox" <?php checked($show_takeaways); ?> id="<?php echo esc_attr($this->get_field_id('show_takeaways')); ?>" name="<?php echo esc_attr($this->get_field_name('show_takeaways')); ?>" />
+            <label for="<?php echo esc_attr($this->get_field_id('show_takeaways')); ?>">Show Takeaways</label>
         </p>
         <?php
     }
 
-    public function update($new_instance, $old_instance) {
+    public function update( $new_instance, $old_instance ) {
         $instance = [];
-        $instance['title'] = !empty($new_instance['title']) ? strip_tags($new_instance['title']) : '';
-        $instance['post_id'] = !empty($new_instance['post_id']) ? intval($new_instance['post_id']) : '';
-        $instance['show_summary'] = !empty($new_instance['show_summary']);
-        $instance['show_takeaways'] = !empty($new_instance['show_takeaways']);
+        $instance['title'] = ! empty($new_instance['title']) ? wp_strip_all_tags($new_instance['title']) : '';
+        $instance['post_id'] = ! empty($new_instance['post_id']) ? intval($new_instance['post_id']) : '';
+        $instance['show_summary'] = ! empty($new_instance['show_summary']);
+        $instance['show_takeaways'] = ! empty($new_instance['show_takeaways']);
         return $instance;
     }
 }

@@ -33,7 +33,6 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 /**
  * Main plugin class for Post Takeaways
  *
- * 
  * Handles initialization, dependencies loading, and core functionality
  * of the Post Takeaways plugin for WordPress.
  *
@@ -70,14 +69,14 @@ class BLOG_TAKEWAY {
         define('BLOG_TAKEWAY_TEXT_DOMAIN', 'post-takeaways');
 
         // Initialize components
-        add_action('init', [ $this, 'init' ]); 
+        add_action('init', [ $this, 'init' ]);
         register_activation_hook(__FILE__, [ $this, 'activate' ]);
         register_deactivation_hook(__FILE__, [ $this, 'deactivate' ]);
-        
+
         // Load required files
-        $this->load_dependencies(); 
+        $this->load_dependencies();
     }
-    
+
     /**
      * Initialize plugin hooks and features
      *
@@ -86,34 +85,34 @@ class BLOG_TAKEWAY {
     public function init() {
         // Load dependencies first
         $this->load_dependencies();
-        
+
         // Enqueue scripts
         add_action('wp_enqueue_scripts', [ $this, 'enqueue_scripts' ]);
         add_action('admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ]);
-        
+
         // Meta box removed
-        
+
         // Auto-generate summary when post is created/updated
         add_action('wp_insert_post', [ $this, 'auto_generate_summary_on_save' ], 10, 3);
-        
+
         // Clean up blog summaries when posts are deleted
         add_action('before_delete_post', [ $this, 'cleanup_summary_on_post_delete' ]);
         add_action('wp_trash_post', [ $this, 'cleanup_summary_on_post_delete' ]);
-        
+
         // Add REST API endpoints
         add_action('rest_api_init', [ $this, 'register_rest_endpoints' ]);
-        
+
         // Add cron job for bulk processing
         add_action('post_takeaways_bulk_generate_cron', [ $this, 'process_bulk_generation' ]);
-        
+
         // Add cron job for cleaning up orphaned summaries
         add_action('post_takeaways_cleanup_orphaned_cron', [ $this, 'cleanup_orphaned_summaries' ]);
-        
+
         // Schedule orphaned cleanup if not already scheduled
-        if (!wp_next_scheduled('post_takeaways_cleanup_orphaned_cron')) {
+        if ( ! wp_next_scheduled('post_takeaways_cleanup_orphaned_cron') ) {
             wp_schedule_event(time(), 'weekly', 'post_takeaways_cleanup_orphaned_cron');
         }
-        
+
         // Admin notice hook removed
     }
 
@@ -130,14 +129,14 @@ class BLOG_TAKEWAY {
         include_once BLOG_TAKEWAY_PLUGIN_DIR . 'includes/class-ai-api-handler.php';
 
         // Initialize admin class early so admin_menu hooks register in time
-        if (is_admin()) {
+        if ( is_admin() ) {
             Blog_Summary_Admin::get_instance();
         }
 
         // Initialize Summary Manager
         Blog_Summary_Manager::get_instance();
     }
- 
+
     /**
      * Handle plugin activation tasks
      *
@@ -146,15 +145,15 @@ class BLOG_TAKEWAY {
     public function activate() {
         // Initialize Post Takeaways database
         $blog_summary_db = new Blog_Summary_Database();
-        
+
         // Create default settings
         $this->create_default_settings();
-        
+
         // Schedule cron job for bulk processing
-        if (!wp_next_scheduled('post_takeaways_bulk_generate_cron')) {
+        if ( ! wp_next_scheduled('post_takeaways_bulk_generate_cron') ) {
             wp_schedule_event(time(), 'hourly', 'post_takeaways_bulk_generate_cron');
         }
-        
+
         // Flush rewrite rules
         flush_rewrite_rules();
     }
@@ -168,7 +167,7 @@ class BLOG_TAKEWAY {
         // Clear scheduled cron jobs
         wp_clear_scheduled_hook('post_takeaways_bulk_generate_cron');
         wp_clear_scheduled_hook('post_takeaways_cleanup_orphaned_cron');
-        
+
         // Flush rewrite rules
         flush_rewrite_rules();
     }
@@ -190,7 +189,7 @@ class BLOG_TAKEWAY {
             'enable_takeaways' => true,
             'cache_duration' => 86400, // 24 hours
         ];
-        
+
         add_option('post_takeaways_settings', $default_settings);
     }
 
@@ -200,18 +199,18 @@ class BLOG_TAKEWAY {
      * @return void
      */
     public function enqueue_scripts() {
-        if (is_single() && get_post_type() === 'post') {
+        if ( is_single() && get_post_type() === 'post' ) {
             wp_enqueue_style(
                 'post-takeaways-frontend',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-widget.css',
                 [],
                 BLOG_TAKEWAY_VERSION
             );
-            
+
             wp_enqueue_script(
                 'post-takeaways-frontend',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-widget.js',
-                ['jquery'],
+                [ 'jquery' ],
                 BLOG_TAKEWAY_VERSION,
                 true
             );
@@ -223,23 +222,23 @@ class BLOG_TAKEWAY {
      *
      * @return void
      */
-    public function enqueue_admin_scripts($hook) {
-        if (strpos($hook, 'post-takeaways') !== false) {
+    public function enqueue_admin_scripts( $hook ) {
+        if ( strpos($hook, 'post-takeaways') !== false ) {
             wp_enqueue_style(
                 'post-takeaways-admin',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-admin.css',
                 [],
                 BLOG_TAKEWAY_VERSION
             );
-            
+
             wp_enqueue_script(
                 'post-takeaways-admin',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-admin.js',
-                ['jquery', 'wp-api'],
+                [ 'jquery', 'wp-api' ],
                 BLOG_TAKEWAY_VERSION,
                 true
             );
-            
+
             wp_localize_script('post-takeaways-admin', 'postTakeawaysAjax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('post_takeaways_nonce'),
@@ -255,7 +254,7 @@ class BLOG_TAKEWAY {
      * @param array $takeaways The takeaways array
      * @return string HTML output
      */
-    private function render_summary_html($summary, $takeaways) {
+    private function render_summary_html( $summary, $takeaways ) {
         $post_id = get_the_ID();
         $html  = '<div class="post-takeaways-summary" id="post-takeaways-summary-' . $post_id . '">';
 
@@ -284,18 +283,18 @@ class BLOG_TAKEWAY {
         </style>';
 
         $html .= '<div class="btw-layout">';
-        
+
         // Left Sidebar with Summary and Takeaways
         $html .= '<aside class="btw-sidebar">';
 
-        if (!empty($summary)) {
+        if ( ! empty($summary) ) {
             $html .= '<div class="btw-summary-card" aria-labelledby="btw-summary-title-' . $post_id . '">';
             $html .= '<h3 id="btw-summary-title-' . $post_id . '">📝 Summary</h3>';
             $html .= '<div class="content">' . wpautop(wp_kses_post($summary)) . '</div>';
             $html .= '</div>';
         }
 
-        if (!empty($takeaways)) {
+        if ( ! empty($takeaways) ) {
             // Normalize takeaways to an array
             $items = is_array($takeaways) ? $takeaways : (array) $takeaways;
             $html .= '<div class="btw-takeaways-card" aria-labelledby="btw-takeaways-title-' . $post_id . '">';
@@ -304,9 +303,10 @@ class BLOG_TAKEWAY {
             $html .= '<span class="btw-toggle-icon">▼</span>';
             $html .= '</h3>';
             $html .= '<ul class="btw-takeaways-list" id="takeaways-' . $post_id . '">';
-            foreach ($items as $t) {
+            foreach ( $items as $t ) {
                 $text = wp_kses_post(is_string($t) ? $t : (string) $t);
-                if ($text === '') { continue; }
+                if ( $text === '' ) {
+					continue; }
                 $html .= '<li class="btw-takeaway-item"><span class="btw-dot">•</span><span class="btw-text">' . $text . '</span></li>';
             }
             $html .= '</ul>';
@@ -354,27 +354,27 @@ class BLOG_TAKEWAY {
      * @param bool $update Whether this is an existing post being updated or not
      * @return void
      */
-    public function auto_generate_summary_on_save($post_id, $post, $update) {
+    public function auto_generate_summary_on_save( $post_id, $post, $update ) {
         // Skip if not a post or is autosave/revision
-        if ($post->post_type !== 'post' || wp_is_post_autosave($post_id) || wp_is_post_revision($post_id)) {
+        if ( $post->post_type !== 'post' || wp_is_post_autosave($post_id) || wp_is_post_revision($post_id) ) {
             return;
         }
 
         // Skip if post is not published
-        if ($post->post_status !== 'publish') {
+        if ( $post->post_status !== 'publish' ) {
             return;
         }
 
         // Check if user has permission to edit posts
-        if (!current_user_can('edit_posts')) {
+        if ( ! current_user_can('edit_posts') ) {
             return;
         }
 
         // Generate summary and takeaways
         $ai_handler = new AI_API_Handler();
         $result = $ai_handler->generate_summary($post->post_content);
-        
-        if (is_wp_error($result)) {
+
+        if ( is_wp_error($result) ) {
             return;
         }
 
@@ -395,8 +395,8 @@ class BLOG_TAKEWAY {
     public function register_rest_endpoints() {
         register_rest_route('post-takeaways/v1', '/generate-summary', [
             'methods' => 'POST',
-            'callback' => [$this, 'generate_summary_endpoint'],
-            'permission_callback' => function($request) {
+            'callback' => [ $this, 'generate_summary_endpoint' ],
+            'permission_callback' => function ( $request ) {
                 return current_user_can('edit_posts') && $this->verify_rest_nonce($request);
             },
             'args' => [
@@ -412,11 +412,11 @@ class BLOG_TAKEWAY {
                 ],
             ],
         ]);
-        
+
         register_rest_route('post-takeaways/v1', '/bulk-generate', [
             'methods' => 'POST',
-            'callback' => [$this, 'bulk_generate_endpoint'],
-            'permission_callback' => function($request) {
+            'callback' => [ $this, 'bulk_generate_endpoint' ],
+            'permission_callback' => function ( $request ) {
                 return current_user_can('manage_options') && $this->verify_rest_nonce($request);
             },
             'args' => [
@@ -426,7 +426,7 @@ class BLOG_TAKEWAY {
                     'items' => [
                         'type' => 'integer',
                     ],
-                    'sanitize_callback' => function($post_ids) {
+                    'sanitize_callback' => function ( $post_ids ) {
                         return array_map('absint', $post_ids);
                     },
                 ],
@@ -440,12 +440,12 @@ class BLOG_TAKEWAY {
      * @param WP_REST_Request $request The request object
      * @return bool Whether nonce is valid
      */
-    private function verify_rest_nonce($request) {
+    private function verify_rest_nonce( $request ) {
         $nonce = $request->get_header('X-WP-Nonce');
-        if (!$nonce) {
+        if ( ! $nonce ) {
             $nonce = $request->get_param('_wpnonce');
         }
-        
+
         return wp_verify_nonce($nonce, 'wp_rest');
     }
 
@@ -455,31 +455,31 @@ class BLOG_TAKEWAY {
      * @param WP_REST_Request $request The request object
      * @return WP_REST_Response The response
      */
-    public function generate_summary_endpoint($request) {
+    public function generate_summary_endpoint( $request ) {
         $post_id = $request->get_param('post_id');
         $content = $request->get_param('content');
-        
-        if (!$post_id || !$content) {
-            return new WP_REST_Response(['error' => 'Missing required parameters'], 400);
+
+        if ( ! $post_id || ! $content ) {
+            return new WP_REST_Response([ 'error' => 'Missing required parameters' ], 400);
         }
-        
+
         // Verify post exists and user can edit it
         $post = get_post($post_id);
-        if (!$post || !current_user_can('edit_post', $post_id)) {
-            return new WP_REST_Response(['error' => 'Invalid post or insufficient permissions'], 403);
+        if ( ! $post || ! current_user_can('edit_post', $post_id) ) {
+            return new WP_REST_Response([ 'error' => 'Invalid post or insufficient permissions' ], 403);
         }
-        
+
         $ai_handler = new AI_API_Handler();
         $result = $ai_handler->generate_summary($content);
-        
-        if (is_wp_error($result)) {
-            return new WP_REST_Response(['error' => $result->get_error_message()], 500);
+
+        if ( is_wp_error($result) ) {
+            return new WP_REST_Response([ 'error' => $result->get_error_message() ], 500);
         }
-        
+
         // Save the generated summary
         update_post_meta($post_id, '_post_takeaways_summary', sanitize_textarea_field($result['summary']));
         update_post_meta($post_id, '_post_takeaways_takeaways', array_map('sanitize_text_field', $result['takeaways']));
-        
+
         return new WP_REST_Response($result);
     }
 
@@ -489,25 +489,25 @@ class BLOG_TAKEWAY {
      * @param WP_REST_Request $request The request object
      * @return WP_REST_Response The response
      */
-    public function bulk_generate_endpoint($request) {
+    public function bulk_generate_endpoint( $request ) {
         $post_ids = $request->get_param('post_ids');
-        
-        if (!$post_ids || !is_array($post_ids)) {
-            return new WP_REST_Response(['error' => 'Missing post IDs'], 400);
+
+        if ( ! $post_ids || ! is_array($post_ids) ) {
+            return new WP_REST_Response([ 'error' => 'Missing post IDs' ], 400);
         }
-        
+
         // Verify all posts exist and user can edit them
-        foreach ($post_ids as $post_id) {
+        foreach ( $post_ids as $post_id ) {
             $post = get_post($post_id);
-            if (!$post || !current_user_can('edit_post', $post_id)) {
-                return new WP_REST_Response(['error' => 'Invalid post ID or insufficient permissions: ' . $post_id], 403);
+            if ( ! $post || ! current_user_can('edit_post', $post_id) ) {
+                return new WP_REST_Response([ 'error' => 'Invalid post ID or insufficient permissions: ' . $post_id ], 403);
             }
         }
-        
+
         // Schedule bulk generation
-        wp_schedule_single_event(time(), 'post_takeaways_bulk_generate_cron', [$post_ids]);
-        
-        return new WP_REST_Response(['message' => 'Bulk generation scheduled']);
+        wp_schedule_single_event(time(), 'post_takeaways_bulk_generate_cron', [ $post_ids ]);
+
+        return new WP_REST_Response([ 'message' => 'Bulk generation scheduled' ]);
     }
 
     /**
@@ -516,15 +516,15 @@ class BLOG_TAKEWAY {
      * @param array $post_ids Array of post IDs
      * @return void
      */
-    public function process_bulk_generation($post_ids) {
+    public function process_bulk_generation( $post_ids ) {
         $ai_handler = new AI_API_Handler();
         $database = new Blog_Summary_Database();
-        
-        foreach ($post_ids as $post_id) {
+
+        foreach ( $post_ids as $post_id ) {
             $post = get_post($post_id);
-            if ($post && $post->post_type === 'post' && $post->post_status === 'publish') {
+            if ( $post && $post->post_type === 'post' && $post->post_status === 'publish' ) {
                 $result = $ai_handler->generate_summary($post->post_content);
-                if (!is_wp_error($result)) {
+                if ( ! is_wp_error($result) ) {
                     $database->save_blog_summary(
                         $post_id,
                         $result['takeaways'],
@@ -541,19 +541,19 @@ class BLOG_TAKEWAY {
      * @param int $post_id The post ID being deleted
      * @return void
      */
-    public function cleanup_summary_on_post_delete($post_id) {
+    public function cleanup_summary_on_post_delete( $post_id ) {
         // Only process for published posts
         $post = get_post($post_id);
-        if (!$post || $post->post_type !== 'post') {
+        if ( ! $post || $post->post_type !== 'post' ) {
             return;
         }
 
         // Delete the summary from database
         $database = new Blog_Summary_Database();
         $database->delete_summary($post_id);
-        
+
         // Log the cleanup
-        error_log("Post Takeaways: Cleaned up summary for deleted post ID: {$post_id}");
+        // error_log("Post Takeaways: Cleaned up summary for deleted post ID: {$post_id}");
     }
 
     /**

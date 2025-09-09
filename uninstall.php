@@ -4,7 +4,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     exit;
 }
 
-class post-takeaways_Uninstaller {
+class Post_Takeaways_Uninstaller {
 
     /**
      * Array of table names
@@ -109,7 +109,7 @@ class post-takeaways_Uninstaller {
      */
     private function remove_post_meta() {
         global $wpdb;
-        
+
         // @codingStandardsIgnoreStart
         foreach ( $this->post_meta_keys as $meta_key ) {
             $wpdb->delete(
@@ -126,7 +126,7 @@ class post-takeaways_Uninstaller {
      */
     private function clear_transients() {
         global $wpdb;
-        
+
         // @codingStandardsIgnoreStart
         foreach ( $this->transient_keys as $transient_key ) {
             // Delete transients with wildcard pattern
@@ -152,5 +152,5 @@ class post-takeaways_Uninstaller {
 }
 
 // Execute the uninstallation
-$uninstaller = new post-takeaways_Uninstaller();
+$uninstaller = new Post_Takeaways_Uninstaller();
 $uninstaller->uninstall();

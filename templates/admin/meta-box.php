@@ -1,5 +1,7 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined('ABSPATH') ) {
+	exit;
+}
 
 $post_id = get_the_ID();
 $summary = get_post_meta($post_id, '_post_takeaways_summary', true);
@@ -12,20 +14,20 @@ $cache_expiry = get_post_meta($post_id, '_post_takeaways_cache_expiry', true);
 <div class="post-takeaways-meta-box">
     <!-- Summary Status -->
     <div class="summary-status">
-        <?php if ($summary): ?>
+        <?php if ( $summary ) : ?>
             <div class="status-indicator success">
                 <span class="status-icon">✅</span>
                 <span class="status-text">Summary Available</span>
             </div>
-            <?php if ($last_generated): ?>
+            <?php if ( $last_generated ) : ?>
                 <div class="generation-info">
-                    <small>Generated: <?php echo esc_html(date('M j, Y g:i A', strtotime($last_generated))); ?></small>
-                    <?php if ($ai_model): ?>
+                    <small>Generated: <?php echo esc_html(gmdate('M j, Y g:i A', strtotime($last_generated))); ?></small>
+                    <?php if ( $ai_model ) : ?>
                         <small>• Model: <?php echo esc_html($ai_model); ?></small>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
-        <?php else: ?>
+        <?php else : ?>
             <div class="status-indicator warning">
                 <span class="status-icon">⚠️</span>
                 <span class="status-text">No Summary Available</span>
@@ -35,11 +37,11 @@ $cache_expiry = get_post_meta($post_id, '_post_takeaways_cache_expiry', true);
     
     <!-- Action Buttons -->
     <div class="action-buttons">
-        <?php if (!$summary): ?>
+        <?php if ( ! $summary ) : ?>
             <button type="button" class="button button-primary" id="generate-summary">
                 🚀 Generate AI Summary
             </button>
-        <?php else: ?>
+        <?php else : ?>
             <button type="button" class="button" id="regenerate-summary">
                 🔄 Regenerate Summary
             </button>
@@ -86,7 +88,7 @@ $cache_expiry = get_post_meta($post_id, '_post_takeaways_cache_expiry', true);
                 <strong>Cache Expiry:</strong>
             </label>
             <input type="datetime-local" id="cache-expiry" name="post_takeaways_cache_expiry" 
-                   value="<?php echo esc_attr($cache_expiry ? date('Y-m-d\TH:i', strtotime($cache_expiry)) : ''); ?>">
+                   value="<?php echo esc_attr($cache_expiry ? gmdate('Y-m-d\TH:i', strtotime($cache_expiry)) : ''); ?>">
             <p class="description">Leave empty for no expiry, or set a future date to cache the summary.</p>
         </div>
     </div>
@@ -432,7 +434,7 @@ jQuery(document).ready(function($) {
             data: {
                 action: 'generate_summary',
                 nonce: postTakeawaysAjax.nonce,
-                post_id: <?php echo $post_id; ?>,
+                post_id: <?php echo esc_js($post_id); ?>,
                 regenerate: $('#regenerate-summary').length > 0
             },
             success: function(response) {

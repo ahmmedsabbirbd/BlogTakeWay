@@ -1,6 +1,6 @@
 {
   "name": "post-takeaways",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "AI-Powered Blog Summaries & Takeaways - WordPress Plugin",
   "main": "index.js",
   "scripts": {
