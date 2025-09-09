@@ -2,14 +2,14 @@
 if (!defined('ABSPATH')) exit;
 
 $post_id = get_the_ID();
-$summary = get_post_meta($post_id, '_blog_takeway_summary', true);
-$takeaways = get_post_meta($post_id, '_blog_takeway_takeaways', true);
-$ai_model = get_post_meta($post_id, '_blog_takeway_ai_model', true);
-$last_generated = get_post_meta($post_id, '_blog_takeway_last_generated', true);
-$cache_expiry = get_post_meta($post_id, '_blog_takeway_cache_expiry', true);
+$summary = get_post_meta($post_id, '_post_takeaways_summary', true);
+$takeaways = get_post_meta($post_id, '_post_takeaways_takeaways', true);
+$ai_model = get_post_meta($post_id, '_post_takeaways_ai_model', true);
+$last_generated = get_post_meta($post_id, '_post_takeaways_last_generated', true);
+$cache_expiry = get_post_meta($post_id, '_post_takeaways_cache_expiry', true);
 ?>
 
-<div class="blog-takeway-meta-box">
+<div class="post-takeaways-meta-box">
     <!-- Summary Status -->
     <div class="summary-status">
         <?php if ($summary): ?>
@@ -59,7 +59,7 @@ $cache_expiry = get_post_meta($post_id, '_blog_takeway_cache_expiry', true);
                 <strong>Summary:</strong>
                 <span class="char-count" id="summary-char-count">0</span> characters
             </label>
-            <textarea id="summary-content" name="blog_takeway_summary" rows="6" 
+            <textarea id="summary-content" name="post_takeaways_summary" rows="6" 
                       placeholder="Enter or edit the AI-generated summary..."><?php echo esc_textarea($summary); ?></textarea>
         </div>
         
@@ -68,7 +68,7 @@ $cache_expiry = get_post_meta($post_id, '_blog_takeway_cache_expiry', true);
                 <strong>Key Takeaways:</strong>
                 <span class="char-count" id="takeaways-char-count">0</span> characters
             </label>
-            <textarea id="takeaways-content" name="blog_takeway_takeaways" rows="4" 
+            <textarea id="takeaways-content" name="post_takeaways_takeaways" rows="4" 
                       placeholder="Enter or edit the key takeaways..."><?php echo esc_textarea($takeaways); ?></textarea>
             <p class="description">Enter one takeaway per line, or use bullet points for better formatting.</p>
         </div>
@@ -77,7 +77,7 @@ $cache_expiry = get_post_meta($post_id, '_blog_takeway_cache_expiry', true);
             <label for="ai-model">
                 <strong>AI Model Used:</strong>
             </label>
-            <input type="text" id="ai-model" name="blog_takeway_ai_model" 
+            <input type="text" id="ai-model" name="post_takeaways_ai_model" 
                    value="<?php echo esc_attr($ai_model); ?>" placeholder="e.g., gpt-4, gpt-3.5-turbo">
         </div>
         
@@ -85,7 +85,7 @@ $cache_expiry = get_post_meta($post_id, '_blog_takeway_cache_expiry', true);
             <label for="cache-expiry">
                 <strong>Cache Expiry:</strong>
             </label>
-            <input type="datetime-local" id="cache-expiry" name="blog_takeway_cache_expiry" 
+            <input type="datetime-local" id="cache-expiry" name="post_takeaways_cache_expiry" 
                    value="<?php echo esc_attr($cache_expiry ? date('Y-m-d\TH:i', strtotime($cache_expiry)) : ''); ?>">
             <p class="description">Leave empty for no expiry, or set a future date to cache the summary.</p>
         </div>
@@ -131,7 +131,7 @@ $cache_expiry = get_post_meta($post_id, '_blog_takeway_cache_expiry', true);
 </div>
 
 <style>
-.blog-takeway-meta-box {
+.post-takeaways-meta-box {
     padding: 15px;
     background: #f9f9f9;
     border: 1px solid #ddd;
@@ -427,11 +427,11 @@ jQuery(document).ready(function($) {
         
         // Send generation request
         $.ajax({
-            url: blogTakewayAjax.ajax_url,
+            url: postTakeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'generate_summary',
-                nonce: blogTakewayAjax.nonce,
+                nonce: postTakeawaysAjax.nonce,
                 post_id: <?php echo $post_id; ?>,
                 regenerate: $('#regenerate-summary').length > 0
             },

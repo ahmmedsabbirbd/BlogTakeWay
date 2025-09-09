@@ -5,14 +5,14 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Blog Summary Admin Class
  *
  * @category WordPress
- * @package  BlogTakeWay
+ * @package  post-takeaways
  * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 class Blog_Summary_Admin {
 
-    private $plugin_slug = 'blog-takeway';
+    private $plugin_slug = 'post-takeaways';
     private static $instance = null;
 
     /**
@@ -46,9 +46,9 @@ class Blog_Summary_Admin {
      * Enqueue admin styles
      */
     public function enqueue_admin_styles($hook_suffix) {
-        if (strpos($hook_suffix, 'blog-takeway') !== false) {
+        if (strpos($hook_suffix, 'post-takeaways') !== false) {
             wp_enqueue_style( 
-                'blog-takeway-admin-style', 
+                'post-takeaways-admin-style', 
                 plugin_dir_url( dirname( __FILE__ ) ) . 'assets/css/admin-style.css',
                 [],
                 BLOG_TAKEWAY_VERSION
@@ -60,20 +60,20 @@ class Blog_Summary_Admin {
      * Enqueue admin scripts
      */
     public function enqueue_admin_scripts($hook_suffix) {
-        if (strpos($hook_suffix, 'blog-takeway') !== false) {
+        if (strpos($hook_suffix, 'post-takeaways') !== false) {
             wp_enqueue_script(
-                'blog-takeway-admin',
+                'post-takeaways-admin',
                 plugin_dir_url( dirname( __FILE__ ) ) . 'build/chat-admin.js',
                 ['jquery', 'wp-api'],
                 BLOG_TAKEWAY_VERSION,
                 true
             );
             
-            wp_localize_script('blog-takeway-admin', 'blogTakewayAjax', [
+            wp_localize_script('post-takeaways-admin', 'postTakeawaysAjax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'admin_url' => admin_url(),
-                'nonce' => wp_create_nonce('blog_takeway_nonce'),
-                'rest_url' => rest_url('blog-takeway/v1/'),
+                'nonce' => wp_create_nonce('post_takeaways_nonce'),
+                'rest_url' => rest_url('post-takeaways/v1/'),
                 'strings' => [
                     'generating' => 'Generating summary...',
                     'success' => 'Summary generated successfully!',
@@ -95,8 +95,8 @@ class Blog_Summary_Admin {
      */
     public function register_admin_menu() {
         add_menu_page(
-            esc_html__( 'Blog TakeWay', 'blog-takeway' ),
-            esc_html__( 'Blog TakeWay', 'blog-takeway' ),
+            esc_html__( 'Post Takeaways', 'post-takeaways' ),
+            esc_html__( 'Post Takeaways', 'post-takeaways' ),
             'manage_options',
             $this->plugin_slug,
             [ $this, 'render_dashboard_page' ],
@@ -107,8 +107,8 @@ class Blog_Summary_Admin {
         // Add Dashboard submenu
         add_submenu_page(
             $this->plugin_slug,
-            esc_html__( 'Dashboard', 'blog-takeway' ),
-            esc_html__( 'Dashboard', 'blog-takeway' ),
+            esc_html__( 'Dashboard', 'post-takeaways' ),
+            esc_html__( 'Dashboard', 'post-takeaways' ),
             'manage_options',
             $this->plugin_slug,
             [ $this, 'render_dashboard_page' ]
@@ -117,8 +117,8 @@ class Blog_Summary_Admin {
         // Add Settings submenu
         add_submenu_page(
             $this->plugin_slug,
-            esc_html__( 'Settings', 'blog-takeway' ),
-            esc_html__( 'Settings', 'blog-takeway' ),
+            esc_html__( 'Settings', 'post-takeaways' ),
+            esc_html__( 'Settings', 'post-takeaways' ),
             'manage_options',
             $this->plugin_slug . '-settings',
             [ $this, 'render_settings_page' ]
@@ -127,8 +127,8 @@ class Blog_Summary_Admin {
         // Add Bulk Generator submenu
         add_submenu_page(
             $this->plugin_slug,
-            esc_html__( 'Bulk Generator', 'blog-takeway' ),
-            esc_html__( 'Bulk Generator', 'blog-takeway' ),
+            esc_html__( 'Bulk Generator', 'post-takeaways' ),
+            esc_html__( 'Bulk Generator', 'post-takeaways' ),
             'manage_options',
             $this->plugin_slug . '-bulk-generator',
             [ $this, 'render_bulk_generator_page' ]
@@ -141,85 +141,85 @@ class Blog_Summary_Admin {
      * Register plugin settings
      */
     public function register_settings() {
-        register_setting('blog_takeway_settings', 'blog_takeway_settings', [
+        register_setting('post_takeaways_settings', 'post_takeaways_settings', [
             'sanitize_callback' => [$this, 'sanitize_settings'],
         ]);
 
         add_settings_section(
-            'blog_takeway_ai_settings',
+            'post_takeaways_ai_settings',
             'AI API Configuration',
             [$this, 'render_ai_settings_section'],
-            'blog_takeway_settings'
+            'post_takeaways_settings'
         );
 
         add_settings_field(
             'ai_api_key',
             'OpenAI API Key',
             [$this, 'render_api_key_field'],
-            'blog_takeway_settings',
-            'blog_takeway_ai_settings'
+            'post_takeaways_settings',
+            'post_takeaways_ai_settings'
         );
 
         add_settings_field(
             'ai_model',
             'AI Model',
             [$this, 'render_model_field'],
-            'blog_takeway_settings',
-            'blog_takeway_ai_settings'
+            'post_takeaways_settings',
+            'post_takeaways_ai_settings'
         );
 
         add_settings_section(
-            'blog_takeway_generation_settings',
+            'post_takeaways_generation_settings',
             'Generation Settings',
             [$this, 'render_generation_settings_section'],
-            'blog_takeway_settings'
+            'post_takeaways_settings'
         );
 
         add_settings_field(
             'summary_length',
             'Summary Length',
             [$this, 'render_length_field'],
-            'blog_takeway_settings',
-            'blog_takeway_generation_settings'
+            'post_takeaways_settings',
+            'post_takeaways_generation_settings'
         );
 
         add_settings_field(
             'summary_style',
             'Summary Style',
             [$this, 'render_style_field'],
-            'blog_takeway_settings',
-            'blog_takeway_generation_settings'
+            'post_takeaways_settings',
+            'post_takeaways_generation_settings'
         );
 
         add_settings_field(
             'auto_generate',
             'Auto-generate on publish',
             [$this, 'render_auto_generate_field'],
-            'blog_takeway_settings',
-            'blog_takeway_generation_settings'
+            'post_takeaways_settings',
+            'post_takeaways_generation_settings'
         );
 
         add_settings_section(
-            'blog_takeway_display_settings',
+            'post_takeaways_display_settings',
             'Display Settings',
             [$this, 'render_display_settings_section'],
-            'blog_takeway_settings'
+            'post_takeaways_settings'
         );
 
         add_settings_field(
             'display_position',
             'Summary Position',
             [$this, 'render_position_field'],
-            'blog_takeway_settings',
-            'blog_takeway_display_settings'
+            'post_takeaways_settings',
+            'post_takeaways_display_settings'
         );
 
         add_settings_field(
             'enable_takeaways',
             'Enable Takeaways',
             [$this, 'render_takeaways_field'],
-            'blog_takeway_settings',
-            'blog_takeway_display_settings'
+            'post_takeaways_settings',
+            'post_takeaways_display_settings'
         );
     }
 
@@ -268,7 +268,7 @@ class Blog_Summary_Admin {
     public function render_dashboard_page() {
         // Check user capabilities
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'blog-takeway'));
+            wp_die(__('You do not have sufficient permissions to access this page.', 'post-takeaways'));
         }
         
         $database = new Blog_Summary_Database();
@@ -284,7 +284,7 @@ class Blog_Summary_Admin {
     public function render_settings_page() {
         // Check user capabilities
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'blog-takeway'));
+            wp_die(__('You do not have sufficient permissions to access this page.', 'post-takeaways'));
         }
         
         include BLOG_TAKEWAY_PLUGIN_DIR . 'templates/admin/settings.php';
@@ -296,7 +296,7 @@ class Blog_Summary_Admin {
     public function render_bulk_generator_page() {
         // Check user capabilities
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'blog-takeway'));
+            wp_die(__('You do not have sufficient permissions to access this page.', 'post-takeaways'));
         }
         
         // Show all published posts so users can (re)generate for any post
@@ -328,7 +328,7 @@ class Blog_Summary_Admin {
         $api_settings = $database->get_api_settings();
         $api_key = $api_settings ? $api_settings['api_key'] : '';
         
-        echo '<input type="password" id="ai_api_key" name="blog_takeway_settings[ai_api_key]" value="' . esc_attr($api_key) . '" class="regular-text" />';
+        echo '<input type="password" id="ai_api_key" name="post_takeaways_settings[ai_api_key]" value="' . esc_attr($api_key) . '" class="regular-text" />';
         echo '<p class="description">Enter your OpenAI API key. <a href="https://platform.openai.com/api-keys" target="_blank">Get your API key here</a>.</p>';
         echo '<button type="button" class="button" id="test-api-connection">Test Connection</button>';
         echo '<span id="api-test-result"></span>';
@@ -348,7 +348,7 @@ class Blog_Summary_Admin {
             'gpt-4-turbo' => 'GPT-4 Turbo (Latest Version)'
         ];
         
-        echo '<select id="ai_model" name="blog_takeway_settings[ai_model]">';
+        echo '<select id="ai_model" name="post_takeaways_settings[ai_model]">';
         foreach ($models as $value => $label) {
             $selected = selected($model, $value, false);
             echo '<option value="' . esc_attr($value) . '" ' . $selected . '>' . esc_html($label) . '</option>';
@@ -368,7 +368,7 @@ class Blog_Summary_Admin {
      * Render length field
      */
     public function render_length_field() {
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         $length = isset($settings['summary_length']) ? $settings['summary_length'] : 'medium';
         
         $options = [
@@ -379,7 +379,7 @@ class Blog_Summary_Admin {
         
         foreach ($options as $value => $label) {
             $checked = checked($length, $value, false);
-            echo '<label><input type="radio" name="blog_takeway_settings[summary_length]" value="' . esc_attr($value) . '" ' . $checked . ' /> ' . esc_html($label) . '</label><br>';
+            echo '<label><input type="radio" name="post_takeaways_settings[summary_length]" value="' . esc_attr($value) . '" ' . $checked . ' /> ' . esc_html($label) . '</label><br>';
         }
     }
 
@@ -387,7 +387,7 @@ class Blog_Summary_Admin {
      * Render style field
      */
     public function render_style_field() {
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         $style = isset($settings['summary_style']) ? $settings['summary_style'] : 'professional';
         
         $options = [
@@ -399,7 +399,7 @@ class Blog_Summary_Admin {
         
         foreach ($options as $value => $label) {
             $checked = checked($style, $value, false);
-            echo '<label><input type="radio" name="blog_takeway_settings[summary_style]" value="' . esc_attr($value) . '" ' . $checked . ' /> ' . esc_html($label) . '</label><br>';
+            echo '<label><input type="radio" name="post_takeaways_settings[summary_style]" value="' . esc_attr($value) . '" ' . $checked . ' /> ' . esc_html($label) . '</label><br>';
         }
     }
 
@@ -407,10 +407,10 @@ class Blog_Summary_Admin {
      * Render auto-generate field
      */
     public function render_auto_generate_field() {
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         $auto_generate = isset($settings['auto_generate']) ? $settings['auto_generate'] : true;
         
-        echo '<label><input type="checkbox" name="blog_takeway_settings[auto_generate]" value="1" ' . checked($auto_generate, true, false) . ' /> Automatically generate summaries when posts are published</label>';
+        echo '<label><input type="checkbox" name="post_takeaways_settings[auto_generate]" value="1" ' . checked($auto_generate, true, false) . ' /> Automatically generate summaries when posts are published</label>';
         echo '<p class="description">If enabled, summaries will be generated automatically for new posts.</p>';
     }
 
@@ -425,7 +425,7 @@ class Blog_Summary_Admin {
      * Render position field
      */
     public function render_position_field() {
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         $position = isset($settings['display_position']) ? $settings['display_position'] : 'after_title';
         
         $options = [
@@ -436,7 +436,7 @@ class Blog_Summary_Admin {
         
         foreach ($options as $value => $label) {
             $checked = checked($position, $value, false);
-            echo '<label><input type="radio" name="blog_takeway_settings[display_position]" value="' . esc_attr($value) . '" ' . $checked . ' /> ' . esc_html($label) . '</label><br>';
+            echo '<label><input type="radio" name="post_takeaways_settings[display_position]" value="' . esc_attr($value) . '" ' . $checked . ' /> ' . esc_html($label) . '</label><br>';
         }
     }
 
@@ -444,10 +444,10 @@ class Blog_Summary_Admin {
      * Render takeaways field
      */
     public function render_takeaways_field() {
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         $enable_takeaways = isset($settings['enable_takeaways']) ? $settings['enable_takeaways'] : true;
         
-        echo '<label><input type="checkbox" name="blog_takeway_settings[enable_takeaways]" value="1" ' . checked($enable_takeaways, true, false) . ' /> Display key takeaways alongside summaries</label>';
+        echo '<label><input type="checkbox" name="post_takeaways_settings[enable_takeaways]" value="1" ' . checked($enable_takeaways, true, false) . ' /> Display key takeaways alongside summaries</label>';
         echo '<p class="description">If enabled, key takeaways will be displayed as bullet points.</p>';
     }
 
@@ -456,7 +456,7 @@ class Blog_Summary_Admin {
      */
     public function ajax_generate_summary() {
         // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'blog_takeway_nonce')) {
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'post_takeaways_nonce')) {
             wp_send_json_error('Invalid nonce');
         }
         
@@ -506,7 +506,7 @@ class Blog_Summary_Admin {
      */
     public function ajax_bulk_generate_summaries() {
         // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'blog_takeway_nonce')) {
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'post_takeaways_nonce')) {
             wp_send_json_error('Invalid nonce');
         }
         
@@ -578,7 +578,7 @@ class Blog_Summary_Admin {
      */
     public function ajax_test_api_connection() {
         // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'blog_takeway_nonce')) {
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'post_takeaways_nonce')) {
             wp_send_json_error('Invalid nonce');
         }
         

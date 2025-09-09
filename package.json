@@ -1,5 +1,5 @@
 {
-  "name": "blog-takeway",
+  "name": "post-takeaways",
   "version": "1.0.0",
   "description": "AI-Powered Blog Summaries & Takeaways - WordPress Plugin",
   "main": "index.js",
@@ -20,7 +20,7 @@
     "takeaways",
     "content-analysis"
   ],
-  "author": "Blog TakeWay Team",
+  "author": "Post Takeaways Team",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

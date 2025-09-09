@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Blog Summary Manager Class
  *
  * @category WordPress
- * @package  BlogTakeWay
+ * @package  post-takeaways
  * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -58,11 +58,11 @@ class Blog_Summary_Manager {
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         
         // Add cron job for cache cleanup
-        add_action('blog_takeway_cache_cleanup', [$this, 'cleanup_expired_cache']);
+        add_action('post_takeaways_cache_cleanup', [$this, 'cleanup_expired_cache']);
         
         // Schedule cache cleanup if not already scheduled
-        if (!wp_next_scheduled('blog_takeway_cache_cleanup')) {
-            wp_schedule_event(time(), 'daily', 'blog_takeway_cache_cleanup');
+        if (!wp_next_scheduled('post_takeaways_cache_cleanup')) {
+            wp_schedule_event(time(), 'daily', 'post_takeaways_cache_cleanup');
         }
 
         // Display summary in blog posts
@@ -90,7 +90,7 @@ class Blog_Summary_Manager {
         $summary_html = ob_get_clean();
 
         // Add summary based on position setting
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         $position = isset($settings['display_position']) ? $settings['display_position'] : 'after_title';
 
         switch ($position) {
@@ -119,14 +119,14 @@ class Blog_Summary_Manager {
         }
 
         // Check if auto-generation is enabled
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         if (!isset($settings['auto_generate']) || !$settings['auto_generate']) {
             return;
         }
 
         // Skip if this is an update and summary already exists
         if ($update) {
-            $existing_summary = get_post_meta($post_id, '_blog_takeway_summary', true);
+            $existing_summary = get_post_meta($post_id, '_post_takeaways_summary', true);
             if (!empty($existing_summary)) {
                 return;
             }
@@ -143,7 +143,7 @@ class Blog_Summary_Manager {
         }
 
         // Generate summary asynchronously to avoid blocking the publish process
-        wp_schedule_single_event(time() + 30, 'blog_takeway_generate_summary_cron', [$post_id]);
+        wp_schedule_single_event(time() + 30, 'post_takeaways_generate_summary_cron', [$post_id]);
     }
 
     /**
@@ -159,11 +159,11 @@ class Blog_Summary_Manager {
         }
 
         // Check if summary already exists
-        $existing_summary = get_post_meta($post_id, '_blog_takeway_summary', true);
+        $existing_summary = get_post_meta($post_id, '_post_takeaways_summary', true);
         if (!empty($existing_summary)) {
             return [
                 'summary' => $existing_summary,
-                'takeaways' => get_post_meta($post_id, '_blog_takeway_takeaways', true),
+                'takeaways' => get_post_meta($post_id, '_post_takeaways_takeaways', true),
                 'status' => 'existing',
             ];
         }
@@ -198,8 +198,8 @@ class Blog_Summary_Manager {
         }
 
         // Save to post meta for backward compatibility
-        update_post_meta($post_id, '_blog_takeway_summary', $result['summary']);
-        update_post_meta($post_id, '_blog_takeway_takeaways', $result['takeaways']);
+        update_post_meta($post_id, '_post_takeaways_summary', $result['summary']);
+        update_post_meta($post_id, '_post_takeaways_takeaways', $result['takeaways']);
 
         return $result;
     }
@@ -262,8 +262,8 @@ class Blog_Summary_Manager {
         }
 
         // Fallback to post meta
-        $summary = get_post_meta($post_id, '_blog_takeway_summary', true);
-        $takeaways = get_post_meta($post_id, '_blog_takeway_takeaways', true);
+        $summary = get_post_meta($post_id, '_post_takeaways_summary', true);
+        $takeaways = get_post_meta($post_id, '_post_takeaways_takeaways', true);
         
         if (!empty($summary)) {
             return [
@@ -302,8 +302,8 @@ class Blog_Summary_Manager {
         }
 
         // Update post meta for backward compatibility
-        update_post_meta($post_id, '_blog_takeway_summary', $summary);
-        update_post_meta($post_id, '_blog_takeway_takeaways', $takeaways);
+        update_post_meta($post_id, '_post_takeaways_summary', $summary);
+        update_post_meta($post_id, '_post_takeaways_takeaways', $takeaways);
 
         return true;
     }
@@ -324,8 +324,8 @@ class Blog_Summary_Manager {
         $db_result = $this->database->delete_summary($post_id);
         
         // Delete from post meta
-        delete_post_meta($post_id, '_blog_takeway_summary');
-        delete_post_meta($post_id, '_blog_takeway_takeaways');
+        delete_post_meta($post_id, '_post_takeaways_summary');
+        delete_post_meta($post_id, '_post_takeaways_takeaways');
 
         return $db_result;
     }
@@ -353,7 +353,7 @@ class Blog_Summary_Manager {
         $class = !empty($atts['class']) ? ' ' . esc_attr($atts['class']) : '';
         $show_title = filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN);
         
-        $output = '<div class="blog-takeway-summary-shortcode' . $class . '">';
+        $output = '<div class="post-takeaways-summary-shortcode' . $class . '">';
         
         if ($show_title) {
             $output .= '<h3 class="summary-title">📝 Summary</h3>';
@@ -388,7 +388,7 @@ class Blog_Summary_Manager {
         $class = !empty($atts['class']) ? ' ' . esc_attr($atts['class']) : '';
         $show_title = filter_var($atts['show_title'], FILTER_VALIDATE_BOOLEAN);
         
-        $output = '<div class="blog-takeway-takeaways-shortcode' . $class . '">';
+        $output = '<div class="post-takeaways-takeaways-shortcode' . $class . '">';
         
         if ($show_title) {
             $output .= '<h3 class="takeaways-title">🎯 Key Takeaways</h3>';
@@ -415,7 +415,7 @@ class Blog_Summary_Manager {
      * Register REST API routes
      */
     public function register_rest_routes() {
-        register_rest_route('blog-takeway/v1', '/summary/(?P<id>\d+)', [
+        register_rest_route('post-takeaways/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'GET',
             'callback' => [$this, 'get_summary_rest'],
             'permission_callback' => '__return_true',
@@ -428,7 +428,7 @@ class Blog_Summary_Manager {
             ],
         ]);
         
-        register_rest_route('blog-takeway/v1', '/summary/(?P<id>\d+)', [
+        register_rest_route('post-takeaways/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'PUT',
             'callback' => [$this, 'update_summary_rest'],
             'permission_callback' => function($request) {
@@ -458,7 +458,7 @@ class Blog_Summary_Manager {
             ],
         ]);
         
-        register_rest_route('blog-takeway/v1', '/summary/(?P<id>\d+)', [
+        register_rest_route('post-takeaways/v1', '/summary/(?P<id>\d+)', [
             'methods' => 'DELETE',
             'callback' => [$this, 'delete_summary_rest'],
             'permission_callback' => function($request) {
@@ -558,7 +558,7 @@ class Blog_Summary_Manager {
         $cleaned = $this->database->clean_expired_cache();
         
         if ($cleaned > 0) {
-            error_log("Blog TakeWay: Cleaned up {$cleaned} expired cache entries");
+            error_log("Post Takeaways: Cleaned up {$cleaned} expired cache entries");
         }
     }
 

@@ -5,32 +5,32 @@ if (!defined('ABSPATH')) exit;
 <div class="wrap">
     <h1 class="wp-heading-inline">Bulk Summary Generator</h1>
     
-    <div class="blog-takeway-bulk-generator">
+    <div class="post-takeaways-bulk-generator">
         <!-- Posts list -->
         <div class="posts-section">
-            <h2><?php esc_html_e('All Posts', 'blog-takeway'); ?></h2>
-            <p><?php esc_html_e('Select any posts to (re)generate AI summaries and takeaways. Status shows whether a summary already exists.', 'blog-takeway'); ?></p>
+            <h2><?php esc_html_e('All Posts', 'post-takeaways'); ?></h2>
+            <p><?php esc_html_e('Select any posts to (re)generate AI summaries and takeaways. Status shows whether a summary already exists.', 'post-takeaways'); ?></p>
             
             <?php if (!empty($posts)): ?>
                 <div class="posts-controls">
                     <div class="controls-left">
-                        <button type="button" class="button" id="select-all"><?php esc_html_e('Select All', 'blog-takeway'); ?></button>
-                        <button type="button" class="button" id="deselect-all"><?php esc_html_e('Deselect All', 'blog-takeway'); ?></button>
+                        <button type="button" class="button" id="select-all"><?php esc_html_e('Select All', 'post-takeaways'); ?></button>
+                        <button type="button" class="button" id="deselect-all"><?php esc_html_e('Deselect All', 'post-takeaways'); ?></button>
                         <button type="button" class="button button-primary" id="generate-selected">
-                            🚀 <?php esc_html_e('Generate Summaries', 'blog-takeway'); ?>
+                            🚀 <?php esc_html_e('Generate Summaries', 'post-takeaways'); ?>
                         </button>
                     </div>
                     <div class="controls-right">
                         <select id="filter-summary" class="filter-select">
-                            <option value="all"><?php esc_html_e('All Posts', 'blog-takeway'); ?></option>
-                            <option value="with-summary"><?php esc_html_e('With Summary', 'blog-takeway'); ?></option>
-                            <option value="without-summary"><?php esc_html_e('Without Summary', 'blog-takeway'); ?></option>
+                            <option value="all"><?php esc_html_e('All Posts', 'post-takeaways'); ?></option>
+                            <option value="with-summary"><?php esc_html_e('With Summary', 'post-takeaways'); ?></option>
+                            <option value="without-summary"><?php esc_html_e('Without Summary', 'post-takeaways'); ?></option>
                         </select>
                         <select id="sort-posts" class="filter-select">
-                            <option value="title-asc"><?php esc_html_e('Title (A-Z)', 'blog-takeway'); ?></option>
-                            <option value="title-desc"><?php esc_html_e('Title (Z-A)', 'blog-takeway'); ?></option>
-                            <option value="date-desc"><?php esc_html_e('Newest First', 'blog-takeway'); ?></option>
-                            <option value="date-asc"><?php esc_html_e('Oldest First', 'blog-takeway'); ?></option>
+                            <option value="title-asc"><?php esc_html_e('Title (A-Z)', 'post-takeaways'); ?></option>
+                            <option value="title-desc"><?php esc_html_e('Title (Z-A)', 'post-takeaways'); ?></option>
+                            <option value="date-desc"><?php esc_html_e('Newest First', 'post-takeaways'); ?></option>
+                            <option value="date-asc"><?php esc_html_e('Oldest First', 'post-takeaways'); ?></option>
                         </select>
                     </div>
                 </div>
@@ -134,7 +134,7 @@ if (!defined('ABSPATH')) exit;
 </div>
 
 <style>
-.blog-takeway-bulk-generator {
+.post-takeaways-bulk-generator {
     margin-top: 20px;
 }
 
@@ -537,22 +537,22 @@ jQuery(document).ready(function($) {
         
         // Check if API key is configured first
         $.ajax({
-            url: blogTakewayAjax.ajax_url,
+            url: post-takeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'test_api_connection',
-                nonce: blogTakewayAjax.nonce
+                nonce: post-takeawaysAjax.nonce
             },
             success: function(response) {
                 if (response.success) {
                     // API is configured, proceed with bulk generation
                     proceedWithBulkGeneration(selectedIds);
                 } else {
-                    alert('❌ API Key Not Configured!\n\nPlease configure your OpenAI API key in the Blog TakeWay settings before generating summaries.');
+                    alert('❌ API Key Not Configured!\n\nPlease configure your OpenAI API key in the Post Takeaways settings before generating summaries.');
                 }
             },
             error: function() {
-                alert('❌ Cannot verify API configuration!\n\nPlease check your Blog TakeWay settings and ensure the API key is properly configured.');
+                alert('❌ Cannot verify API configuration!\n\nPlease check your Post Takeaways settings and ensure the API key is properly configured.');
             }
         });
     });
@@ -590,11 +590,11 @@ jQuery(document).ready(function($) {
         
         // Send bulk generation request
         $.ajax({
-            url: blogTakewayAjax.ajax_url,
+            url: post-takeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'bulk_generate_summaries',
-                nonce: blogTakewayAjax.nonce,
+                nonce: post-takeawaysAjax.nonce,
                 post_ids: postIds
             },
             success: function(response) {

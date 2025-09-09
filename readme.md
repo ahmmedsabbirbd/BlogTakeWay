@@ -1,4 +1,4 @@
-# Blog TakeWay – AI-Powered Blog Summaries & Takeaways
+# Post Takeaways – AI-Powered Blog Summaries & Takeaways
 
 A powerful WordPress plugin that automatically generates intelligent summaries and key takeaways for your blog posts using OpenAI's advanced AI models.
 
@@ -45,15 +45,15 @@ A powerful WordPress plugin that automatically generates intelligent summaries a
 4. Click **Install Now** and then **Activate**
 
 ### Method 2: Manual Installation
-1. Extract the plugin files to `/wp-content/plugins/blog-takeway/`
+1. Extract the plugin files to `/wp-content/plugins/post-takeaways/`
 2. Activate the plugin through the **Plugins** menu in WordPress
-3. Go to **Blog TakeWay > Settings** to configure your OpenAI API key
+3. Go to **Post Takeaways > Settings** to configure your OpenAI API key
 
 ## ⚙️ Configuration
 
 ### 1. OpenAI API Setup
 1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Go to **Blog TakeWay > Settings**
+2. Go to **Post Takeaways > Settings**
 3. Enter your API key and select your preferred model
 4. Click **Test API Connection** to verify setup
 
@@ -78,7 +78,7 @@ Once configured, summaries are automatically generated when you:
 
 ### Manual Generation
 1. Edit any post
-2. Scroll to the **Blog TakeWay Summary** meta box
+2. Scroll to the **Post Takeaways Summary** meta box
 3. Click **Generate AI Summary** or **Regenerate Summary**
 4. Review and edit the generated content
 5. Save your changes
@@ -103,13 +103,13 @@ Access summaries programmatically:
 
 ```php
 // Get summary for a specific post
-GET /wp-json/blog-takeway/v1/summary/{post_id}
+GET /wp-json/post-takeaways/v1/summary/{post_id}
 
 // Update summary
-POST /wp-json/blog-takeway/v1/summary/{post_id}
+POST /wp-json/post-takeaways/v1/summary/{post_id}
 
 // Delete summary
-DELETE /wp-json/blog-takeway/v1/summary/{post_id}
+DELETE /wp-json/post-takeaways/v1/summary/{post_id}
 ```
 
 ## 🔧 Development
@@ -131,7 +131,7 @@ npm run lint
 
 ### File Structure
 ```
-blog-takeway/
+post-takeaways/
 ├── includes/                    # PHP classes
 │   ├── class-blog-summary-database.php
 │   ├── class-blog-summary-manager.php
@@ -143,25 +143,25 @@ blog-takeway/
 ├── src/                        # React components
 ├── assets/                     # Static assets
 ├── build/                      # Built assets
-└── blog-takeway.php           # Main plugin file
+└── post-takeaways.php           # Main plugin file
 ```
 
 ### Hooks and Filters
 ```php
 // Modify summary generation options
-add_filter('blog_takeway_generation_options', function($options) {
+add_filter('post_takeaways_generation_options', function($options) {
     $options['max_length'] = 300;
     return $options;
 });
 
 // Customize summary display
-add_filter('blog_takeway_summary_html', function($html, $summary) {
+add_filter('post_takeaways_summary_html', function($html, $summary) {
     // Custom HTML formatting
     return $html;
 }, 10, 2);
 
 // Hook into summary generation
-add_action('blog_takeway_summary_generated', function($post_id, $summary) {
+add_action('post_takeaways_summary_generated', function($post_id, $summary) {
     // Custom logic after generation
 }, 10, 2);
 ```
@@ -248,9 +248,9 @@ This plugin is licensed under the GPL v2 or later.
 
 ## 🆘 Support
 
-- **Documentation**: [Plugin Documentation](https://blogtakeway.com/docs)
-- **Support Forum**: [WordPress.org Support](https://wordpress.org/support/plugin/blog-takeway)
-- **GitHub Issues**: [Report Bugs](https://github.com/blogtakeway/blog-takeway/issues)
+- **Documentation**: [Plugin Documentation](https://post-takeaways.com/docs)
+- **Support Forum**: [WordPress.org Support](https://wordpress.org/support/plugin/post-takeaways)
+- **GitHub Issues**: [Report Bugs](https://github.com/post-takeaways/post-takeaways/issues)
 
 ## 🙏 Credits
 
@@ -260,4 +260,4 @@ This plugin is licensed under the GPL v2 or later.
 
 ---
 
-**Blog TakeWay** - Making your content more engaging, one summary at a time! 🚀
+**Post Takeaways** - Making your content more engaging, one summary at a time! 🚀

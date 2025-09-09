@@ -3,58 +3,58 @@ if (!defined('ABSPATH')) exit;
 ?>
 
 <div class="wrap">
-    <h1 class="wp-heading-inline">Blog TakeWay Settings</h1>
+    <h1 class="wp-heading-inline">Post Takeaways Settings</h1>
     
-    <div class="blog-takeway-settings">
+    <div class="post-takeaways-settings">
         <form method="post" action="options.php">
             <?php
-            settings_fields('blog_takeway_settings');
-            do_settings_sections('blog_takeway_settings');
+            settings_fields('post_takeaways_settings');
+            do_settings_sections('post_takeaways_settings');
             submit_button('Save Settings');
             ?>
         </form>
         
         <!-- API Test Section -->
         <div class="api-test-section">
-            <h2><?php esc_html_e('Test API Connection', 'blog-takeway'); ?></h2>
-            <p><?php esc_html_e('Test your OpenAI API connection to ensure everything is working properly.', 'blog-takeway'); ?></p>
+            <h2><?php esc_html_e('Test API Connection', 'post-takeaways'); ?></h2>
+            <p><?php esc_html_e('Test your OpenAI API connection to ensure everything is working properly.', 'post-takeaways'); ?></p>
             <button type="button" class="button button-secondary" id="test-api-connection">
-                🧪 <?php esc_html_e('Test API Connection', 'blog-takeway'); ?>
+                🧪 <?php esc_html_e('Test API Connection', 'post-takeaways'); ?>
             </button>
             <div id="api-test-result"></div>
         </div>
         
         <!-- Usage Information -->
         <div class="usage-info">
-            <h2><?php esc_html_e('Usage Information', 'blog-takeway'); ?></h2>
+            <h2><?php esc_html_e('Usage Information', 'post-takeaways'); ?></h2>
             <div class="info-grid">
                 <div class="info-card">
-                    <h3>📊 <?php esc_html_e('Token Usage', 'blog-takeway'); ?></h3>
-                    <p><?php esc_html_e('Monitor your OpenAI API token usage to manage costs effectively.', 'blog-takeway'); ?></p>
+                    <h3>📊 <?php esc_html_e('Token Usage', 'post-takeaways'); ?></h3>
+                    <p><?php esc_html_e('Monitor your OpenAI API token usage to manage costs effectively.', 'post-takeaways'); ?></p>
                     <ul>
-                        <li><strong><?php esc_html_e('Short summaries:', 'blog-takeway'); ?></strong> <?php esc_html_e('~50-75 words (200 tokens)', 'blog-takeway'); ?></li>
-                        <li><strong><?php esc_html_e('Medium summaries:', 'blog-takeway'); ?></strong> <?php esc_html_e('~100-125 words (300 tokens)', 'blog-takeway'); ?></li>
-                        <li><strong><?php esc_html_e('Long summaries:', 'blog-takeway'); ?></strong> <?php esc_html_e('~150-200 words (500 tokens)', 'blog-takeway'); ?></li>
+                        <li><strong><?php esc_html_e('Short summaries:', 'post-takeaways'); ?></strong> <?php esc_html_e('~50-75 words (200 tokens)', 'post-takeaways'); ?></li>
+                        <li><strong><?php esc_html_e('Medium summaries:', 'post-takeaways'); ?></strong> <?php esc_html_e('~100-125 words (300 tokens)', 'post-takeaways'); ?></li>
+                        <li><strong><?php esc_html_e('Long summaries:', 'post-takeaways'); ?></strong> <?php esc_html_e('~150-200 words (500 tokens)', 'post-takeaways'); ?></li>
                     </ul>
                 </div>
                 
                 <div class="info-card">
-                    <h3>⚡ <?php esc_html_e('Performance Tips', 'blog-takeway'); ?></h3>
+                    <h3>⚡ <?php esc_html_e('Performance Tips', 'post-takeaways'); ?></h3>
                     <ul>
-                        <li><?php esc_html_e('Use GPT-3.5-turbo for cost-effective summaries', 'blog-takeway'); ?></li>
-                        <li><?php esc_html_e('Enable caching to reduce API calls', 'blog-takeway'); ?></li>
-                        <li><?php esc_html_e('Use bulk generation during off-peak hours', 'blog-takeway'); ?></li>
-                        <li><?php esc_html_e('Monitor generation logs for errors', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Use GPT-3.5-turbo for cost-effective summaries', 'post-takeaways'); ?></li>
+                        <li><?php esc_html_e('Enable caching to reduce API calls', 'post-takeaways'); ?></li>
+                        <li><?php esc_html_e('Use bulk generation during off-peak hours', 'post-takeaways'); ?></li>
+                        <li><?php esc_html_e('Monitor generation logs for errors', 'post-takeaways'); ?></li>
                     </ul>
                 </div>
                 
                 <div class="info-card">
-                    <h3>🔧 <?php esc_html_e('Troubleshooting', 'blog-takeway'); ?></h3>
+                    <h3>🔧 <?php esc_html_e('Troubleshooting', 'post-takeaways'); ?></h3>
                     <ul>
-                        <li><?php esc_html_e('Ensure your API key is valid and has sufficient credits', 'blog-takeway'); ?></li>
-                        <li><?php esc_html_e('Check that your content meets minimum length requirements', 'blog-takeway'); ?></li>
-                        <li><?php esc_html_e('Verify your WordPress cron jobs are running', 'blog-takeway'); ?></li>
-                        <li><?php esc_html_e('Review generation logs for specific error messages', 'blog-takeway'); ?></li>
+                        <li><?php esc_html_e('Ensure your API key is valid and has sufficient credits', 'post-takeaways'); ?></li>
+                        <li><?php esc_html_e('Check that your content meets minimum length requirements', 'post-takeaways'); ?></li>
+                        <li><?php esc_html_e('Verify your WordPress cron jobs are running', 'post-takeaways'); ?></li>
+                        <li><?php esc_html_e('Review generation logs for specific error messages', 'post-takeaways'); ?></li>
                     </ul>
                 </div>
             </div>
@@ -63,7 +63,7 @@ if (!defined('ABSPATH')) exit;
 </div>
 
 <style>
-.blog-takeway-settings {
+.post-takeaways-settings {
     margin-top: 20px;
 }
 
@@ -146,11 +146,11 @@ jQuery(document).ready(function($) {
         resultDiv.removeClass('success error').addClass('loading').show().text('Testing API connection...');
         
         $.ajax({
-            url: blogTakewayAjax.ajax_url,
+            url: post-takeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'test_api_connection',
-                nonce: blogTakewayAjax.nonce
+                nonce: post-takeawaysAjax.nonce
             },
             success: function(response) {
                 if (response.success) {

@@ -1,21 +1,21 @@
 <?php
 
 /**
- * Plugin Name:  Blog TakeWay – AI-Powered Blog Summaries & Takeaways
- * Plugin URI:   https://wppool.com/plugins/blog-takeway
+ * Plugin Name:  Post Takeaways – AI-Powered Blog Summaries & Takeaways
+ * Plugin URI:   https://wppool.com/plugins/post-takeaways
  * Description:  Automatically generate AI-powered summaries and key takeaways for your blog posts. Features include bulk generation, custom styling, and responsive design for better reader engagement.
  * Version:      1.1.0
  * Requires PHP: 7.4
  * Author:       WPPOOL Team <support@wppool.com>
  * Author URI:   https://wppool.com/
  * Contributors: ahmmedsabbirbd
- * Text Domain:  blog-takeway
+ * Text Domain:  post-takeaways
  * Domain Path:  /languages/
  * License:      GPL2
  * License URI:  http://www.gnu.org/licenses/gpl-2.0.txt
  *
  * @category WordPress
- * @package  BlogTakeWay
+ * @package  post-takeaways
  * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
  * @link     https://wppool.com/
@@ -31,14 +31,14 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 }
 
 /**
- * Main plugin class for Blog TakeWay
+ * Main plugin class for Post Takeaways
  *
  * 
  * Handles initialization, dependencies loading, and core functionality
- * of the Blog TakeWay plugin for WordPress.
+ * of the Post Takeaways plugin for WordPress.
  *
  * @category WordPress
- * @package  BlogTakeWay
+ * @package  post-takeaways
  * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ http://www.gnu.org/licenses/gpl-2.0.txt
  */
@@ -67,7 +67,7 @@ class BLOG_TAKEWAY {
         define('BLOG_TAKEWAY_VERSION', '1.1.0');
         define('BLOG_TAKEWAY_PLUGIN_DIR', plugin_dir_path(__FILE__));
         define('BLOG_TAKEWAY_PLUGIN_URL', plugin_dir_url(__FILE__));
-        define('BLOG_TAKEWAY_TEXT_DOMAIN', 'blog-takeway');
+        define('BLOG_TAKEWAY_TEXT_DOMAIN', 'post-takeaways');
 
         // Initialize components
         add_action('init', [ $this, 'init' ]); 
@@ -104,14 +104,14 @@ class BLOG_TAKEWAY {
         add_action('rest_api_init', [ $this, 'register_rest_endpoints' ]);
         
         // Add cron job for bulk processing
-        add_action('blog_takeway_bulk_generate_cron', [ $this, 'process_bulk_generation' ]);
+        add_action('post_takeaways_bulk_generate_cron', [ $this, 'process_bulk_generation' ]);
         
         // Add cron job for cleaning up orphaned summaries
-        add_action('blog_takeway_cleanup_orphaned_cron', [ $this, 'cleanup_orphaned_summaries' ]);
+        add_action('post_takeaways_cleanup_orphaned_cron', [ $this, 'cleanup_orphaned_summaries' ]);
         
         // Schedule orphaned cleanup if not already scheduled
-        if (!wp_next_scheduled('blog_takeway_cleanup_orphaned_cron')) {
-            wp_schedule_event(time(), 'weekly', 'blog_takeway_cleanup_orphaned_cron');
+        if (!wp_next_scheduled('post_takeaways_cleanup_orphaned_cron')) {
+            wp_schedule_event(time(), 'weekly', 'post_takeaways_cleanup_orphaned_cron');
         }
         
         // Admin notice hook removed
@@ -123,7 +123,7 @@ class BLOG_TAKEWAY {
      * @return void
      */
     private function load_dependencies() {
-        // Load Blog TakeWay classes
+        // Load Post Takeaways classes
         include_once BLOG_TAKEWAY_PLUGIN_DIR . 'includes/class-blog-summary-database.php';
         include_once BLOG_TAKEWAY_PLUGIN_DIR . 'includes/class-blog-summary-manager.php';
         include_once BLOG_TAKEWAY_PLUGIN_DIR . 'includes/class-blog-summary-admin.php';
@@ -144,15 +144,15 @@ class BLOG_TAKEWAY {
      * @return void
      */
     public function activate() {
-        // Initialize Blog TakeWay database
+        // Initialize Post Takeaways database
         $blog_summary_db = new Blog_Summary_Database();
         
         // Create default settings
         $this->create_default_settings();
         
         // Schedule cron job for bulk processing
-        if (!wp_next_scheduled('blog_takeway_bulk_generate_cron')) {
-            wp_schedule_event(time(), 'hourly', 'blog_takeway_bulk_generate_cron');
+        if (!wp_next_scheduled('post_takeaways_bulk_generate_cron')) {
+            wp_schedule_event(time(), 'hourly', 'post_takeaways_bulk_generate_cron');
         }
         
         // Flush rewrite rules
@@ -166,8 +166,8 @@ class BLOG_TAKEWAY {
      */
     public function deactivate() {
         // Clear scheduled cron jobs
-        wp_clear_scheduled_hook('blog_takeway_bulk_generate_cron');
-        wp_clear_scheduled_hook('blog_takeway_cleanup_orphaned_cron');
+        wp_clear_scheduled_hook('post_takeaways_bulk_generate_cron');
+        wp_clear_scheduled_hook('post_takeaways_cleanup_orphaned_cron');
         
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -191,7 +191,7 @@ class BLOG_TAKEWAY {
             'cache_duration' => 86400, // 24 hours
         ];
         
-        add_option('blog_takeway_settings', $default_settings);
+        add_option('post_takeaways_settings', $default_settings);
     }
 
     /**
@@ -202,14 +202,14 @@ class BLOG_TAKEWAY {
     public function enqueue_scripts() {
         if (is_single() && get_post_type() === 'post') {
             wp_enqueue_style(
-                'blog-takeway-frontend',
+                'post-takeaways-frontend',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-widget.css',
                 [],
                 BLOG_TAKEWAY_VERSION
             );
             
             wp_enqueue_script(
-                'blog-takeway-frontend',
+                'post-takeaways-frontend',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-widget.js',
                 ['jquery'],
                 BLOG_TAKEWAY_VERSION,
@@ -224,26 +224,26 @@ class BLOG_TAKEWAY {
      * @return void
      */
     public function enqueue_admin_scripts($hook) {
-        if (strpos($hook, 'blog-takeway') !== false) {
+        if (strpos($hook, 'post-takeaways') !== false) {
             wp_enqueue_style(
-                'blog-takeway-admin',
+                'post-takeaways-admin',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-admin.css',
                 [],
                 BLOG_TAKEWAY_VERSION
             );
             
             wp_enqueue_script(
-                'blog-takeway-admin',
+                'post-takeaways-admin',
                 BLOG_TAKEWAY_PLUGIN_URL . 'build/chat-admin.js',
                 ['jquery', 'wp-api'],
                 BLOG_TAKEWAY_VERSION,
                 true
             );
             
-            wp_localize_script('blog-takeway-admin', 'blogTakewayAjax', [
+            wp_localize_script('post-takeaways-admin', 'postTakeawaysAjax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('blog_takeway_nonce'),
-                'rest_url' => rest_url('blog-takeway/v1/'),
+                'nonce' => wp_create_nonce('post_takeaways_nonce'),
+                'rest_url' => rest_url('post-takeaways/v1/'),
             ]);
         }
     }
@@ -257,7 +257,7 @@ class BLOG_TAKEWAY {
      */
     private function render_summary_html($summary, $takeaways) {
         $post_id = get_the_ID();
-        $html  = '<div class="blog-takeway-summary" id="blog-takeway-summary-' . $post_id . '">';
+        $html  = '<div class="post-takeaways-summary" id="post-takeaways-summary-' . $post_id . '">';
 
         // Inline styles for left sidebar layout with expandable takeaways
         $html .= '<style>
@@ -339,7 +339,7 @@ class BLOG_TAKEWAY {
         });
         </script>';
 
-        $html .= '</div>'; // .blog-takeway-summary
+        $html .= '</div>'; // .post-takeaways-summary
 
         return $html;
     }
@@ -393,7 +393,7 @@ class BLOG_TAKEWAY {
      * @return void
      */
     public function register_rest_endpoints() {
-        register_rest_route('blog-takeway/v1', '/generate-summary', [
+        register_rest_route('post-takeaways/v1', '/generate-summary', [
             'methods' => 'POST',
             'callback' => [$this, 'generate_summary_endpoint'],
             'permission_callback' => function($request) {
@@ -413,7 +413,7 @@ class BLOG_TAKEWAY {
             ],
         ]);
         
-        register_rest_route('blog-takeway/v1', '/bulk-generate', [
+        register_rest_route('post-takeaways/v1', '/bulk-generate', [
             'methods' => 'POST',
             'callback' => [$this, 'bulk_generate_endpoint'],
             'permission_callback' => function($request) {
@@ -477,8 +477,8 @@ class BLOG_TAKEWAY {
         }
         
         // Save the generated summary
-        update_post_meta($post_id, '_blog_takeway_summary', sanitize_textarea_field($result['summary']));
-        update_post_meta($post_id, '_blog_takeway_takeaways', array_map('sanitize_text_field', $result['takeaways']));
+        update_post_meta($post_id, '_post_takeaways_summary', sanitize_textarea_field($result['summary']));
+        update_post_meta($post_id, '_post_takeaways_takeaways', array_map('sanitize_text_field', $result['takeaways']));
         
         return new WP_REST_Response($result);
     }
@@ -505,7 +505,7 @@ class BLOG_TAKEWAY {
         }
         
         // Schedule bulk generation
-        wp_schedule_single_event(time(), 'blog_takeway_bulk_generate_cron', [$post_ids]);
+        wp_schedule_single_event(time(), 'post_takeaways_bulk_generate_cron', [$post_ids]);
         
         return new WP_REST_Response(['message' => 'Bulk generation scheduled']);
     }
@@ -553,7 +553,7 @@ class BLOG_TAKEWAY {
         $database->delete_summary($post_id);
         
         // Log the cleanup
-        error_log("Blog TakeWay: Cleaned up summary for deleted post ID: {$post_id}");
+        error_log("Post Takeaways: Cleaned up summary for deleted post ID: {$post_id}");
     }
 
     /**

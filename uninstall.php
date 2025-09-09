@@ -4,7 +4,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
     exit;
 }
 
-class BlogTakeWay_Uninstaller {
+class post-takeaways_Uninstaller {
 
     /**
      * Array of table names
@@ -44,17 +44,17 @@ class BlogTakeWay_Uninstaller {
         ];
 
         $this->options = [
-            'blog_takeway_settings',
+            'post_takeaways_settings',
         ];
 
         $this->post_meta_keys = [
-            '_blog_takeway_summary',
-            '_blog_takeway_takeaways',
+            '_post_takeaways_summary',
+            '_post_takeaways_takeaways',
         ];
 
         $this->transient_keys = [
-            'blog_takeway_cache_',
-            'blog_takeway_bulk_',
+            'post_takeaways_cache_',
+            'post_takeaways_bulk_',
         ];
     }
 
@@ -99,8 +99,8 @@ class BlogTakeWay_Uninstaller {
      */
     private function clear_scheduled_cron_jobs() {
         // @codingStandardsIgnoreStart
-        wp_clear_scheduled_hook('blog_takeway_bulk_generate_cron');
-        wp_clear_scheduled_hook('blog_takeway_cleanup_orphaned_cron');
+        wp_clear_scheduled_hook('post_takeaways_bulk_generate_cron');
+        wp_clear_scheduled_hook('post_takeaways_cleanup_orphaned_cron');
         // @codingStandardsIgnoreEnd
     }
 
@@ -152,5 +152,5 @@ class BlogTakeWay_Uninstaller {
 }
 
 // Execute the uninstallation
-$uninstaller = new BlogTakeWay_Uninstaller();
+$uninstaller = new post-takeaways_Uninstaller();
 $uninstaller->uninstall();

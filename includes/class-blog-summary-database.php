@@ -2,10 +2,10 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Database handling class for Blog TakeWay
+ * Database handling class for Post Takeaways
  *
  * @category WordPress
- * @package  BlogTakeWay
+ * @package  post-takeaways
  * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -352,7 +352,7 @@ class Blog_Summary_Database {
      * @return string MySQL datetime string
      */
     private function calculate_cache_expiry() {
-        $settings = get_option('blog_takeway_settings', []);
+        $settings = get_option('post_takeaways_settings', []);
         $cache_duration = isset($settings['cache_duration']) ? $settings['cache_duration'] : 86400; // 24 hours default
         
         return date('Y-m-d H:i:s', time() + $cache_duration);

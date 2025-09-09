@@ -2,10 +2,10 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * AI API Handler class for Blog TakeWay
+ * AI API Handler class for Post Takeaways
  *
  * @category WordPress
- * @package  BlogTakeWay
+ * @package  post-takeaways
  * @author   WPPOOL Team <support@wppool.com>
  * @license  GPL-2.0+ https://www.gnu.org/licenses/gpl-2.0.html
  */

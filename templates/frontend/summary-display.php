@@ -25,7 +25,7 @@ $headings = $matches[1] ?? [];
     <!-- Key Takeaways Section -->
     <div class="key-takeaways-section">
         <div class="key-takeaways-header">
-            <span class="key-takeaways-title"><?php esc_html_e('Key Takeaways', 'blog-takeway'); ?></span>
+            <span class="key-takeaways-title"><?php esc_html_e('Key Takeaways', 'post-takeaways'); ?></span>
         </div>
 
         <div class="takeaways-content">
@@ -80,12 +80,12 @@ article.format-standard,
 article.hentry, 
 article.category-uncategorized, 
 article.ast-article-single,
-article.blogtakeway-enhanced {
+article.post-takeaways-enhanced {
     position: relative;
 }
 
-/* BlogTakeWay Wrapper */
-.blogtakeway-wrapper {
+/* post-takeaways Wrapper */
+.post-takeaways-wrapper {
     display: flex;
     gap: 2rem;
     align-items: flex-start;
@@ -246,7 +246,7 @@ article.blogtakeway-enhanced {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-    .blogtakeway-wrapper {
+    .post-takeaways-wrapper {
         flex-direction: column;
         gap: 1.5rem;
     }
@@ -269,7 +269,7 @@ article.blogtakeway-enhanced {
 }
 
 @media (max-width: 768px) {
-    .blogtakeway-wrapper {
+    .post-takeaways-wrapper {
         gap: 1rem;
     }
     
@@ -325,12 +325,12 @@ jQuery(document).ready(function($) {
     
     if (articleElement.length > 0) {
         // Check if already processed to prevent infinite loops
-        if (articleElement.hasClass('blogtakeway-enhanced') || articleElement.find('.blogtakeway-wrapper').length > 0) {
+        if (articleElement.hasClass('post-takeaways-enhanced') || articleElement.find('.post-takeaways-wrapper').length > 0) {
             return; // Already processed, exit
         }
         
-        // Add BlogTakeWay plugin class to the article element
-        articleElement.addClass('blogtakeway-enhanced');
+        // Add post-takeaways plugin class to the article element
+        articleElement.addClass('post-takeaways-enhanced');
         
         // Get all existing content
         var allContent = articleElement.html();
@@ -389,7 +389,7 @@ jQuery(document).ready(function($) {
         
         // Create wrapper div containing only min-read and article content (no comments)
         var wrapperHTML = `
-            <div class="blogtakeway-wrapper">
+            <div class="post-takeaways-wrapper">
                 ${minReadHTML}
                 <div class="article-content-wrapper">
                     ${articleContent}

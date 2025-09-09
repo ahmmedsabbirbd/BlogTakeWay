@@ -2,17 +2,17 @@
 if (!defined('ABSPATH')) exit;
 ?>
 
-<div class="wrap blog-takeway-wrap">
-    <h1 class="wp-heading-inline">Blog TakeWay Dashboard</h1>
+<div class="wrap post-takeaways-wrap">
+    <h1 class="wp-heading-inline">Post Takeaways Dashboard</h1>
     
-    <div class="blog-takeway-dashboard">
+    <div class="post-takeaways-dashboard">
         <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📊</div>
                 <div class="stat-content">
                     <h3><?php echo esc_html($stats['total_summaries'] ?? 0); ?></h3>
-                    <p><?php esc_html_e('Total Summaries', 'blog-takeway'); ?></p>
+                    <p><?php esc_html_e('Total Summaries', 'post-takeaways'); ?></p>
                 </div>
             </div>
             
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) exit;
                 <div class="stat-icon">✅</div>
                 <div class="stat-content">
                     <h3><?php echo esc_html($stats['published_summaries'] ?? 0); ?></h3>
-                    <p><?php esc_html_e('Published', 'blog-takeway'); ?></p>
+                    <p><?php esc_html_e('Published', 'post-takeaways'); ?></p>
                 </div>
             </div>
             
@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) exit;
                 <div class="stat-icon">🔄</div>
                 <div class="stat-content">
                     <h3><?php echo esc_html($stats['recent_generations'] ?? 0); ?></h3>
-                    <p><?php esc_html_e('Recent (7 days)', 'blog-takeway'); ?></p>
+                    <p><?php esc_html_e('Recent (7 days)', 'post-takeaways'); ?></p>
                 </div>
             </div>
             
@@ -36,20 +36,20 @@ if (!defined('ABSPATH')) exit;
                 <div class="stat-icon">⏰</div>
                 <div class="stat-content">
                     <h3><?php echo esc_html($stats['cache_expired'] ?? 0); ?></h3>
-                    <p><?php esc_html_e('Cache Expired', 'blog-takeway'); ?></p>
+                    <p><?php esc_html_e('Cache Expired', 'post-takeaways'); ?></p>
                 </div>
             </div>
         </div>
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <h2><?php esc_html_e('Quick Actions', 'blog-takeway'); ?></h2>
+            <h2><?php esc_html_e('Quick Actions', 'post-takeaways'); ?></h2>
             <div class="action-buttons">
-                <a href="<?php echo esc_url(admin_url('admin.php?page=blog-takeway-bulk-generator')); ?>" class="button button-primary">
-                    🚀 <?php esc_html_e('Bulk Generate Summaries', 'blog-takeway'); ?>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=post-takeaways-bulk-generator')); ?>" class="button button-primary">
+                    🚀 <?php esc_html_e('Bulk Generate Summaries', 'post-takeaways'); ?>
                 </a>
-                <a href="<?php echo esc_url(admin_url('admin.php?page=blog-takeway-settings')); ?>" class="button button-secondary">
-                    ⚙️ <?php esc_html_e('Configure Settings', 'blog-takeway'); ?>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=post-takeaways-settings')); ?>" class="button button-secondary">
+                    ⚙️ <?php esc_html_e('Configure Settings', 'post-takeaways'); ?>
                 </a>
             </div>
         </div>
@@ -58,7 +58,7 @@ if (!defined('ABSPATH')) exit;
 
 <style>
 /* Dashboard Wrapper */
-.blog-takeway-wrap {
+.post-takeaways-wrap {
     margin: 20px;
     max-width: 1200px;
 }
@@ -134,7 +134,7 @@ if (!defined('ABSPATH')) exit;
 
 /* Responsive Design */
 @media (max-width: 782px) {
-    .blog-takeway-wrap {
+    .post-takeaways-wrap {
         margin: 10px;
     }
 
