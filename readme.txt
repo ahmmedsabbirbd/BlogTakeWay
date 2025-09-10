@@ -3,7 +3,7 @@ Contributors: post-takeaways
 Tags: ai, openai, summary, takeaways, blog, content, automation, gpt
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -118,6 +118,11 @@ All OpenAI models including GPT-4, GPT-3.5-turbo, and others. You can choose you
 
 == Changelog ==
 
+= 1.1.1 =
+* Fixed JavaScript error in bulk generator preventing summary generation
+* Fixed API connection check in bulk generator
+* Improved error handling in bulk generation process
+
 = 1.1.0 =
 * Added theme compatibility improvements for "Min Read" and "Takeaways" display
 * Enhanced responsive design for mobile devices
@@ -135,6 +140,9 @@ All OpenAI models including GPT-4, GPT-3.5-turbo, and others. You can choose you
 * Caching system and performance optimization
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+Bug fix: Resolves JavaScript error in bulk generator that prevented summary generation. Safe to update.
 
 = 1.1.0 =
 Important update: Adds better theme compatibility, responsive design improvements, and accessibility enhancements. Safe to update.

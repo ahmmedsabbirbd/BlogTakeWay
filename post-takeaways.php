@@ -4,7 +4,7 @@
  * Plugin Name:  Post Takeaways – AI-Powered Blog Summaries & Takeaways
  * Plugin URI:   https://wppool.com/plugins/post-takeaways
  * Description:  Automatically generate AI-powered summaries and key takeaways for your blog posts. Features include bulk generation, custom styling, and responsive design for better reader engagement.
- * Version:      1.1.0
+ * Version:      1.1.1
  * Requires PHP: 7.4
  * Author:       WPPOOL Team <support@wppool.com>
  * Author URI:   https://wppool.com/
@@ -63,7 +63,7 @@ class BLOG_TAKEWAY {
     private function __construct() {
         // Define constants
         define('BLOG_TAKEWAY_PLUGIN_FILE', __FILE__);
-        define('BLOG_TAKEWAY_VERSION', '1.1.0');
+        define('BLOG_TAKEWAY_VERSION', '1.1.1');
         define('BLOG_TAKEWAY_PLUGIN_DIR', plugin_dir_path(__FILE__));
         define('BLOG_TAKEWAY_PLUGIN_URL', plugin_dir_url(__FILE__));
         define('BLOG_TAKEWAY_TEXT_DOMAIN', 'post-takeaways');
