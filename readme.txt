@@ -109,17 +109,21 @@ All OpenAI models including GPT-4, GPT-3.5-turbo, and others. You can choose you
 
 == Screenshots ==
 
-1. **Dashboard Overview** - Main admin dashboard with statistics and quick actions
-2. **Settings Page** - OpenAI API configuration and generation settings
-3. **Bulk Generator** - Interface for processing multiple posts at once
-4. **Generation Logs** - Detailed logs of all AI operations
-5. **Frontend Display** - Beautiful summary display on blog posts
-6. **Post Editor** - Meta box for manual summary generation and editing
+1. screenshot-1.png - The main admin dashboard showing statistics, recent summaries, and quick actions
+2. screenshot-2.png - Settings page where you configure your OpenAI API key and customize generation settings
+3. screenshot-3.png - Bulk generator interface for processing multiple posts at once with progress tracking
+4. screenshot-4.png - Generation logs showing detailed AI operation history and status
+5. screenshot-5.png - Frontend display of a blog post with summary and key takeaways
+6. screenshot-6.png - Post editor meta box for manual summary generation and editing
 
 == Changelog ==
 
 = 1.1.0 =
-* Most theme support the "Min Read", "Takeaways"
+* Added theme compatibility improvements for "Min Read" and "Takeaways" display
+* Enhanced responsive design for mobile devices
+* Fixed styling issues with various WordPress themes
+* Improved accessibility for screen readers
+* Added RTL language support
 
 = 1.0.0 =
 * Initial release with OpenAI API integration
@@ -133,24 +137,17 @@ All OpenAI models including GPT-4, GPT-3.5-turbo, and others. You can choose you
 == Upgrade Notice ==
 
 = 1.1.0 =
-* Most theme support the "Min Read", "Takeaways"
+Important update: Adds better theme compatibility, responsive design improvements, and accessibility enhancements. Safe to update.
 
 = 1.0.0 =
-* Initial release with OpenAI API integration
-* Automatic summary generation on post publish
-* Bulk summary generation for existing posts
-* Comprehensive admin dashboard
-* Frontend display with shortcodes and widgets
-* REST API endpoints
-* Caching system and performance optimization
+Initial release of Post Takeaways. Includes all core features for AI-powered blog summaries.
 
 == Support ==
 
-* **Documentation**: [Plugin Documentation](https://post-takeaways.com/docs)
 * **Support Forum**: [WordPress.org Support](https://wordpress.org/support/plugin/post-takeaways)
-* **GitHub**: [Report Issues](https://github.com/post-takeaways/post-takeaways/issues)
+* **Rate the Plugin**: [Leave a Review](https://wordpress.org/support/plugin/post-takeaways/reviews/)
 
-For premium support and advanced features, visit [post-takeaways.com](https://post-takeaways.com).
+Need help? Visit our [support forum](https://wordpress.org/support/plugin/post-takeaways) on WordPress.org.
 
 == Developer Notes ==
 
