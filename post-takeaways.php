@@ -516,7 +516,7 @@ class BLOG_TAKEWAY {
      * @param array $post_ids Array of post IDs
      * @return void
      */
-    public function process_bulk_generation( $post_ids ) {
+    public function process_bulk_generation( $post_ids = [] ) {
         $ai_handler = new AI_API_Handler();
         $database = new Blog_Summary_Database();
 
