@@ -1,48 +1,48 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined('ABSPATH') ) {
+	exit;
+}
 ?>
 
 <div class="wrap">
     <h1 class="wp-heading-inline">Bulk Summary Generator</h1>
     
-    <div class="blog-takeway-bulk-generator">
+    <div class="post-takeaways-bulk-generator">
         <!-- Posts list -->
         <div class="posts-section">
-            <h2>All Posts</h2>
-            <p>Select any posts to (re)generate AI summaries and takeaways. Status shows whether a summary already exists.</p>
+            <h2><?php esc_html_e('All Posts', 'post-takeaways'); ?></h2>
+            <p><?php esc_html_e('Select any posts to (re)generate AI summaries and takeaways. Status shows whether a summary already exists.', 'post-takeaways'); ?></p>
             
-            <?php if (!empty($posts)): ?>
+            <?php if ( ! empty($posts) ) : ?>
                 <div class="posts-controls">
                     <div class="controls-left">
-                        <button type="button" class="button" id="select-all">Select All</button>
-                        <button type="button" class="button" id="deselect-all">Deselect All</button>
+                        <button type="button" class="button" id="select-all"><?php esc_html_e('Select All', 'post-takeaways'); ?></button>
+                        <button type="button" class="button" id="deselect-all"><?php esc_html_e('Deselect All', 'post-takeaways'); ?></button>
                         <button type="button" class="button button-primary" id="generate-selected">
-                            🚀 Generate Summaries
+                            🚀 <?php esc_html_e('Generate Summaries', 'post-takeaways'); ?>
                         </button>
                     </div>
                     <div class="controls-right">
                         <select id="filter-summary" class="filter-select">
-                            <option value="all">All Posts</option>
-                            <option value="with-summary">With Summary</option>
-                            <option value="without-summary">Without Summary</option>
+                            <option value="all"><?php esc_html_e('All Posts', 'post-takeaways'); ?></option>
+                            <option value="with-summary"><?php esc_html_e('With Summary', 'post-takeaways'); ?></option>
+                            <option value="without-summary"><?php esc_html_e('Without Summary', 'post-takeaways'); ?></option>
                         </select>
                         <select id="sort-posts" class="filter-select">
-                            <option value="title-asc">Title (A-Z)</option>
-                            <option value="title-desc">Title (Z-A)</option>
-                            <option value="date-desc">Newest First</option>
-                            <option value="date-asc">Oldest First</option>
+                            <option value="title-asc"><?php esc_html_e('Title (A-Z)', 'post-takeaways'); ?></option>
+                            <option value="title-desc"><?php esc_html_e('Title (Z-A)', 'post-takeaways'); ?></option>
+                            <option value="date-desc"><?php esc_html_e('Newest First', 'post-takeaways'); ?></option>
+                            <option value="date-asc"><?php esc_html_e('Oldest First', 'post-takeaways'); ?></option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="posts-list">
-                    <?php foreach ($posts as $post): ?>
-                        <?php 
-                            global $wpdb;
-                            $has_summary = $wpdb->get_var($wpdb->prepare(
-                                "SELECT COUNT(*) FROM {$wpdb->prefix}blog_summaries WHERE post_id = %d AND status = 'published'",
-                                $post->ID
-                            ));
+                    <?php foreach ( $posts as $post ) { ?>
+                        <?php
+                            $database = new Blog_Summary_Database();
+                            $summary = $database->get_summary($post->ID);
+                            $has_summary = !empty($summary) && $summary['status'] === 'published';
                             $status_class = $has_summary ? 'has-summary' : 'missing-summary';
                             $status_text  = $has_summary ? 'Has Summary' : 'Missing Summary';
                         ?>
@@ -53,14 +53,14 @@ if (!defined('ABSPATH')) exit;
                             </label>
                             <div class="post-info">
                                 <h3 class="post-title">
-                                    <a href="<?php echo get_edit_post_link($post->ID); ?>" target="_blank">
+                                    <a href="<?php echo esc_url(get_edit_post_link($post->ID)); ?>" target="_blank">
                                         <?php echo esc_html($post->post_title); ?>
                                     </a>
                                     <span class="summary-status <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_text); ?></span>
                                 </h3>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                    <?php } ?>
                 </div>
                 
                 <div class="bulk-actions">
@@ -72,7 +72,7 @@ if (!defined('ABSPATH')) exit;
                     </button>
                 </div>
                 
-            <?php else: ?>
+            <?php else : ?>
                 <div class="no-posts">
                     <p>🎉 All published posts already have summaries!</p>
                     <p>You can manually edit existing summaries or regenerate them from individual post edit pages.</p>
@@ -134,7 +134,7 @@ if (!defined('ABSPATH')) exit;
 </div>
 
 <style>
-.blog-takeway-bulk-generator {
+.post-takeaways-bulk-generator {
     margin-top: 20px;
 }
 
@@ -537,22 +537,22 @@ jQuery(document).ready(function($) {
         
         // Check if API key is configured first
         $.ajax({
-            url: blogTakewayAjax.ajax_url,
+            url: post-takeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'test_api_connection',
-                nonce: blogTakewayAjax.nonce
+                nonce: post-takeawaysAjax.nonce
             },
             success: function(response) {
                 if (response.success) {
                     // API is configured, proceed with bulk generation
                     proceedWithBulkGeneration(selectedIds);
                 } else {
-                    alert('❌ API Key Not Configured!\n\nPlease configure your OpenAI API key in the Blog TakeWay settings before generating summaries.');
+                    alert('❌ API Key Not Configured!\n\nPlease configure your OpenAI API key in the Post Takeaways settings before generating summaries.');
                 }
             },
             error: function() {
-                alert('❌ Cannot verify API configuration!\n\nPlease check your Blog TakeWay settings and ensure the API key is properly configured.');
+                alert('❌ Cannot verify API configuration!\n\nPlease check your Post Takeaways settings and ensure the API key is properly configured.');
             }
         });
     });
@@ -590,11 +590,11 @@ jQuery(document).ready(function($) {
         
         // Send bulk generation request
         $.ajax({
-            url: blogTakewayAjax.ajax_url,
+            url: post-takeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'bulk_generate_summaries',
-                nonce: blogTakewayAjax.nonce,
+                nonce: post-takeawaysAjax.nonce,
                 post_ids: postIds
             },
             success: function(response) {

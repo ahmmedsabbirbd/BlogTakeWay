@@ -1,11 +1,15 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined('ABSPATH') ) {
+	exit;
+}
 
 // Get data from database
 $database = new Blog_Summary_Database();
 $summary_data = $database->get_summary(get_the_ID());
 
-if (!$summary_data) return;
+if ( ! $summary_data ) {
+	return;
+}
 
 // Get min_read from database
 $min_read_list = json_decode($summary_data['min_read_list'], true);
@@ -25,15 +29,15 @@ $headings = $matches[1] ?? [];
     <!-- Key Takeaways Section -->
     <div class="key-takeaways-section">
         <div class="key-takeaways-header">
-            <span class="key-takeaways-title">Key Takeaways</span>
+            <span class="key-takeaways-title"><?php esc_html_e('Key Takeaways', 'post-takeaways'); ?></span>
         </div>
 
         <div class="takeaways-content">
-            <?php if (!empty($summary_data['takeaways'])): ?>
+            <?php if ( ! empty($summary_data['takeaways']) ) : ?>
                 <ul class="takeaways-list">
-                    <?php foreach ($summary_data['takeaways'] as $takeaway): ?>
+                    <?php foreach ( $summary_data['takeaways'] as $takeaway ) { ?>
                         <li><?php echo esc_html($takeaway); ?></li>
-                    <?php endforeach; ?>
+                    <?php } ?>
                 </ul>
             <?php endif; ?>
         </div>
@@ -80,12 +84,12 @@ article.format-standard,
 article.hentry, 
 article.category-uncategorized, 
 article.ast-article-single,
-article.blogtakeway-enhanced {
+article.post-takeaways-enhanced {
     position: relative;
 }
 
-/* BlogTakeWay Wrapper */
-.blogtakeway-wrapper {
+/* post-takeaways Wrapper */
+.post-takeaways-wrapper {
     display: flex;
     gap: 2rem;
     align-items: flex-start;
@@ -246,7 +250,7 @@ article.blogtakeway-enhanced {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-    .blogtakeway-wrapper {
+    .post-takeaways-wrapper {
         flex-direction: column;
         gap: 1.5rem;
     }
@@ -269,7 +273,7 @@ article.blogtakeway-enhanced {
 }
 
 @media (max-width: 768px) {
-    .blogtakeway-wrapper {
+    .post-takeaways-wrapper {
         gap: 1rem;
     }
     
@@ -325,12 +329,12 @@ jQuery(document).ready(function($) {
     
     if (articleElement.length > 0) {
         // Check if already processed to prevent infinite loops
-        if (articleElement.hasClass('blogtakeway-enhanced') || articleElement.find('.blogtakeway-wrapper').length > 0) {
+        if (articleElement.hasClass('post-takeaways-enhanced') || articleElement.find('.post-takeaways-wrapper').length > 0) {
             return; // Already processed, exit
         }
         
-        // Add BlogTakeWay plugin class to the article element
-        articleElement.addClass('blogtakeway-enhanced');
+        // Add post-takeaways plugin class to the article element
+        articleElement.addClass('post-takeaways-enhanced');
         
         // Get all existing content
         var allContent = articleElement.html();
@@ -373,14 +377,14 @@ jQuery(document).ready(function($) {
                         </div>
                     </div>
                 </div>
-                <?php if (!empty($headings)): ?>
+                <?php if ( ! empty($headings) ) : ?>
                     <div class="toc-section">
                         <div class="toc-list">
-                            <?php foreach ($headings as $heading): ?>
-                                <a href="#<?php echo sanitize_title(strip_tags($heading)); ?>" class="toc-item">
-                                    <?php echo esc_html(strip_tags($heading)); ?>
+                            <?php foreach ( $headings as $heading ) { ?>
+                                <a href="#<?php echo esc_attr(sanitize_title(wp_strip_all_tags($heading))); ?>" class="toc-item">
+                                    <?php echo esc_html(wp_strip_all_tags($heading)); ?>
                                 </a>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -389,7 +393,7 @@ jQuery(document).ready(function($) {
         
         // Create wrapper div containing only min-read and article content (no comments)
         var wrapperHTML = `
-            <div class="blogtakeway-wrapper">
+            <div class="post-takeaways-wrapper">
                 ${minReadHTML}
                 <div class="article-content-wrapper">
                     ${articleContent}
