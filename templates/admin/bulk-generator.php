@@ -537,11 +537,11 @@ jQuery(document).ready(function($) {
         
         // Check if API key is configured first
         $.ajax({
-            url: post-takeawaysAjax.ajax_url,
+            url: postTakeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'test_api_connection',
-                nonce: post-takeawaysAjax.nonce
+                nonce: postTakeawaysAjax.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -590,11 +590,11 @@ jQuery(document).ready(function($) {
         
         // Send bulk generation request
         $.ajax({
-            url: post-takeawaysAjax.ajax_url,
+            url: postTakeawaysAjax.ajax_url,
             type: 'POST',
             data: {
                 action: 'bulk_generate_summaries',
-                nonce: post-takeawaysAjax.nonce,
+                nonce: postTakeawaysAjax.nonce,
                 post_ids: postIds
             },
             success: function(response) {
